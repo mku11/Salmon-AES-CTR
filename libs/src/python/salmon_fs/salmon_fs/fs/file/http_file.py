@@ -28,9 +28,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import http.client
 from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
+from salmon_core.convert.base_64 import Base64
 import re
 from typeguard import typechecked
 import urllib
@@ -39,6 +39,8 @@ from datetime import datetime
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.file.credentials import Credentials
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 from salmon_fs.fs.streams.http_file_stream import HttpFileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
@@ -52,23 +54,39 @@ class HttpFile(IFile):
     MAX_REDIRECTS: int = 5
     separator: str = "/"
 
-    def __init__(self, path: str):
+    def get_credentials(self):
+        """!
+        Get the HTTP service credentials
+        @returns The credentials
+        """
+        return self.__credentials
+
+    def set_credentials(self, credentials: Credentials):
+        """!
+        Set the HTTP service credentials
+        @param credentials: The credentials
+        """
+        self.__credentials = credentials
+
+    def __init__(self, path: str, credentials: Credentials | None = None):
         """!
         Instantiate a real file represented by the filepath and service path provided.
         @param path: The filepath.
         """
         self.__file_path: str = path
         self.__response: HTTPResponse | None = None
+        self.__credentials: Credentials | None = credentials
 
     def __get_response(self) -> HTTPResponse:
         if not self.__response:
             headers = {}
             self.__set_default_headers(headers)
+            self.__set_service_auth(headers)
             conn: HTTPConnection | HTTPSConnection | None = None
             try:
-                url = self.__file_path
+                url: str = self.__file_path
                 while count := HttpFile.MAX_REDIRECTS:
-                    conn = self.__create_connection(urlparse(url).netloc)
+                    conn = self.__create_connection(url)
                     conn.request("GET", urlparse(url).path, headers=headers)
                     self.__response = conn.getresponse()
                     if self.__response.getheader('location'):
@@ -165,7 +183,7 @@ class HttpFile(IFile):
             path = path[0:-1]
 
         parent_file_path: str = path[0:path.rindex(HttpFile.separator)] if HttpFile.separator in path else ""
-        return HttpFile(parent_file_path)
+        return HttpFile(parent_file_path, self.__credentials)
 
     def get_path(self) -> str:
         """!
@@ -237,7 +255,8 @@ class HttpFile(IFile):
                         continue
                     if "%" in filename:
                         filename = urllib.parse.unquote(filename)
-                    p_file: HttpFile = HttpFile(self.__file_path + HttpFile.separator + filename)
+                    p_file: HttpFile = HttpFile(self.__file_path + HttpFile.separator + filename,
+                                                self.__credentials)
                     files.append(p_file)
                 return files
             finally:
@@ -275,7 +294,7 @@ class HttpFile(IFile):
         if self.is_file():
             return None
         n_filepath: str = self.get_child_path(filename)
-        child: HttpFile = HttpFile(n_filepath)
+        child: HttpFile = HttpFile(n_filepath, self.__credentials)
         return child
 
     def rename_to(self, new_filename: str) -> bool:
@@ -312,6 +331,13 @@ class HttpFile(IFile):
         """
         return self.__file_path
 
+    def __set_service_auth(self, headers: dict[str, str]):
+        if not self.__credentials:
+            return
+        headers['Authorization'] = 'Basic ' + Base64().encode(bytearray(
+            (self.__credentials.get_service_user() + ":" + self.__credentials.get_service_password())
+            .encode('utf-8')))
+
     def __check_status(self, http_response: HTTPResponse, status: int):
         if http_response.status != status:
             raise IOError(str(http_response.status)
@@ -321,11 +347,6 @@ class HttpFile(IFile):
         headers["Cache"] = "no-store"
         headers["Content-type"] = "application/x-www-form-urlencoded"
 
-    def __create_connection(self, host):
-        conn = None
-        scheme = urlparse(self.__file_path).scheme
-        if scheme == "http":
-            conn = http.client.HTTPConnection(host)
-        elif scheme == "https":
-            conn = http.client.HTTPSConnection(host)
+    def __create_connection(self, url: str) -> HTTPConnection:
+        conn: HTTPConnection = HttpSyncClient.create_connection(url)
         return conn

@@ -286,6 +286,12 @@ class File(IFile):
         """
         pass
 
+    def get_credentials(self):
+        """!
+        Get the credentials if available
+        """
+        pass
+
     def __str__(self) -> str:
         """!
         Returns a string representation of this object

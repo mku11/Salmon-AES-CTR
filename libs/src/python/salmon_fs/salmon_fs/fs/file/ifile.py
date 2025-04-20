@@ -230,6 +230,12 @@ class IFile(ABC):
         """
         pass
 
+    def get_credentials(self):
+        """!
+        Get the credentials if available
+        """
+        pass
+
     @staticmethod
     def copy_file_contents(src: IFile, dest: IFile, options: IFile.CopyContentsOptions) -> bool:
         """!

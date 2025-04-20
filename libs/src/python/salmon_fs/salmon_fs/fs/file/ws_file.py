@@ -29,9 +29,7 @@ SOFTWARE.
 """
 
 import json
-import http.client
 import urllib.parse
-from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from typing import Any
 
@@ -39,6 +37,8 @@ from typeguard import typechecked
 from threading import RLock
 
 from salmon_core.convert.base_64 import Base64
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
+from salmon_fs.fs.file.credentials import Credentials
 from salmon_fs.fs.file.ifile import IFile
 from salmon_fs.fs.streams.ws_file_stream import WSFileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -98,7 +98,7 @@ class WSFile(IFile):
                 conn: HTTPConnection | HTTPSConnection | None = None
                 http_response: HTTPResponse | None = None
                 try:
-                    conn = self.__create_connection()
+                    conn = self.__create_connection(self.__service_path)
                     conn.request("GET", "/api/info" + "?" + params, headers=headers)
                     http_response = conn.getresponse()
                     self.__check_status(http_response, 200)
@@ -124,7 +124,7 @@ class WSFile(IFile):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection()
+            conn = self.__create_connection(self.__service_path)
             conn.request("POST", "/api/mkdir", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
@@ -151,7 +151,7 @@ class WSFile(IFile):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection()
+            conn = self.__create_connection(self.__service_path)
             conn.request("POST", "/api/create", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
@@ -179,7 +179,7 @@ class WSFile(IFile):
                 conn: HTTPConnection | HTTPSConnection | None = None
                 http_response: HTTPResponse | None = None
                 try:
-                    conn = self.__create_connection()
+                    conn = self.__create_connection(self.__service_path)
                     conn.request("DELETE", "/api/delete", headers=headers, body=params)
                     http_response = conn.getresponse()
                     self.__check_status(http_response, 200)
@@ -196,7 +196,7 @@ class WSFile(IFile):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection()
+            conn = self.__create_connection(self.__service_path)
             conn.request("DELETE", "/api/delete", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
@@ -315,7 +315,7 @@ class WSFile(IFile):
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
             try:
-                conn = self.__create_connection()
+                conn = self.__create_connection(self.__service_path)
                 conn.request("GET", "/api/list" + "?" + params, headers=headers)
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
@@ -341,7 +341,7 @@ class WSFile(IFile):
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
             try:
-                conn = self.__create_connection()
+                conn = self.__create_connection(self.__service_path)
                 conn.request("GET", "/api/list" + "?" + params, headers=headers)
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
@@ -397,7 +397,7 @@ class WSFile(IFile):
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
             try:
-                conn = self.__create_connection()
+                conn = self.__create_connection(self.__service_path)
                 conn.request("PUT", "/api/move", headers=headers, body=params)
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
@@ -440,7 +440,7 @@ class WSFile(IFile):
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
             try:
-                conn = self.__create_connection()
+                conn = self.__create_connection(self.__service_path)
                 conn.request("POST", "/api/copy", headers=headers, body=params)
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
@@ -480,7 +480,7 @@ class WSFile(IFile):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection()
+            conn = self.__create_connection(self.__service_path)
             conn.request("PUT", "/api/rename", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
@@ -504,7 +504,7 @@ class WSFile(IFile):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection()
+            conn = self.__create_connection(self.__service_path)
             conn.request("POST", "/api/mkdir", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
@@ -552,39 +552,6 @@ class WSFile(IFile):
         headers["Cache"] = "no-store"
         headers["Content-type"] = "application/x-www-form-urlencoded"
 
-    def __create_connection(self):
-        conn = None
-        scheme = urlparse(self.__service_path).scheme
-        if scheme == "http":
-            conn = http.client.HTTPConnection(urlparse(self.__service_path).netloc)
-        elif scheme == "https":
-            conn = http.client.HTTPSConnection(urlparse(self.__service_path).netloc)
+    def __create_connection(self, url: str) -> HTTPConnection:
+        conn: HTTPConnection = HttpSyncClient.create_connection(url)
         return conn
-
-@typechecked
-class Credentials:
-    """!
-    Credentials
-    """
-    def __init__(self, service_user: str, service_password: str):
-        """!
-        Instntiate the credentials
-        @param service_user: The user name
-        @param service_password: The password
-        """
-        self.__service_user: str = service_user
-        self.__service_password: str = service_password
-
-    def get_service_user(self) -> str:
-        """!
-        Get the service user name
-        @returns The user name
-        """
-        return self.__service_user
-
-    def get_service_password(self) -> str:
-        """!
-        Get the service password
-        @returns The password
-        """
-        return self.__service_password

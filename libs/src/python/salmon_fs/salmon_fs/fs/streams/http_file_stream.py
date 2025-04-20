@@ -27,13 +27,14 @@ SOFTWARE.
 """
 
 from typeguard import typechecked
-import http.client
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 from wrapt import synchronized
 
+from salmon_core.convert.base_64 import Base64
 from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -75,11 +76,12 @@ class HttpFileStream(RandomAccessStream):
         if not self.__response:
             headers = {}
             self.__set_default_headers(headers)
+            self.__set_service_auth(headers)
             if self.position > 0:
                 headers['Range'] = "bytes=" + str(self.position) + "-"
             url = self.__file.get_path()
             while count := HttpFileStream.MAX_REDIRECTS:
-                self.conn = self.__create_connection(urlparse(url).netloc)
+                self.conn = self.__create_connection(self.__file.get_path())
                 self.conn.request("GET", urlparse(url).path, headers=headers)
                 self.__response = self.conn.getresponse()
                 if self.__response.getheader('location'):
@@ -213,6 +215,15 @@ class HttpFileStream(RandomAccessStream):
         self.conn = None
         self.__response = None
 
+
+    def __set_service_auth(self, headers: dict[str, str]):
+        if not self.__file.get_credentials():
+            return
+        headers['Authorization'] = 'Basic ' + Base64().encode(
+            bytearray((self.__file.get_credentials().get_service_user() + ":"
+                       + self.__file.get_credentials().get_service_password())
+                      .encode('utf-8')))
+
     def __check_status(self, http_response: HTTPResponse, status: int):
         if http_response.status != status:
             raise IOError(str(http_response.status)
@@ -222,11 +233,6 @@ class HttpFileStream(RandomAccessStream):
         headers["Cache"] = "no-store"
         headers["Content-type"] = "application/x-www-form-urlencoded"
 
-    def __create_connection(self, host):
-        conn = None
-        scheme = urlparse(self.__file.get_path()).scheme
-        if scheme == "http":
-            conn = http.client.HTTPConnection(host)
-        elif scheme == "https":
-            conn = http.client.HTTPSConnection(host)
+    def __create_connection(self, url: str) -> HTTPConnection:
+        conn: HTTPConnection = HttpSyncClient.create_connection(url)
         return conn

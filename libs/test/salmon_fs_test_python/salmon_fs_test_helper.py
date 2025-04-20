@@ -33,6 +33,7 @@ from enum import Enum
 from unittest import TestCase
 import random
 from io import BufferedIOBase
+
 from typeguard import typechecked
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
@@ -50,8 +51,10 @@ from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 from salmon_fs.salmonfs.drive.ws_drive import WSDrive
 from salmon_fs.salmonfs.drive.http_drive import HttpDrive
 from salmon_fs.salmonfs.drive.drive import Drive
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 from salmon_fs.fs.file.http_file import HttpFile
-from salmon_fs.fs.file.ws_file import Credentials, WSFile
+from salmon_fs.fs.file.credentials import Credentials
+from salmon_fs.fs.file.ws_file import WSFile
 from salmon_fs.fs.file.file import File
 from salmon_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
@@ -101,7 +104,6 @@ class SalmonFSTestHelper:
     # WS_SERVER_URL = "https://localhost:8443" // for testing from the Web browser
     WS_SERVER_URL = os.getenv("WS_SERVER_URL", WS_SERVER_URL)
     WS_TEST_DIRNAME = "ws"
-
     credentials = Credentials("user", "password")
 
     # HTTP server(Read - only)
@@ -112,6 +114,7 @@ class SalmonFSTestHelper:
     HTTP_VAULT_DIRNAME = "vault"
     HTTP_VAULT_DIR_URL = HTTP_SERVER_VIRTUAL_URL + "/" + HTTP_TEST_DIRNAME + "/" + HTTP_VAULT_DIRNAME
     HTTP_VAULT_FILES_DIR_URL = HTTP_VAULT_DIR_URL + "/file"
+    http_credentials = Credentials("user", "password")
 
     # performance
     ENC_IMPORT_BUFFER_SIZE = 512 * 1024
@@ -198,10 +201,12 @@ class SalmonFSTestHelper:
                                                                            SalmonFSTestHelper.TEST_EXPORT_DIRNAME)
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                                 SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME)
-        SalmonFSTestHelper.HTTP_VAULT_DIR = HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
+        SalmonFSTestHelper.HTTP_VAULT_DIR = HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL, SalmonFSTestHelper.http_credentials)
         SalmonFSTestHelper.create_test_files()
         SalmonFSTestHelper.create_http_files()
         SalmonFSTestHelper.create_http_vault()
+
+        HttpSyncClient.set_allow_clear_text_traffic(True) # only for testing purposes
 
     @staticmethod
     def create_dir(parent: IFile, dir_name: str):
