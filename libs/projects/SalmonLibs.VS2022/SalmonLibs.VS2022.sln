@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Salmon.Win", "Salmon.Win\Sa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SalmonNative", "SalmonNative\SalmonNative.vcxproj", "{4C23CBA6-6B26-4195-A9C5-DB47714C75AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SalmonFSAndroidTest", "SalmonFSAndroidTest\SalmonFSAndroidTest.csproj", "{0D62F73C-97E9-4590-98D1-9FE03BE461EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SalmonFSAndroidTest", "SalmonFSAndroidTest\SalmonFSAndroidTest.csproj", "{0D62F73C-97E9-4590-98D1-9FE03BE461EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -265,18 +265,14 @@ Global
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.DebugGPU|x86.ActiveCfg = Debug|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.DebugGPU|x86.Build.0 = Debug|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.DebugGPU|x86.Deploy.0 = Debug|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x64.ActiveCfg = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x64.Build.0 = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x64.Deploy.0 = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x86.ActiveCfg = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x86.Build.0 = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.Release|x86.Deploy.0 = Release|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|Any CPU.ActiveCfg = Release|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|Any CPU.Build.0 = Release|Any CPU
-		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|Any CPU.Deploy.0 = Release|Any CPU
+		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|x64.ActiveCfg = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|x64.Build.0 = Release|Any CPU
 		{0D62F73C-97E9-4590-98D1-9FE03BE461EF}.ReleaseGPU|x64.Deploy.0 = Release|Any CPU
