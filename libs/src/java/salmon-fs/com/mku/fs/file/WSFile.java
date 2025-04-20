@@ -86,17 +86,6 @@ public class WSFile implements IFile {
         this.credentials = credentials;
     }
 
-
-    /**
-     * Instantiate a real file represented by the filepath provided (Remote read-write drive)
-     *
-     * @param path        The filepath. This should be a relative path of the vault folder
-     * @param servicePath The REST API server path
-     */
-    public WSFile(String path, String servicePath) {
-        this(path, servicePath, null);
-    }
-
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
      *
