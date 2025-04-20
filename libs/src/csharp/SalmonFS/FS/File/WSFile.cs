@@ -35,6 +35,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
+
 using System.Web;
 using static Mku.FS.File.HttpFile;
 using static Mku.FS.File.IFile;
@@ -216,6 +218,7 @@ public class WSFile : IFile
         }
     }
 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private Response GetResponse()
     {
         if (this.response == null)

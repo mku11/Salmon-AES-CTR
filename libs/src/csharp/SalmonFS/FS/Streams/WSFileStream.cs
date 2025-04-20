@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Mku.Convert;
 using System.Web;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using Mku.FS.File;
 using static Mku.FS.File.HttpFile;
 
@@ -233,7 +234,7 @@ public class WSFileStream : RandomAccessStream
         position += Math.Min(buffer.Length, count);
     }
 
-
+	[MethodImpl(MethodImplOptions.Synchronized)]
     private Stream GetInputStream()
     {
         if (this.closed)
@@ -262,6 +263,7 @@ public class WSFileStream : RandomAccessStream
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
+                Close();
                 throw;
             }
         }

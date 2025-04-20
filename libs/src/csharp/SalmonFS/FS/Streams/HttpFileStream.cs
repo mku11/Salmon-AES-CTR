@@ -28,6 +28,8 @@ using System.Net.Http;
 using System.Net;
 using System.Web;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
+
 using Mku.FS.File;
 using Mku.Streams;
 using static Mku.FS.File.HttpFile;
@@ -186,6 +188,7 @@ public class HttpFileStream : RandomAccessStream
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
+	[MethodImpl(MethodImplOptions.Synchronized)]
     private Stream GetInputStream()
     {
         if (this.closed)
@@ -213,6 +216,7 @@ public class HttpFileStream : RandomAccessStream
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
+                Close();
                 throw;
             }
         }

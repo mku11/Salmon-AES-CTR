@@ -33,6 +33,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Runtime.CompilerServices;
 using static Mku.FS.File.IFile;
 using MemoryStream = Mku.Streams.MemoryStream;
 
@@ -75,6 +76,7 @@ public class HttpFile : IFile
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private Response GetResponse()
     {
         if (this.response == null)
@@ -96,7 +98,7 @@ public class HttpFile : IFile
                     Length = httpResponse.Content.Headers.ContentLength??0,
                     LastModified = httpResponse.Content.Headers.LastModified?.ToUnixTimeMilliseconds()??0,
                     ContentType = httpResponse.Content.Headers.ContentType.ToString(),
-                    StatusCode = httpResponse.StatusCode
+                    StatusCode = (int) httpResponse.StatusCode
                 };
             }
             finally
@@ -132,7 +134,7 @@ public class HttpFile : IFile
     ///  True if file or directory exists.
 	/// </summary>
 	///  <returns>True if file/directory exists</returns>
-    public bool Exists => this.GetResponse().StatusCode == HttpStatusCode.OK || this.GetResponse().StatusCode == HttpStatusCode.PartialContent;
+    public bool Exists => this.GetResponse().StatusCode == (int) HttpStatusCode.OK || this.GetResponse().StatusCode == (int) HttpStatusCode.PartialContent;
 
     /// <summary>
     ///  Get the absolute path on the physical disk. For C# this is the same as the filepath.
@@ -400,7 +402,7 @@ public class HttpFile : IFile
 
     class Response
     {
-        public HttpStatusCode StatusCode { get; internal set; }
+        public int StatusCode { get; internal set; }
         internal long Length { get; set; }
         internal string ContentType { get; set; }
         internal long LastModified { get; set; }
