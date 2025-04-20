@@ -351,6 +351,14 @@ public class File implements IFile {
     public void reset() {
 
     }
+	
+	/**
+	 * Get the user credentials
+	 * @return The credentials
+	 */
+    public Credentials getCredentials() {
+        return null;
+    }
 
     /**
      * Returns a string representation of this object

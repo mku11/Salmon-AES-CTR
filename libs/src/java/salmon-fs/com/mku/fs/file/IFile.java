@@ -225,6 +225,12 @@ public interface IFile {
      */
     void reset();
 
+	/**
+	 * Get the user credentials
+	 * @return The credentials
+	 */
+    Credentials getCredentials();
+	
     /**
      * Copy contents of a file to another file.
      *
