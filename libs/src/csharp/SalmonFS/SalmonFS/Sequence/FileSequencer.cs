@@ -61,7 +61,7 @@ public class FileSequencer : INonceSequencer
         this.serializer = serializer;
         if (!sequenceFile.Exists)
         {
-            this.sequenceFile = sequenceFile.Parent.CreateFile(sequenceFile.Name);
+            this.SequenceFile = sequenceFile.Parent.CreateFile(sequenceFile.Name);
             SaveSequenceFile(new Dictionary<string, NonceSequence>());
         }
     }
