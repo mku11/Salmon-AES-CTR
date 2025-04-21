@@ -9,7 +9,9 @@ from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.streams.aes_stream import ProviderType
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_fs.fs.file.file import File
-from salmon_fs.fs.file.ws_file import WSFile, Credentials
+from salmon_fs.fs.file.ws_file import WSFile
+from salmon_fs.fs.file.credentials import Credentials
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 
 from samples.drive_sample import DriveSample
 
@@ -18,6 +20,8 @@ ws_user = "user"
 ws_password = "password"
 drive_path = "/example_drive_" + str(round(time.time() * 1000))
 password = "test123"
+
+HttpSyncClient.set_allow_clear_text_traffic(True)  # allow clear traffic only for testing
 
 # Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
 # NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")

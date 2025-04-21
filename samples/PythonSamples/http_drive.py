@@ -8,12 +8,18 @@ from salmon_core.salmon.streams.aes_stream import ProviderType
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_fs.fs.file.file import File
 from salmon_fs.fs.file.http_file import HttpFile
+from salmon_fs.fs.file.http_sync_client import HttpSyncClient
+from salmon_fs.fs.file.credentials import Credentials
 
 from samples.drive_sample import DriveSample
 
 http_drive_url = "http://localhost/testvault"
 password = "test"
 threads = 1
+http_user = "user"
+http_password = "password"
+
+HttpSyncClient.set_allow_clear_text_traffic(True)  # allow clear traffic only for testing
 
 # Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
 # NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
@@ -27,7 +33,7 @@ if __name__ == '__main__':
     if not export_dir.exists():
         export_dir.mkdir()
 
-    http_dir = HttpFile(http_drive_url)
+    http_dir = HttpFile(http_drive_url, Credentials(http_user, http_password))
     http_drive = DriveSample.open_drive(http_dir, password)
     DriveSample.list_files(http_drive)
     DriveSample.export_files(http_drive, export_dir, threads)
