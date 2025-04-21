@@ -83,7 +83,7 @@ class WSFileStream(RandomAccessStream):
             self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFileStream.__PATH: self.__file.get_path(),
                                              WSFileStream.__POSITION: self.position})
-            self.conn = self.__create_connection(self.__file.get_path())
+            self.conn = self.__create_connection(self.__file.get_service_path())
             self.conn.request("GET", "/api/get" + "?" + params, headers=headers)
             self.__response = self.conn.getresponse()
             self.__check_status(self.__response, 206 if self.position > 0 else 200)
@@ -140,7 +140,7 @@ class WSFileStream(RandomAccessStream):
             self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFileStream.__PATH: self.__file.get_path(),
                                              WSFileStream.__POSITION: self.start_position})
-            self.conn = self.__create_connection(self.__file.get_path())
+            self.conn = self.__create_connection(self.__file.get_service_path())
 
             def start_upload():
                 self.conn.request("POST", "/api/upload" + "?" + params, headers=headers, body=data)
@@ -208,7 +208,7 @@ class WSFileStream(RandomAccessStream):
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
         try:
-            conn = self.__create_connection(self.__file.get_path())
+            conn = self.__create_connection(self.__file.get_service_path())
             conn.request("PUT", "/api/setLength", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
