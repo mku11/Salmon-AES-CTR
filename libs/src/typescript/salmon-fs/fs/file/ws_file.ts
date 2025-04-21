@@ -23,10 +23,12 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { Base64 } from '../../../salmon-core/convert/base64.js';
 import { CopyOptions, IFile, MoveOptions } from './ifile.js';
 import { WSFileStream } from '../streams/ws_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
+import { Credentials } from './credentials.js';
+import { HttpSyncClient } from './http_sync_client.js';
+import { Base64Utils } from '../../../salmon-core/salmon/encode/base64_utils.js';
 
 /**
  * Salmon RealFile implementation for Web Service files.
@@ -84,9 +86,9 @@ export class WSFile implements IFile {
 			this.#setDefaultHeaders(headers);
 			this.#setServiceAuth(headers);
 			let httpResponse: Response | null = null;
-			httpResponse = (await fetch(this.#servicePath + "/api/info" 
+			httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/info" 
 				+ "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
-				{method: 'GET', headers: headers}));
+                {method: 'GET', headers: headers});
 			await this.#checkStatus(httpResponse, 200);
 			this.response = await httpResponse.json();
 		}
@@ -105,9 +107,8 @@ export class WSFile implements IFile {
         this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, nDirPath);
-        let httpResponse: Response | null = null;
-        httpResponse = (await fetch(this.#servicePath + "/api/mkdir", 
-            { method: 'POST', body: params, headers: headers }));
+        let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/mkdir", 
+            { method: 'POST', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         let dir: WSFile = new WSFile(nDirPath, this.#servicePath, this.#credentials);
         return dir;
@@ -126,9 +127,8 @@ export class WSFile implements IFile {
         this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, nFilePath);
-        let httpResponse: Response | null = null;
-        httpResponse = (await fetch(this.#servicePath + "/api/create", 
-            { method: 'POST', body: params, headers: headers }));
+        let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/create", 
+            { method: 'POST', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         let nFile: WSFile = new WSFile(nFilePath, this.#servicePath, this.#credentials);
         return nFile;
@@ -147,9 +147,8 @@ export class WSFile implements IFile {
                 this.#setServiceAuth(headers);
                 let params: URLSearchParams = new URLSearchParams();
                 params.append(WSFile.#PATH, file.getPath());
-                let httpResponse: Response | null = null;
-                httpResponse = (await fetch(this.#servicePath + "/api/delete", 
-                    { method: 'DELETE', body: params, headers: headers }));
+                let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/delete", 
+                    { method: 'DELETE', body: params, headers: headers });
                 await this.#checkStatus(httpResponse, 200);
             }
         }
@@ -159,9 +158,8 @@ export class WSFile implements IFile {
         this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
-        let httpResponse: Response | null = null;
-        httpResponse = (await fetch(this.#servicePath + "/api/delete", 
-            { method: 'DELETE', body: params, headers: headers }));
+        let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/delete", 
+            { method: 'DELETE', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
 		this.reset();
         return true;
@@ -287,10 +285,9 @@ export class WSFile implements IFile {
             let headers: Headers = new Headers();
             this.#setDefaultHeaders(headers);
             this.#setServiceAuth(headers);
-            let httpResponse: Response | null = null;
-            httpResponse = (await fetch(this.#servicePath + "/api/list"
+            let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()), 
-                { method: 'GET', headers: headers }));
+                { method: 'GET', headers: headers });
             await this.#checkStatus(httpResponse, 200);
             let res: number = (await httpResponse.json()).length;
             return res;
@@ -307,10 +304,9 @@ export class WSFile implements IFile {
             let headers: Headers = new Headers();
             this.#setDefaultHeaders(headers);
             this.#setServiceAuth(headers);
-            let httpResponse: Response | null = null;
-            httpResponse = (await fetch(this.#servicePath + "/api/list"
+            let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
-                { method: 'GET', headers: headers }));
+                { method: 'GET', headers: headers });
             await this.#checkStatus(httpResponse, 200);
             let realFiles: WSFile[] = [];
             let realDirs: WSFile[] = [];
@@ -354,8 +350,8 @@ export class WSFile implements IFile {
             params.append(WSFile.#DEST_DIR, newDir.getPath());
             params.append(WSFile.#FILENAME, newName);
             let httpResponse: Response | null = null;
-            httpResponse = (await fetch(this.#servicePath + "/api/move", 
-                { method: 'PUT', body: params, headers: headers }));
+            httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/move", 
+                { method: 'PUT', body: params, headers: headers });
             await this.#checkStatus(httpResponse, 200);
             newFile = new WSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
 			this.reset();
@@ -389,9 +385,8 @@ export class WSFile implements IFile {
             params.append(WSFile.#PATH, this.#filePath);
             params.append(WSFile.#DEST_DIR, newDir.getPath());
             params.append(WSFile.#FILENAME, newName);
-            let httpResponse: Response | null = null;
-            httpResponse = (await fetch(this.#servicePath + "/api/copy", 
-                { method: 'POST', body: params, headers: headers }));
+            let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/copy", 
+                { method: 'POST', body: params, headers: headers });
             await this.#checkStatus(httpResponse, 200);
             newFile = new WSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
 			this.reset();
@@ -425,9 +420,8 @@ export class WSFile implements IFile {
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
         params.append(WSFile.#FILENAME, newFilename);
-        let httpResponse: Response | null = null;
-        httpResponse = (await fetch(this.#servicePath + "/api/rename", 
-            { method: 'PUT', body: params, headers: headers }));
+        let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/rename", 
+            { method: 'PUT', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         return true;
     }
@@ -443,9 +437,8 @@ export class WSFile implements IFile {
         this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
-        let httpResponse: Response | null = null;
-        httpResponse = (await fetch(this.#servicePath + "/api/mkdir", 
-            { method: 'POST', body: params, headers: headers }));
+        let httpResponse: Response = await HttpSyncClient.getResponse(this.#servicePath + "/api/mkdir", 
+            { method: 'POST', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         return true;
     }
@@ -476,7 +469,7 @@ export class WSFile implements IFile {
     #setServiceAuth(headers: Headers) {
         if(!this.#credentials)
             return;
-        headers.append('Authorization', 'Basic ' + new Base64().encode(
+        headers.append('Authorization', 'Basic ' + Base64Utils.getBase64().encode(
             new TextEncoder().encode(this.#credentials.getServiceUser() + ":" + this.#credentials.getServicePassword())));
     }
     
@@ -490,37 +483,5 @@ export class WSFile implements IFile {
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "close");
-    }
-}
-
-export class Credentials {
-    readonly #serviceUser: string;
-
-    /**
-     * Get the user name
-     * @returns {string} The user name
-     */
-    public getServiceUser(): string {
-        return this.#serviceUser;
-    }
-
-    /**
-     * Get the password
-     * @returns {string} The password
-     */
-    public getServicePassword(): string {
-        return this.#servicePassword;
-    }
-
-    readonly #servicePassword: string;
-
-    /**
-     * Construct a credentials object.
-     * @param {string} serviceUser The user name
-     * @param {string} servicePassword The password
-     */
-    public constructor(serviceUser: string, servicePassword: string) {
-        this.#serviceUser = serviceUser;
-        this.#servicePassword = servicePassword;
     }
 }

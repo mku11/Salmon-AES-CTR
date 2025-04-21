@@ -43,10 +43,11 @@ import { FileSearcher, SearchOptions} from '../../lib/salmon-fs/fs/drive/utils/f
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AuthConfig } from '../../lib/salmon-fs/salmonfs/auth/auth_config.js';
 import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
-import { Credentials, WSFile } from '../../lib/salmon-fs/fs/file/ws_file.js';
+import { WSFile } from '../../lib/salmon-fs/fs/file/ws_file.js';
+import { Credentials } from '../../lib/salmon-fs/fs/file/credentials.js';
 import { WSDrive } from '../../lib/salmon-fs/salmonfs/drive/ws_drive.js';
 import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
-import { HttpFileStream } from '../../lib/salmon-fs/fs/streams/http_file_stream.js';
+import { HttpSyncClient } from '../../lib/salmon-fs/fs/file/http_sync_client.js';
 import { FileImportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_importer.js';
 import { FileExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_exporter.js';
 import { BatchExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
@@ -111,6 +112,7 @@ export class SalmonFSTestHelper {
 	static HTTP_SERVER_VIRTUAL_URL;
     static HTTP_VAULT_DIR_URL;
     static HTTP_VAULT_FILES_DIR_URL;
+    static httpCredentials = new Credentials("user", "password");
 
     // performance
     static ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
@@ -196,10 +198,12 @@ export class SalmonFSTestHelper {
         SalmonFSTestHelper.TEST_SEQ_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL, this.httpCredentials);
 		await SalmonFSTestHelper.createTestFiles();
         await SalmonFSTestHelper.createHttpFiles();
         await SalmonFSTestHelper.createHttpVault();
+
+        HttpSyncClient.setAllowClearTextTraffic(true); // only for testing purposes
 	}
 	
 	static async createDir(parent, dirName) {

@@ -27,6 +27,9 @@ import { CopyOptions, IFile, MoveOptions } from './ifile.js';
 import { HttpFileStream } from '../streams/http_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 import { MemoryStream } from '../../../salmon-core/streams/memory_stream.js';
+import { Credentials } from './credentials.js';
+import { HttpSyncClient } from './http_sync_client.js';
+import { Base64Utils } from '../../../salmon-core/salmon/encode/base64_utils.js';
 
 /**
  * Salmon RealFile implementation for Javascript.
@@ -37,26 +40,37 @@ export class HttpFile implements IFile {
 	 */
     public static readonly separator: string = "/";
 
-    filePath: string;
-    response: Response | null = null;
+    #filePath: string;
+    #response: Response | null = null;
+
+    #credentials: Credentials | null = null;
+
+    /**
+	 * Get the user credentials
+	 * @return The credentials
+	 */
+    public getCredentials(): Credentials | null {
+        return this.#credentials;
+    }
 
     /**
      * Instantiate a real file represented by the filepath provided.
      * @param {string} path The filepath.
      */
-    public constructor(path: string) {
-        this.filePath = path;
+    public constructor(path: string, credentials: Credentials | null = null) {
+        this.#filePath = path;
+        this.#credentials = credentials;
     }
 
     async #getResponse(): Promise<Response> {
-        if (this.response == null) {
+        if (this.#response == null) {
 			let headers = new Headers();
 			this.#setDefaultHeaders(headers);
-            this.response = (await fetch(this.filePath, 
-			{method: 'HEAD', headers: headers}));
-			await this.#checkStatus(this.response, 200);
+            this.#setServiceAuth(headers);
+            this.#response = await HttpSyncClient.getResponse(this.#filePath, {method: 'HEAD', headers: headers});
+			await this.#checkStatus(this.#response, 200);
 		}
-        return this.response;
+        return this.#response;
     }
 
     /**
@@ -99,7 +113,7 @@ export class HttpFile implements IFile {
      * @returns {string} The path
      */
     public getPath(): string {
-        return this.filePath;
+        return this.#filePath;
     }
 
     /**
@@ -107,7 +121,7 @@ export class HttpFile implements IFile {
      * @returns {string} The absolute path.
      */
     public getDisplayPath(): string {
-        return this.filePath;
+        return this.#filePath;
     }
 
     /**
@@ -115,9 +129,9 @@ export class HttpFile implements IFile {
      * @returns {string} The name of this file or directory.
      */
     public getName(): string {
-        if (this.filePath == null)
+        if (this.#filePath == null)
             throw new Error("Filepath is not assigned");
-        let nFilePath = this.filePath;
+        let nFilePath = this.#filePath;
         if(nFilePath.endsWith("/"))
             nFilePath = nFilePath.substring(0,nFilePath.length-1);
         let basename: string | undefined = nFilePath.split(HttpFile.separator).pop();
@@ -153,11 +167,11 @@ export class HttpFile implements IFile {
      * @returns {Promise<IFile>} The parent directory.
      */
     public async getParent(): Promise<IFile> {
-		let path: string = this.filePath;
+		let path: string = this.#filePath;
 		if(path.endsWith(HttpFile.separator))
 			path = path.slice(0,-1);
         let parentFilePath: string = path.substring(0, path.lastIndexOf(HttpFile.separator));
-        return new HttpFile(parentFilePath);
+        return new HttpFile(parentFilePath, this.#credentials);
     }
 
     /**
@@ -247,7 +261,7 @@ export class HttpFile implements IFile {
 				if (filename.includes("%")){
 					filename = decodeURIComponent(filename);
 				}
-				let file: IFile = new HttpFile(this.filePath + HttpFile.separator + filename);
+				let file: IFile = new HttpFile(this.#filePath + HttpFile.separator + filename, this.#credentials);
 				files.push(file);
 			}
 			return files;
@@ -284,7 +298,7 @@ export class HttpFile implements IFile {
     public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
             return null;
-        let child: HttpFile = new HttpFile(this.filePath + HttpFile.separator + filename);
+        let child: HttpFile = new HttpFile(this.#filePath + HttpFile.separator + filename, this.#credentials);
         return child;
     }
 
@@ -309,7 +323,7 @@ export class HttpFile implements IFile {
      * Reset cached properties
      */
     public reset() {
-		this.response = null;
+		this.#response = null;
 	}
 
     /**
@@ -317,7 +331,7 @@ export class HttpFile implements IFile {
      * @returns {string} The string
      */
     public toString(): string {
-        return this.filePath;
+        return this.#filePath;
     }
 	
 	async #checkStatus(httpResponse: Response, status: number) {
@@ -326,6 +340,13 @@ export class HttpFile implements IFile {
                     + " " + httpResponse.statusText);
     }
 
+    #setServiceAuth(headers: Headers) {
+        if(!this.#credentials)
+            return;
+        headers.append('Authorization', 'Basic ' + Base64Utils.getBase64().encode(
+            new TextEncoder().encode(this.#credentials.getServiceUser() + ":" + this.#credentials.getServicePassword())));
+    }
+    
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "close");

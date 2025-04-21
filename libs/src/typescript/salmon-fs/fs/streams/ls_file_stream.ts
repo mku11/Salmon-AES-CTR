@@ -25,7 +25,7 @@ SOFTWARE.
 import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
 import { IFile } from "../file/ifile.js";
-import { Base64 } from "../../../salmon-core/convert/base64.js";
+import { Base64Utils } from '../../../salmon-core/salmon/encode/base64_utils.js';
 
 /**
  * An advanced file stream implementation for localStorage files.
@@ -39,7 +39,6 @@ export class LocalStorageFileStream extends RandomAccessStream {
     readonly #file: IFile;
     #stream: MemoryStream;
     #canWrite: boolean = false;
-    #base64: Base64;
 
     /**
      * Construct a file stream from an LocalStorageFile.
@@ -51,7 +50,6 @@ export class LocalStorageFileStream extends RandomAccessStream {
     public constructor(file: IFile, mode: string) {
         super();
         this.#file = file;
-        this.#base64 = new Base64();
         if (mode == "rw") {
             this.#canWrite = true;
             this.#stream = new MemoryStream();
@@ -59,7 +57,7 @@ export class LocalStorageFileStream extends RandomAccessStream {
             let contents: string | null = localStorage.getItem(this.#file.getDisplayPath());
             if(contents == null)
                 contents = "";
-            this.#stream = new MemoryStream(this.#base64.decode(contents));
+            this.#stream = new MemoryStream(Base64Utils.getBase64().decode(contents));
         }
     }
 
@@ -162,7 +160,7 @@ export class LocalStorageFileStream extends RandomAccessStream {
      * Flush the buffers to the associated file.
      */
     public override async flush(): Promise<void> {
-        let contents: string = this.#base64.encode(this.#stream.toArray());
+        let contents: string = Base64Utils.getBase64().encode(this.#stream.toArray());
         let key: string = this.#file.getDisplayPath();
         localStorage.setItem(key, contents);
     }

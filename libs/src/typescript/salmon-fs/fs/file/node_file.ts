@@ -29,6 +29,7 @@ import { IOException } from '../../../salmon-core/streams/io_exception.js';
 import { mkdir, stat, readdir, rename, open, FileHandle } from 'node:fs/promises';
 import { Stats, rmdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
+import { Credentials } from './credentials.js';
 
 /**
  * Salmon real local filesystem implementation for node js. This can be used only with node js.
@@ -304,6 +305,14 @@ export class NodeFile implements IFile {
     public reset() {
 		
 	}
+
+    /**
+     * Get the user credentials
+     * @return The credentials
+     */
+    public getCredentials(): Credentials | null {
+        return null;
+    }
 
     /**
      * Returns a string representation of this object

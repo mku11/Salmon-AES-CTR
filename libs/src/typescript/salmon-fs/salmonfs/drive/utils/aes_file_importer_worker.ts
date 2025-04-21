@@ -34,7 +34,8 @@ import { AesFile } from "../../file/aes_file.js";
 export class AesFileImporterWorker extends FileImporterWorker {
 
     override async getTargetFile(params: any): Promise<IVirtualFile | null> {
-        let realFile: IFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
+        let realFile: IFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle,
+            params.servicePath, params.credentials);
         let targetFile: AesFile = new AesFile(realFile);
         targetFile.setAllowOverwrite(true);
         targetFile.setEncryptionKey(params.key);

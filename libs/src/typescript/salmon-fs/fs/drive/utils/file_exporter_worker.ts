@@ -48,7 +48,8 @@ export class FileExporterWorker {
      * @returns {Promise<IFile>} The target file
      */
     async getTargetFile(params: any): Promise<IFile> {
-        return await FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle);
+        return await FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle,
+            params.servicePath, params.credentials);
     }
 
     async receive(worker: FileExporterWorker, event: any) {

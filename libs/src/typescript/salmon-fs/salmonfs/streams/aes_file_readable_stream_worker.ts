@@ -27,7 +27,7 @@ import { IFile } from "../../fs/file/ifile.js";
 import { AesFile } from "../file/aes_file.js";
 import { fillBufferPart } from "../../../salmon-core/streams/readable_stream_wrapper.js";
 import { Buffer } from "../../../salmon-core/streams/buffer.js";
-import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { FileUtils } from "../../fs/drive/utils/file_utils.js";
 
 let stream: AesStream | null = null;
 let cacheBuffer: Buffer | null = null;
@@ -53,29 +53,13 @@ async function close() {
         cacheBuffer.clear();
 }
 
-async function getInstance(type: string, param: any): Promise<any> {
-    switch (type) {
-        case 'NodeFile':
-            const { NodeFile } = await import("../../fs/file/node_file.js");
-            return new NodeFile(param);
-        case 'HttpFile':
-            const { HttpFile } = await import("../../fs/file/http_file.js");
-            return new HttpFile(param);
-        case 'File':
-            const { File } = await import("../../fs/file/file.js");
-            return new File(param);
-        case 'WSFile':
-            throw new Error("Multithreading for Web Service files is not supported");
-    }
-    throw new Error("Unknown class type");
-}
-
 async function startRead(event: any): Promise<void> {
     try {
         let params = typeof process === 'object' ? event : event.data;
         let chunkBytesRead: number = 0;
         if (stream == null) {
-            let realFile: IFile = await getInstance(params.readFileClassType, params.fileToReadHandle);
+            let realFile: IFile = await FileUtils.getInstance(params.readFileClassType, params.fileToReadHandle, 
+                params.servicePath, params.credentials);
             let fileToExport: AesFile = new AesFile(realFile);
             fileToExport.setEncryptionKey(params.key);
             await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);

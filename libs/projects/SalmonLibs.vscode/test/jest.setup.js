@@ -19,6 +19,8 @@ var testRunnerMode = TestRunnerMode.NodeJS;
 var testDir = "d:\\tmp\\salmon\\test";
 var threads = 1;
 
+testMode = TestMode.WebService;
+
 for(let arg of process.argv) {
     let opt = arg.split("=");
     if(opt[0] == "TEST_DIR" && opt[1])

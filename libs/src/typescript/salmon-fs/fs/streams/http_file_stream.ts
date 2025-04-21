@@ -25,6 +25,9 @@ SOFTWARE.
 import { IOException } from "../../../salmon-core/streams/io_exception.js";
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
 import { IFile } from "../file/ifile.js";
+import { Base64Utils } from '../../../salmon-core/salmon/encode/base64_utils.js';
+import { HttpSyncClient } from '../file/http_sync_client.js';
+import { Credentials } from '../file/credentials.js';
 
 /**
  * An advanced file stream implementation for remote HTTP files.
@@ -33,9 +36,9 @@ import { IFile } from "../file/ifile.js";
 export class HttpFileStream extends RandomAccessStream {
     static MAX_LEN_PER_REQUEST = 8 * 1024 * 1024;
     /**
-     * The web service file associated with this stream.
+     * The HTTP file associated with this stream.
      */
-    readonly file: IFile;
+    #file: IFile;
 
     #position: number = 0;
     #end_position: number = 0;
@@ -58,7 +61,7 @@ export class HttpFileStream extends RandomAccessStream {
      */
     public constructor(file: IFile, mode: string) {
         super();
-        this.file = file;
+        this.#file = file;
         if (mode == "rw") {
             throw new Error("Unsupported Operation, readonly filesystem");
         }
@@ -70,6 +73,7 @@ export class HttpFileStream extends RandomAccessStream {
         if (this.#stream == null) {
             let headers = new Headers();
 			this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
 			let end = await this.getLength() - 1;
             let requestLength = HttpFileStream.MAX_LEN_PER_REQUEST;
             if (end == -1 || end >= this.#position + requestLength) {
@@ -80,7 +84,7 @@ export class HttpFileStream extends RandomAccessStream {
             // or it's a full request but we don't know the end
             if(this.#position > 0 || end == HttpFileStream.MAX_LEN_PER_REQUEST - 1)
 			    headers.append("Range", "bytes=" + this.#position + "-" + end);
-            let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", headers: headers });
+            let httpResponse = await HttpSyncClient.getResponse(this.#file.getPath(), { cache: "no-store", headers: headers });
 
             await this.#checkStatus(httpResponse, new Set([200, 206]));
             this.#stream = httpResponse.body;
@@ -127,7 +131,7 @@ export class HttpFileStream extends RandomAccessStream {
      * @returns {Promise<number>} The length
      */
     public override async getLength(): Promise<number> {
-        return await this.file.getLength();
+        return await this.#file.getLength();
     }
 
     /**
@@ -177,7 +181,7 @@ export class HttpFileStream extends RandomAccessStream {
             }
             this.#position += bytesRead;
         }
-        if(bytesRead < count && this.#position == this.#end_position + 1 && this.#position < await this.file.getLength()) {
+        if(bytesRead < count && this.#position == this.#end_position + 1 && this.#position < await this.#file.getLength()) {
             await this.reset();
         }
         let reader: ReadableStreamDefaultReader = await this.#getReader();
@@ -228,7 +232,7 @@ export class HttpFileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.Current)
             pos += offset;
         else if (origin == SeekOrigin.End)
-            pos = await this.file.getLength() - offset;
+            pos = await this.#file.getLength() - offset;
 
         await this.setPosition(pos);
         return this.#position;
@@ -273,6 +277,14 @@ export class HttpFileStream extends RandomAccessStream {
             }
     }
 
+    #setServiceAuth(headers: Headers) {
+        let credentials: Credentials | null = this.#file.getCredentials();
+        if(!credentials)
+            return;
+        headers.append('Authorization', 'Basic ' + Base64Utils.getBase64().encode(
+            new TextEncoder().encode(credentials.getServiceUser() + ":" + credentials.getServicePassword())));
+    }
+    
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "close");

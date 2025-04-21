@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { Credentials } from './credentials.js';
 
 /**
  * Interface that represents a real file. This class is used internally by the virtual disk to
@@ -195,6 +196,11 @@ export interface IFile {
      */
     reset(): any;
 
+    /**
+	 * Get the credentials
+	 * @return The credentials
+	 */
+    getCredentials(): Credentials | null;
 }
 
 /**

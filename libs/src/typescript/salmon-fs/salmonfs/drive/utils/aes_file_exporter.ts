@@ -49,11 +49,8 @@ export class AesFileExporter extends FileExporter {
     async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number> {
         // we force the whole content to use 1 thread if:
         if(
-            // we are in the browser andthe target is a local file (chromes crswap clash between writers)
-            (targetFile.constructor.name === 'File' && typeof process !== 'object') 
-            // or Web Service files (require passing the credentials)
-            || sourceFile.getRealFile().constructor.name == 'WSFile' 
-            || targetFile.constructor.name === 'WSFile)') {
+            // we are in the browser and the target is a local file (chromes crswap clash between writers)
+            targetFile.constructor.name === 'File' && typeof process !== 'object') {
             return await (sourceFile as AesFile).getLength();
         }
         return await (sourceFile as AesFile).getMinimumPartSize();

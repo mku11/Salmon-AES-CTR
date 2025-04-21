@@ -25,6 +25,7 @@ SOFTWARE.
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
 import { CopyOptions, IFile, MoveOptions } from './ifile.js';
 import { LocalStorageFileStream } from '../streams/ls_file_stream.js';
+import { Credentials } from './credentials.js';
 
 /**
  * Salmon localStorage implementation. This can be used to store small files.
@@ -244,6 +245,14 @@ export class LocalStorageFile implements IFile {
     public reset() {
 		
 	}
+
+    /**
+     * Get the credentials
+     * @return The credentials
+     */
+    public getCredentials(): Credentials | null {
+        return null;
+    }
 
     /**
      * Returns a string representation of this object

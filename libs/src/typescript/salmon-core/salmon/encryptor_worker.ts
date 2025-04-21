@@ -28,7 +28,9 @@ async function receive(event: any) {
     let params = typeof process === 'object' ? event : event.data;
     let destBuffer = new Uint8Array(params.out_size);
 	try {
-		let { startPos, endPos } = await encryptData(params.data, params.start, params.length, destBuffer, params.key, params.nonce, params.format, params.integrity, params.hashKey, params.chunkSize, params.bufferSize);
+		let { startPos, endPos } = await encryptData(params.data, params.start, params.length, destBuffer, 
+			params.key, params.nonce, params.format, 
+			params.integrity, params.hashKey, params.chunkSize, params.bufferSize);
 		let msg = { startPos: startPos, endPos: endPos, outData: destBuffer };
 		if (typeof process === 'object') {
 			const { parentPort } = await import("worker_threads");

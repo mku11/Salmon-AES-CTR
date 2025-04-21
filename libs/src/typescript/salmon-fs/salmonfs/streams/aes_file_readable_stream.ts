@@ -99,10 +99,6 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
             this.#threads = AesFileReadableStream.#DEFAULT_THREADS;
         if((this.#threads & (this.#threads-1)) != 0)
             throw new Error("Threads needs to be a power of 2 (ie 1,2,4,8)");
-        if(this.#threads > 1 && this.#aesFile.getRealFile().constructor.name === 'WSFile'){
-			console.log("Multithreading for web service files is not supported, setting single thread");
-			this.#threads = 1;
-        }
         if(this.#threads == 1)
             this.setStream(await this.#aesFile.getInputStream());
         await this.setPositionEnd(this.getTotalSize() - 1);

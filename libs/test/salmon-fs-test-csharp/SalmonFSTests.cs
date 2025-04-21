@@ -56,8 +56,6 @@ public class SalmonFSTests
         int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
             int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
-        testMode = TestMode.WebService;
-
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
         Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);

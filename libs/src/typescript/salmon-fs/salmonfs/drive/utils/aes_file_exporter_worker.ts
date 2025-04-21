@@ -38,7 +38,8 @@ export class AesFileExporterWorker extends FileExporterWorker {
      * @returns {Promise<IVirtualFile | null>} The virtual file
      */
     override async getSourceFile(params: any): Promise<IVirtualFile | null> {
-        let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
+        let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle,
+            params.serviePath, params.credentials);
         let fileToExport: AesFile = new AesFile(realFile);
         fileToExport.setEncryptionKey(params.key);
         await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);

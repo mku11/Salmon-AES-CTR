@@ -59,8 +59,6 @@ public class SalmonFSAndroidTests
         int threads = System.Environment.GetEnvironmentVariable("ENC_THREADS") != null && !System.Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
                 int.Parse(System.Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
-        threads = 2;
-
         SalmonFSAndroidTestHelper.SetTestParams(Activity, testDir, testMode);
 
         log("testDir: " + testDir);

@@ -23,10 +23,12 @@ SOFTWARE.
 */
 
 import { IOException } from "../../../salmon-core/streams/io_exception.js";
-import { Base64 } from '../../../salmon-core/convert/base64.js';
 import { MemoryStream } from '../../../salmon-core/streams/memory_stream.js';
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
 import { WSFile } from "../file/ws_file.js";
+import { Base64Utils } from '../../../salmon-core/salmon/encode/base64_utils.js';
+import { HttpSyncClient } from '../file/http_sync_client.js';
+import { Credentials } from '../file/credentials.js';
 
 /**
  * File stream implementation for Web Service files.
@@ -40,7 +42,7 @@ export class WSFileStream extends RandomAccessStream {
     /**
      * The web service file associated with this stream.
      */
-    readonly file: WSFile;
+    #file: WSFile;
 
     #canWrite: boolean = false;
     position: number = 0;
@@ -64,7 +66,7 @@ export class WSFileStream extends RandomAccessStream {
      */
     public constructor(file: WSFile, mode: string) {
         super();
-        this.file = file;
+        this.#file = file;
         this.#canWrite = mode == "rw";
     }
 
@@ -81,8 +83,8 @@ export class WSFileStream extends RandomAccessStream {
                 end = this.position + WSFileStream.MAX_LEN_PER_REQUEST - 1;
             }
             let httpResponse: Response | null = null;
-            httpResponse = await fetch(this.file.getServicePath() + "/api/get" 
-                + "?" + WSFileStream.#PATH + "=" + encodeURIComponent(this.file.getPath())
+            httpResponse = await HttpSyncClient.getResponse(this.#file.getServicePath() + "/api/get" 
+                + "?" + WSFileStream.#PATH + "=" + encodeURIComponent(this.#file.getPath())
                 + "&" + WSFileStream.#POSITION + "=" + this.position.toString(), 
                 { method: 'GET', headers: headers });
             await this.#checkStatus(httpResponse, this.position > 0 ? 206 : 200);
@@ -108,7 +110,7 @@ export class WSFileStream extends RandomAccessStream {
             let startPosition: number = await this.getPosition();
             const boundary = "*******";
             let header = "--"+boundary+"\r\n"; 
-            header += "Content-Disposition: form-data; name=\"file\"; filename=\""+ this.file.getName() + "\"\r\n";
+            header += "Content-Disposition: form-data; name=\"file\"; filename=\""+ this.#file.getName() + "\"\r\n";
             header += "\r\n";
 			let headerData = new TextEncoder().encode(header);
             
@@ -130,8 +132,8 @@ export class WSFileStream extends RandomAccessStream {
 				let httpResponse: Response | null = null;
 				let data: Uint8Array = body.toArray();
 				
-				httpResponse = await fetch(sstream.file.getServicePath() + "/api/upload" 
-					+ "?" + WSFileStream.#PATH + "=" + encodeURIComponent(sstream.file.getPath())
+				httpResponse = await HttpSyncClient.getResponse(sstream.#file.getServicePath() + "/api/upload" 
+					+ "?" + WSFileStream.#PATH + "=" + encodeURIComponent(sstream.#file.getPath())
 					+ "&" + WSFileStream.#POSITION + "=" + startPosition.toString(), 
 					{ method: 'POST', body: new Blob([data]), headers: headers } as RequestInit);
 				await sstream.#checkStatus(httpResponse, startPosition > 0 ? 206 : 200);
@@ -197,7 +199,7 @@ export class WSFileStream extends RandomAccessStream {
      * @returns {Promise<number>} The length
      */
     public override async getLength(): Promise<number> {
-        return await this.file.getLength();
+        return await this.#file.getLength();
     }
 
     /**
@@ -230,10 +232,10 @@ export class WSFileStream extends RandomAccessStream {
         this.#setDefaultHeaders(headers);
         this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
-        params.append(WSFileStream.#PATH, this.file.getPath());
+        params.append(WSFileStream.#PATH, this.#file.getPath());
         params.append(WSFileStream.#LENGTH, value.toString());
         let httpResponse: Response | null = null;
-        httpResponse = await fetch(this.file.getServicePath() + "/api/setLength", 
+        httpResponse = await HttpSyncClient.getResponse(this.#file.getServicePath() + "/api/setLength", 
 		{ method: 'PUT', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         await this.reset();
@@ -257,7 +259,7 @@ export class WSFileStream extends RandomAccessStream {
             }
             this.position += bytesRead;
         }
-        if(bytesRead < count && this.position == this.end_position + 1 && this.position < await this.file.getLength()) {
+        if(bytesRead < count && this.position == this.end_position + 1 && this.position < await this.#file.getLength()) {
             await this.reset();
         }
         let reader: ReadableStreamDefaultReader = await this.getReader();
@@ -310,7 +312,7 @@ export class WSFileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.Current)
             pos += offset;
         else if (origin == SeekOrigin.End)
-            pos = await this.file.getLength() - offset;
+            pos = await this.#file.getLength() - offset;
 
         await this.setPosition(pos);
         return this.position;
@@ -355,14 +357,15 @@ export class WSFileStream extends RandomAccessStream {
         
         this.buffer = null;
         this.bufferPosition = 0;
-		this.file.reset();
+		this.#file.reset();
     }
     
     #setServiceAuth(headers: Headers) {
-        if(!this.file.getCredentials())
+        let credentials: Credentials | null = this.#file.getCredentials();
+        if(!credentials)
             return;
-        headers.append('Authorization', 'Basic ' + new Base64().encode(
-            new TextEncoder().encode(this.file.getCredentials()?.getServiceUser() + ":" + this.file.getCredentials()?.getServicePassword())));
+        headers.append('Authorization', 'Basic ' + Base64Utils.getBase64().encode(
+            new TextEncoder().encode(credentials.getServiceUser() + ":" + credentials.getServicePassword())));
     }
     
     async #checkStatus(httpResponse: Response, status: number) {

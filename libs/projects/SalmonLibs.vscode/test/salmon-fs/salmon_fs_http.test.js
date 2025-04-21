@@ -158,7 +158,8 @@ describe('salmon-httpfs', () => {
         let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         console.log("reading: " + localFile.getDisplayPath());
         let localChkSum = await SalmonFSTestHelper.getChecksum(localFile);
-        let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME, 
+            SalmonFSTestHelper.httpCredentials);
         let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let stream = await httpFile.getInputStream();
         let digest = await SalmonFSTestHelper.getChecksumStream(stream);

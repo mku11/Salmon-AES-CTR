@@ -24,10 +24,9 @@ SOFTWARE.
 import { ReadableStreamWrapper } from "../../../salmon-core/streams/readable_stream_wrapper.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { IFile } from "../../fs/file/ifile.js";
-import { File } from "../../fs/file/file.js";
-import { HttpFile } from "../../fs/file/http_file.js";
 import { AesFile } from "../file/aes_file.js";
 import { AesFileReadableStream } from "../streams/aes_file_readable_stream.js";
+import { FileUtils } from "../../fs/drive/utils/file_utils.js";
 
 export class AesServiceWorker {
 	static BUFFERS = 4;
@@ -48,20 +47,11 @@ export class AesServiceWorker {
 		return position;
 	}
 
-	async getFile(type: string, param: any): Promise<IFile> {
-		switch (type) {
-			case 'HttpFile':
-				return new HttpFile(param);
-			case 'File':
-				return new File(param);
-		}
-		throw new Error("Unknown class type");
-	}
-
 	async #getResponse(request: Request) {
 		let position: number = this.getPosition(request.headers);
 		let params: any = this.requests[request.url];
-		let file: IFile = await this.getFile(params.fileClass, params.fileHandle);
+		let file: IFile = await FileUtils.getInstance(params.fileClass, params.fileHandle, 
+			params.servicePath, params.credentials);
 		let aesFile: AesFile = new AesFile(file);
 		aesFile.setEncryptionKey(params.key);
 		await aesFile.setVerifyIntegrity(params.integrity, params.hash_key);

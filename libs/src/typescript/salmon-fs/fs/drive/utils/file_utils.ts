@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Credentials } from '../../file/credentials.js';
+
 /**
  * File Utilities
  */
@@ -113,21 +115,25 @@ export class FileUtils {
      * 
      * @param {string} type The file class type string (ie: 'File')
      * @param {any} param The file constructor parameter
+     * @param {string} servicePath The file constructor parameter
+     * @param {Credentials} credentials The file constructor parameter
      * @returns {Promise<any>} A file object (ie: File)
      */
-    public static async getInstance(type: string, param: any): Promise<any> {
+    public static async getInstance(type: string, fileHandle: any, 
+        servicePath: string, credentials: Credentials): Promise<any> {
         switch (type) {
             case 'File':
                 const { File: File } = await import("../../../fs/file/file.js");
-                return new File(param);
+                return new File(fileHandle);
             case 'NodeFile':
                 const { NodeFile: NodeFile } = await import("../../../fs/file/node_file.js");
-                return new NodeFile(param);
+                return new NodeFile(fileHandle);
             case 'HttpFile':
                 const { HttpFile: HttpFile } = await import("../../../fs/file/http_file.js");
-                return new HttpFile(param);
+                return new HttpFile(fileHandle, credentials);
             case 'WSFile':
-                throw new Error("Multithreading for Web Service files is not supported");
+                const { WSFile } = await import("../../../fs/file/ws_file.js");
+            return new WSFile(fileHandle, servicePath, credentials);
         }
         throw new Error("Unknown class type");
     }

@@ -26,6 +26,7 @@ import { RandomAccessStream } from '../../../salmon-core/streams/random_access_s
 import { CopyContentsOptions, CopyOptions, IFile, MoveOptions, copyFileContents } from './ifile.js';
 import { FileStream } from '../streams/file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
+import { Credentials } from './credentials.js';
 
 /**
  * Salmon real local filesystem implementation for Javascript. This can be used only with the 
@@ -386,6 +387,14 @@ export class File implements IFile {
     public reset() {
 		
 	}
+
+    /**
+	 * Get the credentials
+	 * @return The credentials
+	 */
+    public getCredentials(): Credentials | null {
+        return null;
+    }
 
     /**
      * Returns a string representation of this object
