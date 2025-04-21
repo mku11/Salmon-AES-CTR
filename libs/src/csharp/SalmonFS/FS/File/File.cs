@@ -45,6 +45,11 @@ public class File : IFile
     private string filePath;
 
     /// <summary>
+    /// Get the service credentials.
+    /// </summary>
+    public Credentials ServiceCredentials { get; set; }
+
+    /// <summary>
     ///  Instantiate a real file represented by the filepath provided.
 	/// </summary>
 	///  <param name="path">The filepath.</param>

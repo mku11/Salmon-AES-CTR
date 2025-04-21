@@ -38,7 +38,6 @@ using Mku.SalmonFS.File;
 using Mku.SalmonFS.Streams;
 using Mku.SalmonFS.Drive.Utils;
 using Mku.FS.Drive.Utils;
-using Mku.FS.Streams;
 
 namespace Mku.Salmon.Test;
 
@@ -57,6 +56,7 @@ public class SalmonFSTests
         int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
             int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
+        testMode = TestMode.WebService;
 
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
         Console.WriteLine("testDir: " + testDir);

@@ -33,11 +33,17 @@ public class HttpDriveActivity : AppCompatActivity
     private int threads = 1;
     private static readonly string defaultPassword = "test";
     string defaultHttpDriveURL = "http://192.168.1.4/testvault";
+    string httpUser = "user";
+    string httpPassword = "password";
+
     private AesDrive httpDrive;
 
     protected override void OnCreate(Bundle bundle)
     {
         base.OnCreate(bundle);
+
+        // only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.AllowClearTextTraffic = true;
 
         SetContentView(Resource.Layout.activity_http_drive);
 
@@ -113,7 +119,7 @@ public class HttpDriveActivity : AppCompatActivity
         ClearLog();
         try
         {
-            IFile driveDir = new HttpFile(httpURL.Text.ToString());
+            IFile driveDir = new HttpFile(httpURL.Text.ToString(), new Credentials(httpUser, httpPassword));
             httpDrive = DriveSample.OpenDrive(driveDir, password.Text.ToString(),
                     Log);
         }

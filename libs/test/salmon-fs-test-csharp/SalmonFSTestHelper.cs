@@ -43,6 +43,7 @@ using Mku.SalmonFS.Streams;
 using MemoryStream = Mku.Streams.MemoryStream;
 using Mku.Streams;
 using Mku.FS.Streams;
+using System.Net.Http;
 
 namespace Mku.Salmon.Test;
 
@@ -82,7 +83,7 @@ public class SalmonFSTestHelper
         && !System.Environment.GetEnvironmentVariable("WS_SERVER_URL").Equals("") ?
             System.Environment.GetEnvironmentVariable("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     internal static string WS_TEST_DIRNAME = "ws";
-    internal static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
+    internal static Credentials credentials = new Credentials("user", "password");
 
     // HTTP server (Read-only)
     //static string HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
@@ -96,6 +97,7 @@ public class SalmonFSTestHelper
     internal static string HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL
             + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
     internal static string HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs";
+    internal static Credentials httpCredentials = new Credentials("user", "password");
 
     // performance
     internal static int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
@@ -167,10 +169,12 @@ public class SalmonFSTestHelper
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL, SalmonFSTestHelper.httpCredentials);
         SalmonFSTestHelper.CreateTestFiles();
         SalmonFSTestHelper.CreateHttpFiles();
         SalmonFSTestHelper.CreateHttpVault();
+
+        HttpSyncClient.AllowClearTextTraffic = true; // only for testing purposes
     }
 
     public static IFile CreateDir(IFile parent, string dirName)

@@ -27,7 +27,6 @@ using Java.Lang;
 using Mku.FS.File;
 using Mku.FS.Streams;
 using Xamarin.Android.Net;
-using static Mku.FS.File.HttpFile;
 using AndroidX.DocumentFile.Provider;
 using Uri = Android.Net.Uri;
 
@@ -40,6 +39,7 @@ namespace Mku.Android.FS.File;
 public class AndroidFileSystem
 {
     private static Context context;
+    private static bool initialized;
 
     /// <summary>
     /// Initialize the Android Drive before creating or opening any virtual drives.
@@ -47,14 +47,19 @@ public class AndroidFileSystem
     /// <param name="context">The Android context</param>
     public static void Initialize(Context context)
     {
+        if (initialized)
+            return;
         AndroidFileSystem.context = context.ApplicationContext;
-
         // android needs its own handler
-        HttpSyncClient client = new HttpSyncClient(new AndroidMessageHandler());
+        AndroidMessageHandler androidMessageHandler = new AndroidMessageHandler();
+        androidMessageHandler.AllowAutoRedirect = false;
+        HttpSyncClient client = new HttpSyncClient(androidMessageHandler);
+        HttpSyncClient.Instance = client;
         HttpFile.Client = client;
         HttpFileStream.Client = client;
         WSFile.Client = client;
         WSFileStream.Client = client;
+        initialized = true;
     }
 
     /// <summary>

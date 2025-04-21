@@ -38,8 +38,8 @@ using System.Text.Json.Serialization;
 using System.Runtime.CompilerServices;
 
 using System.Web;
-using static Mku.FS.File.HttpFile;
 using static Mku.FS.File.IFile;
+using Mku.Salmon.Encode;
 
 
 namespace Mku.FS.File;
@@ -61,7 +61,7 @@ public class WSFile : IFile
     /// <summary>
     /// The HTTP client
     /// </summary>
-    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
+    public static HttpSyncClient Client { get; set; } = HttpSyncClient.Instance;
     private string filePath;
     private Response response;
 
@@ -74,33 +74,6 @@ public class WSFile : IFile
     /// Get the service credentials.
     /// </summary>
     public Credentials ServiceCredentials { get; set; }
-
-    /// <summary>
-    /// Salmon Web service credentials
-    /// </summary>
-    public class Credentials
-    {
-        /// <summary>
-        /// Get the user name.
-        /// </summary>
-        public string ServiceUser { get; private set; }
-
-        /// <summary>
-        /// Get the password.
-        /// </summary>
-        public string ServicePassword { get; private set; }
-
-        /// <summary>
-        /// Construct the credentials.
-        /// </summary>
-        /// <param name="serviceUser"></param>
-        /// <param name="servicePassword"></param>
-        public Credentials(string serviceUser, string servicePassword)
-        {
-            this.ServiceUser = serviceUser;
-            this.ServicePassword = servicePassword;
-        }
-    }
 
     /// <summary>
     /// Response from the web service.
@@ -808,10 +781,14 @@ public class WSFile : IFile
                     + msg);
         }
     }
+
     private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
     {
-        string encoding = new Base64().Encode(UTF8Encoding.UTF8.GetBytes(ServiceCredentials.ServiceUser + ":" + ServiceCredentials.ServicePassword));
-        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
+        if (this.ServiceCredentials != null)
+        {
+            string encoding = Base64Utils.Base64.Encode(UTF8Encoding.UTF8.GetBytes(ServiceCredentials.ServiceUser + ":" + ServiceCredentials.ServicePassword));
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
+        }
     }
 
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)

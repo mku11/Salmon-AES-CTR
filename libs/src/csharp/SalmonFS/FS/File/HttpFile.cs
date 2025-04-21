@@ -36,6 +36,8 @@ using System.Web;
 using System.Runtime.CompilerServices;
 using static Mku.FS.File.IFile;
 using MemoryStream = Mku.Streams.MemoryStream;
+using Mku.Salmon.Encode;
+using System.Net.Http.Headers;
 
 namespace Mku.FS.File;
 
@@ -52,18 +54,25 @@ public class HttpFile : IFile
     /// <summary>
     /// The Http Client
     /// </summary>
-    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
+    public static HttpSyncClient Client { get; set; } = HttpSyncClient.Instance;
     private string filePath;
     private Response response;
+
+    /// <summary>
+    /// Get the service credentials.
+    /// </summary>
+    public Credentials ServiceCredentials { get; set; }
 
     /// <summary>
     ///  Instantiate a remote file represented by the filepath provided.
     ///  The REST API server path (ie https://localhost:8080/)
     /// </summary>
     ///  <param name="path">The filepath.</param>
-    public HttpFile(string path)
+    ///  <param name="credentials">The credentials if applicable.</param>
+    public HttpFile(string path, Credentials credentials = null)
     {
         this.filePath = path;
+        this.ServiceCredentials = credentials;
     }
 
     /// <summary>
@@ -91,6 +100,7 @@ public class HttpFile : IFile
 
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 SetDefaultHeaders(requestMessage);
+                SetServiceAuth(requestMessage);
                 httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 this.response = new Response()
@@ -204,7 +214,7 @@ public class HttpFile : IFile
             int index = path.LastIndexOf(HttpFile.Separator);
             if (index == -1)
                 return null;
-            HttpFile parent = new HttpFile(path.Substring(0, index));
+            HttpFile parent = new HttpFile(path.Substring(0, index), ServiceCredentials);
             return parent;
         }
     }
@@ -284,7 +294,8 @@ public class HttpFile : IFile
                         {
                             filename = HttpUtility.UrlDecode(filename);
                         }
-                        IFile file = new HttpFile(this.filePath + HttpFile.Separator + filename);
+                        IFile file = new HttpFile(this.filePath 
+                            + HttpFile.Separator + filename, ServiceCredentials);
                         files.Add(file);
                     }
                     matcher = matcher.NextMatch();
@@ -336,7 +347,7 @@ public class HttpFile : IFile
         if (IsFile)
             return null;
         string nFilepath = this.GetChildPath(filename);
-        HttpFile child = new HttpFile(nFilepath);
+        HttpFile child = new HttpFile(nFilepath, ServiceCredentials);
         return child;
     }
 
@@ -392,6 +403,15 @@ public class HttpFile : IFile
         {
             throw new IOException(httpResponse.StatusCode
                     + " " + httpResponse.ReasonPhrase);
+        }
+    }
+
+    private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
+    {
+        if (this.ServiceCredentials != null)
+        {
+            string encoding = Base64Utils.Base64.Encode(UTF8Encoding.UTF8.GetBytes(ServiceCredentials.ServiceUser + ":" + ServiceCredentials.ServicePassword));
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
         }
     }
 

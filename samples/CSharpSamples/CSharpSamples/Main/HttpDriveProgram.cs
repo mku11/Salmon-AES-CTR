@@ -1,4 +1,6 @@
 using Mku.FS.File;
+using Mku.FS.Credentials;
+using Mku.FS.HttpSyncClient;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
 using Mku.SalmonFS.Drive;
@@ -12,7 +14,12 @@ class HttpDriveProgram
     {
         string httpDriveURL = "http://localhost:8000/test/httpserv/vault";
         string password = "test123";
+		string httpUser = "user";
+        string httpPassword = "password";
         int threads = 1;
+		
+		// only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.AllowClearTextTraffic = true;
 		
 		AesStream.AesProviderType = ProviderType.Default;
 
@@ -23,7 +30,7 @@ class HttpDriveProgram
         if (!exportDir.Exists)
             exportDir.Mkdir();
 
-        HttpFile httpDir = new HttpFile(httpDriveURL);
+        HttpFile httpDir = new HttpFile(httpDriveURL, new Credentials(httpUser, httpPassword));
         AesDrive httpDrive = DriveSample.OpenDrive(httpDir, password);
         DriveSample.ListFiles(httpDrive);
         DriveSample.ExportFiles(httpDrive, exportDir, threads);

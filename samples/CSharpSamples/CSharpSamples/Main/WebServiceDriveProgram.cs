@@ -2,6 +2,8 @@ using Mku.FS.File;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
 using Mku.SalmonFS.Drive;
+using Mku.FS.Credentials;
+using Mku.FS.HttpSyncClient;
 using static Mku.FS.File.WSFile;
 using File = Mku.FS.File.File;
 using IFile = Mku.FS.File.IFile;
@@ -18,6 +20,9 @@ class WebServiceDriveProgram
         string drivePath = "/example_drive_" + Time.Time.CurrentTimeMillis();
         string password = "test123";
 
+		// only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.AllowClearTextTraffic = true;
+		
         AesStream.AesProviderType = ProviderType.Default;
 
         IFile[] filesToImport = [new File("./data/file.txt")];

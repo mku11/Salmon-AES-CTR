@@ -23,7 +23,9 @@ SOFTWARE.
 */
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,13 +37,20 @@ namespace Mku.FS.File;
 public class HttpSyncClient : HttpClient
 {
     private static readonly int DEFAULT_TIMEOUT_MS = 10000;
+    private static readonly int MAX_REDIRECTS = 3;
+
+    private HttpMessageHandler MessageHandler { get; set; }
+
     /// <summary>
-    /// Construct a generic client
+    /// Set to true to allow clear text traffic (HTTP), otherwise you need to use secure HTTPS protocols.
+    /// Clear text traffic should ONLY be used for testing purposes.
     /// </summary>
-    public HttpSyncClient() : base()
-    {
-		this.Timeout = TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT_MS);
-    }
+    public static bool AllowClearTextTraffic { get; set; } = false;
+
+    /// <summary>
+    /// The HttpClient to use
+    /// </summary>
+    public static HttpSyncClient Instance { get; set; } = new HttpSyncClient(new HttpClientHandler() { AllowAutoRedirect = false});
 
     /// <summary>
     /// Construct a generic client based with the specified message handler
@@ -49,7 +58,8 @@ public class HttpSyncClient : HttpClient
     /// <param name="messageHandler">The message handler</param>
     public HttpSyncClient(HttpMessageHandler messageHandler) : base(messageHandler)
     {
-		this.Timeout = TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT_MS);
+        this.MessageHandler = messageHandler;
+        this.Timeout = TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT_MS);
     }
 
     /// <summary>
@@ -89,10 +99,49 @@ public class HttpSyncClient : HttpClient
     /// <returns></returns>
     public virtual new HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
     {
-        var task = Task.Run(async () => await SendAsync(request, HttpCompletionOption.ResponseHeadersRead));
-		task.ConfigureAwait(false);
-        task.Wait();
-        HttpResponseMessage response = task.Result;
+        Uri uri = request.RequestUri;
+        HttpResponseMessage response = null;
+        int count = 0;
+        while (count < MAX_REDIRECTS)
+        {
+            if (!uri.Scheme.Equals("https") && !AllowClearTextTraffic)
+                throw new Exception("Clear text traffic should only be used for testing purpores, " +
+                        "use HttpSyncClient.setAllowClearTextTraffic() to override");
+            if (uri.Host == null || uri.Host.Length == 0)
+                throw new Exception("Malformed URL or unknown service, check the path");
+
+            Dictionary<string, IEnumerable<string>> headers = new Dictionary<string, IEnumerable<string>>();
+            foreach (var header in request.Headers)
+                headers.Add(header.Key, header.Value);
+
+            Task<HttpResponseMessage> task = Task.Run(async () => await SendAsync(request, HttpCompletionOption.ResponseHeadersRead));
+            task.ConfigureAwait(false);
+            task.Wait();
+            response = task.Result;
+            if(response.Headers.Location != null)
+            {
+                Uri nUri = null;
+                if(response.Headers.Location.IsAbsoluteUri) {
+                    nUri = response.Headers.Location;
+                } else
+                {
+                    nUri = new Uri(request.RequestUri, response.Headers.Location);
+                }
+                HttpRequestMessage nRequest = new HttpRequestMessage(request.Method, nUri);
+                if(request.RequestUri.Host == nUri.Host)
+                {
+                    foreach (var header in headers)
+                        nRequest.Headers.Add(header.Key, header.Value);
+                }
+                count += 1;
+                request.Dispose();
+                response.Dispose();
+                request = nRequest;
+            } else
+            {
+                break;
+            }
+        }
         return response;
     }
 }

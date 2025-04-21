@@ -48,6 +48,9 @@ public class WebServiceDriveActivity : AppCompatActivity
     {
         base.OnCreate(bundle);
 
+        // only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.AllowClearTextTraffic = true;
+
         SetContentView(Resource.Layout.activity_web_service_drive);
 
         wsURL = (EditText)FindViewById(Resource.Id.WEB_SERVICE_LOCATION);
@@ -146,7 +149,7 @@ public class WebServiceDriveActivity : AppCompatActivity
         {
             IFile driveDir = new WSFile(drivePath.Text.ToString(),
                     wsURL.Text.ToString(),
-                    new WSFile.Credentials(wsUserName.Text.ToString(),
+                    new Credentials(wsUserName.Text.ToString(),
                             wsPassword.Text.ToString()));
             if (!driveDir.Exists)
             {
@@ -168,7 +171,7 @@ public class WebServiceDriveActivity : AppCompatActivity
         {
             IFile driveDir = new WSFile(drivePath.Text.ToString(),
                     wsURL.Text.ToString(),
-                    new WSFile.Credentials(wsUserName.Text.ToString(),
+                    new Credentials(wsUserName.Text.ToString(),
                             wsPassword.Text.ToString()));
             wsDrive = DriveSample.OpenDrive(driveDir, password.Text.ToString(), Log);
         }

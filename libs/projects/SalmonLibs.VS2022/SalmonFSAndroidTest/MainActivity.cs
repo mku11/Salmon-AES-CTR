@@ -39,8 +39,7 @@ using System.Threading;
 using SalmonFSAndroidTest;
 using Android.Util;
 using Android.Content.PM;
-using System.Net.Http;
-using Xamarin.Android.Net;
+
 
 namespace Mku.Salmon.Test;
 
@@ -88,10 +87,10 @@ public class MainActivity : Activity
             //System.Environment.SetEnvironmentVariable("TEST_MODE", "Local");
             //RunFSTests();
 
-            System.Environment.SetEnvironmentVariable("TEST_MODE", "WebService");
-            RunFSTests();
+            //System.Environment.SetEnvironmentVariable("TEST_MODE", "WebService");
+            //RunFSTests();
 
-            //RunFSHttpTests();
+            RunFSHttpTests();
         });
     }
 

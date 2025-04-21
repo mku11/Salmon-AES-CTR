@@ -184,6 +184,12 @@ public interface IFile
 	/// </summary>
     void Reset();
 
+
+    /// <summary>
+    /// Get the service credentials.
+    /// </summary>
+    Credentials ServiceCredentials { get; set; }
+
     /// <summary>
     /// Copy contents of a file to another file.
     /// </summary>

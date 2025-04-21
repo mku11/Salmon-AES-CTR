@@ -36,6 +36,7 @@ using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using Mku.FS.File;
 using static Mku.FS.File.HttpFile;
+using Mku.Salmon.Encode;
 
 namespace Mku.FS.Streams;
 
@@ -53,7 +54,7 @@ public class WSFileStream : RandomAccessStream
     /// <summary>
     /// The HTTP client
     /// </summary>
-    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
+    public static HttpSyncClient Client { get; set; } = HttpSyncClient.Instance;
     private Stream inputStream;
     private Stream outputStream;
     private bool closed;
@@ -389,10 +390,14 @@ public class WSFileStream : RandomAccessStream
                     + " " + httpResponse.ReasonPhrase);
         }
     }
+
     private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
     {
-        string encoding = new Base64().Encode(UTF8Encoding.UTF8.GetBytes(file.ServiceCredentials.ServiceUser + ":" + file.ServiceCredentials.ServicePassword));
-        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
+        if (this.file.ServiceCredentials != null)
+        {
+            string encoding = Base64Utils.Base64.Encode(UTF8Encoding.UTF8.GetBytes(file.ServiceCredentials.ServiceUser + ":" + file.ServiceCredentials.ServicePassword));
+            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
+        }
     }
 
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)

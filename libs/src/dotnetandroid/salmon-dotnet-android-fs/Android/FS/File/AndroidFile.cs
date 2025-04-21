@@ -60,6 +60,10 @@ public class AndroidFile : IFile
     private bool? _isDirectory;
     private bool? _isFile;
 
+    /// <summary>
+    /// Get the service credentials.
+    /// </summary>
+    public Credentials ServiceCredentials { get; set; }
 
     /// <summary>
     /// Construct an AndroidFile wrapper from an Android DocumentFile.

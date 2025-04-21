@@ -30,6 +30,7 @@
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\WSFile.cs" Link="FS\File\WSFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\HttpFile.cs" Link="FS\File\HttpFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\HttpSyncClient.cs" Link="FS\File\HttpSyncClient.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\Credentials.cs" Link="FS\File\Credentials.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\IFile.cs" Link="FS\File\IFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\IVirtualFile.cs" Link="FS\File\IVirtualFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\VirtualDrive.cs" Link="FS\Drive\VirtualDrive.cs" />
