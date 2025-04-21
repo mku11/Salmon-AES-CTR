@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!@brief Web Service File implementation for Python.
+"""!@brief Http client for Python.
 """
 
 from __future__ import annotations
