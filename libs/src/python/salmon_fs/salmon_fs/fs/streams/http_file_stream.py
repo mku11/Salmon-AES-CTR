@@ -66,7 +66,7 @@ class HttpFileStream(RandomAccessStream):
             raise Exception("Unsupported Operation, readonly filesystem")
 
         self.__canWrite: bool = mode == "rw"
-        self.conn: HTTPConnection | HTTPSConnection | None = None
+        self.__conn: HTTPConnection | HTTPSConnection | None = None
         self.__response: HTTPResponse | None = None
         self.closed: bool = False
 
@@ -81,14 +81,17 @@ class HttpFileStream(RandomAccessStream):
                 headers['Range'] = "bytes=" + str(self.position) + "-"
             url = self.__file.get_path()
             while count := HttpFileStream.MAX_REDIRECTS:
-                self.conn = self.__create_connection(self.__file.get_path())
-                self.conn.request("GET", urlparse(url).path, headers=headers)
-                self.__response = self.conn.getresponse()
+                self.__conn = self.__create_connection(self.__file.get_path())
+                self.__conn.request("GET", urlparse(url).path, headers=headers)
+                self.__response = self.__conn.getresponse()
                 if self.__response.getheader('location'):
-                    url = urljoin(url, self.__response.getheader('location'))
+                    n_url = urljoin(url, self.__response.getheader('location'))
                     count -= 1
                     self.__response.close()
-                    self.conn.close()
+                    self.__conn.close()
+                    if urlparse(n_url).netloc != urlparse(url).netloc:
+                        header = None
+                    url = n_url
                 else:
                     break
             self.__check_status(self.__response, 206 if self.position > 0 else 200)
@@ -210,9 +213,9 @@ class HttpFileStream(RandomAccessStream):
         """
         if self.__response:
             self.__response.close()
-        if self.conn:
-            self.conn.close()
-        self.conn = None
+        if self.__conn:
+            self.__conn.close()
+        self.__conn = None
         self.__response = None
 
 

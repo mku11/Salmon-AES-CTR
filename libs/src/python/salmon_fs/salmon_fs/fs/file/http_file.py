@@ -51,7 +51,7 @@ class HttpFile(IFile):
     Http (read only) File implementation for Python.
     """
 
-    MAX_REDIRECTS: int = 5
+    MAX_REDIRECTS: int = 3
     separator: str = "/"
 
     def get_credentials(self):
@@ -85,15 +85,19 @@ class HttpFile(IFile):
             conn: HTTPConnection | HTTPSConnection | None = None
             try:
                 url: str = self.__file_path
-                while count := HttpFile.MAX_REDIRECTS:
+                count = 0
+                while count < HttpFile.MAX_REDIRECTS:
                     conn = self.__create_connection(url)
                     conn.request("GET", urlparse(url).path, headers=headers)
                     self.__response = conn.getresponse()
                     if self.__response.getheader('location'):
-                        url = urljoin(url, self.__response.getheader('location'))
-                        count -= 1
+                        n_url = urljoin(url, self.__response.getheader('location'))
+                        count += 1
                         self.__response.close()
                         conn.close()
+                        if urlparse(n_url).netloc != urlparse(url).netloc:
+                            header = None
+                        url = n_url
                     else:
                         break
                 self.__check_status(self.__response, 200)
