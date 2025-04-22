@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @RequestMapping("/api")
 /**
  * Provides endpoints for manipulating the filesystem remotely. The file system is expected to contain encrypted

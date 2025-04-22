@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.file.Credentials;
 import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.WSFile;
@@ -50,8 +51,8 @@ public class SalmonWSTestHelper {
     public static String TEST_SEQ_DIR = TEST_OUTPUT_DIR + "//seq";
     public static String VAULT_PATH = "test_vault"; // relative path to an existing vault on the server
     public static HashMap<String, String> users;
-    public static WSFile.Credentials credentials1 = new WSFile.Credentials("user", "password");
-    public static WSFile.Credentials wrongCredentials1 = new WSFile.Credentials("wrongUser", "wrongPass");
+    public static Credentials credentials1 = new Credentials("user", "password");
+    public static Credentials wrongCredentials1 = new Credentials("wrongUser", "wrongPass");
 
     static SequenceSerializer sequenceSerializer = new SequenceSerializer();
 

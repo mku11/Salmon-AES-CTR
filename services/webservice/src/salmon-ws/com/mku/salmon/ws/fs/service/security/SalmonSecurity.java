@@ -27,6 +27,7 @@ import com.mku.salmon.ws.fs.service.controller.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -57,7 +58,7 @@ public class SalmonSecurity {
         http.csrf().disable();
 
         http.authorizeRequests()
-                .antMatchers("/public/**")
+                .antMatchers("/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -66,6 +67,7 @@ public class SalmonSecurity {
                 .authenticationEntryPoint(authenticationEntryPoint);
         return http.build();
     }
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         FileSystem.getInstance().setPath(path);
@@ -80,4 +82,13 @@ public class SalmonSecurity {
         }
     }
 
+    @EnableWebSecurity
+    public class WebSecurityConfig {
+
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.cors(Customizer.withDefaults()); // allow OPTIONS method for browser preflight
+            return http.build();
+        }
+    }
 }
