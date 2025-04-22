@@ -84,11 +84,11 @@ public class MainActivity : Activity
         Task.Run(() => {
             Thread.Sleep(1000);
 
-            //System.Environment.SetEnvironmentVariable("TEST_MODE", "Local");
-            //RunFSTests();
+            System.Environment.SetEnvironmentVariable("TEST_MODE", "Local");
+            RunFSTests();
 
-            //System.Environment.SetEnvironmentVariable("TEST_MODE", "WebService");
-            //RunFSTests();
+            System.Environment.SetEnvironmentVariable("TEST_MODE", "WebService");
+            RunFSTests();
 
             RunFSHttpTests();
         });
