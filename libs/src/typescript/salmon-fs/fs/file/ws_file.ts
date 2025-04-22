@@ -60,13 +60,6 @@ export class WSFile implements IFile {
 
     #credentials: Credentials;
 
-    /**
-     * Set the web service credentials
-     * @param {Credentials} credentials The credentials
-     */
-    public setCredentials(credentials: Credentials) {
-        this.#credentials = credentials;
-    }
 
     /**
      * Instantiate a real file represented by the filepath provided.
