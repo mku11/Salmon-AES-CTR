@@ -29,7 +29,7 @@ export class HttpSyncClient {
     // static getResponse(arg0: string, arg1: RequestInit): Response | PromiseLike<Response | null> | null {
     //     throw new Error("Method not implemented.");
     // }
-    private static allowClearTextTraffic: boolean = false;
+    static #allowClearTextTraffic: boolean = false;
 
     /**
      * Check if clear text traffic (HTTP) is allowed, otherwise you need to use secure HTTPS protocols.
@@ -38,7 +38,7 @@ export class HttpSyncClient {
      * @return True if allow clear text traffic
      */
     public static getAllowClearTextTraffic(): boolean {
-        return HttpSyncClient.allowClearTextTraffic;
+        return HttpSyncClient.#allowClearTextTraffic;
     }
 
     /**
@@ -47,7 +47,7 @@ export class HttpSyncClient {
      * @param allow True to allow clear text traffic.
      */
     public static setAllowClearTextTraffic(allow: boolean) {
-        HttpSyncClient.allowClearTextTraffic = allow;
+        HttpSyncClient.#allowClearTextTraffic = allow;
     }
 
 	/**
@@ -58,7 +58,7 @@ export class HttpSyncClient {
 	 */
     static async getResponse(urlpath: string, init?: RequestInit): Promise<Response>{
         let url: URL = new URL(urlpath);
-        if(url.protocol !== "https" && !HttpSyncClient.allowClearTextTraffic)
+        if(url.protocol !== "https" && !HttpSyncClient.#allowClearTextTraffic)
             throw new Error("Clear text traffic should only be used for testing purpores, " +
                     "use HttpSyncClient.setAllowClearTextTraffic() to override");
 		if(url.hostname == null || url.hostname.length == 0)
