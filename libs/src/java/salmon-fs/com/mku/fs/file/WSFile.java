@@ -78,14 +78,6 @@ public class WSFile implements IFile {
      */
     private Credentials credentials;
 
-	/**
-	 * Set the user credentials
-	 * @param credentials The credentials
-	 */
-    public void setCredentials(Credentials credentials) {
-        this.credentials = credentials;
-    }
-
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
      *
