@@ -51,7 +51,7 @@ export class AesServiceWorker {
 		let position: number = this.getPosition(request.headers);
 		let params: any = this.requests[request.url];
 		let file: IFile = await FileUtils.getInstance(params.fileClass, params.fileHandle, 
-			params.servicePath, params.credentials);
+			params.servicePath, params.serviceUser, params.servicePassword);
 		let aesFile: AesFile = new AesFile(file);
 		aesFile.setEncryptionKey(params.key);
 		await aesFile.setVerifyIntegrity(params.integrity, params.hash_key);

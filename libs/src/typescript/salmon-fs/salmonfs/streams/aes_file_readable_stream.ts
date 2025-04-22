@@ -29,7 +29,10 @@ import { Buffer } from "../../../salmon-core/streams/buffer.js";
 import { IntegrityException } from "../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { AuthException } from "../auth/auth_exception.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-
+import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
+import { Credentials } from "../../fs/file/credentials.js";
+import { IFile } from "../../fs/file/ifile.js";
+import { FileUtils } from "../../fs/drive/utils/file_utils.js";
 
 /**
  * ReadableStream wrapper for seeking and reading an encrypted AesFile.
@@ -142,7 +145,12 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if(this.#aesFile == null)
                     throw new Error("File is missing");
-                let fileToReadHandle: any = await this.#aesFile.getRealFile().getPath();
+                let realFile: IFile = this.#aesFile.getRealFile();
+                let readFileClassType: string = realFile.constructor.name;
+                let fileToReadHandle: any = await realFile.getPath();
+                let servicePath: string | null = await FileUtils.getServicePath(realFile);
+                let credentials: Credentials | null = realFile.getCredentials();
+                
                 if (typeof process !== 'object') {
 
                     if (this.#workers[i] == null)
@@ -186,13 +194,17 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
                     index: i,
                     startPosition: startPosition,
                     fileToReadHandle: fileToReadHandle,
-                    readFileClassType: this.#aesFile.getRealFile().constructor.name,
+                    readFileClassType: readFileClassType,
                     start: start, length: length,
                     key: this.#aesFile.getEncryptionKey(),
                     integrity: this.#aesFile.isIntegrityEnabled(),
                     hash_key: this.#aesFile.getHashKey(),
                     chunk_size: this.#aesFile.getRequestedChunkSize(),
-                    cacheBufferSize: this.getBufferSize()
+                    cacheBufferSize: this.getBufferSize(),
+                    allowClearTextTraffic: HttpSyncClient.getAllowClearTextTraffic(),
+                    servicePath: servicePath,
+                    serviceUser: credentials?.getServiceUser(),
+                    servicePassword: credentials?.getServicePassword()
                 });
             }));
         }

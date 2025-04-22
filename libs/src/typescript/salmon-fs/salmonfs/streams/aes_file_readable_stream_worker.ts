@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { IFile } from "../../fs/file/ifile.js";
+import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
 import { AesFile } from "../file/aes_file.js";
 import { fillBufferPart } from "../../../salmon-core/streams/readable_stream_wrapper.js";
 import { Buffer } from "../../../salmon-core/streams/buffer.js";
@@ -56,10 +57,12 @@ async function close() {
 async function startRead(event: any): Promise<void> {
     try {
         let params = typeof process === 'object' ? event : event.data;
+        if(params.allowClearTextTraffic)
+            HttpSyncClient.setAllowClearTextTraffic(true);
         let chunkBytesRead: number = 0;
         if (stream == null) {
             let realFile: IFile = await FileUtils.getInstance(params.readFileClassType, params.fileToReadHandle, 
-                params.servicePath, params.credentials);
+                params.servicePath, params.serviceUser, params.servicePassword);
             let fileToExport: AesFile = new AesFile(realFile);
             fileToExport.setEncryptionKey(params.key);
             await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);

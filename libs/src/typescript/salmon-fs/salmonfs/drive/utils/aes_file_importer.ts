@@ -23,11 +23,14 @@ SOFTWARE.
 */
 
 import { IFile } from "../../../fs/file/ifile.js";
+import { HttpSyncClient } from "../../../fs/file/http_sync_client.js";
+import { Credentials } from "../../../fs/file/credentials.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { AuthException } from "../../auth/auth_exception.js";
 import { FileImporter } from "../../../fs/drive/utils/file_importer.js";
 import { AesFile } from "../../file/aes_file.js";
+import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
 
 /**
  * Imports files to a drive.
@@ -108,9 +111,18 @@ export class AesFileImporter extends FileImporter {
      */
     async getWorkerMessage(index: number, sourceFile: IFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
-        let importedFile = targetFile as AesFile;
-        let fileToImportHandle: any = await sourceFile.getPath();
-        let importedFileHandle: any = await importedFile.getRealFile().getPath();
+
+        let realSourceFileHandle: any = await sourceFile.getPath();
+        let realSourceFileType: string = sourceFile.constructor.name;
+        let realSourceServicePath: string | null = await FileUtils.getServicePath(sourceFile);
+        let realSourceFileCredentials: Credentials | null = sourceFile.getCredentials();
+        
+        let targetFileToImport = targetFile as AesFile;
+        let realTargetFile = targetFileToImport.getRealFile();
+        let realTargetFileHandle: any = await realTargetFile.getPath();
+        let realTargetFileType: string = realTargetFile.constructor.name;
+        let realTargetServicePath: string | null = await FileUtils.getServicePath(realTargetFile);
+        let realTargetFileCredentials: Credentials | null = realTargetFile.getCredentials();
         
         let start: number = partSize * index;
         let length: number;
@@ -122,16 +134,23 @@ export class AesFileImporter extends FileImporter {
         return {
             message: 'start',
             index: index,
-            fileToImportHandle: fileToImportHandle,
-            importFileClassType: sourceFile.constructor.name,
+            realSourceFileHandle: realSourceFileHandle,
+            realSourceFileType: realSourceFileType,
+            realSourceServicePath: realSourceServicePath,
+            realSourceServiceUser: realSourceFileCredentials?.getServiceUser(),
+            realSourceServicePassword: realSourceFileCredentials?.getServicePassword(),
+            realTargetFileHandle: realTargetFileHandle,
+            realTargetFileType: realTargetFileType,
+            realTargetServicePath: realTargetServicePath,
+            realTargetServiceUser: realTargetFileCredentials?.getServiceUser(),
+            realTargetServicePassword: realTargetFileCredentials?.getServicePassword(),
             start: start, length: length,
-            importedFileHandle: importedFileHandle,
-            importedFileClassType: importedFile.getRealFile().constructor.name,
-            key: importedFile.getEncryptionKey(),
+            key: targetFileToImport.getEncryptionKey(),
             integrity: integrity,
-            hash_key: importedFile.getHashKey(),
-            chunk_size: importedFile.getRequestedChunkSize(),
-            bufferSize: bufferSize
+            hash_key: targetFileToImport.getHashKey(),
+            chunk_size: targetFileToImport.getRequestedChunkSize(),
+            bufferSize: bufferSize,
+            allowClearTextTraffic: HttpSyncClient.getAllowClearTextTraffic()
         }
     }
 }

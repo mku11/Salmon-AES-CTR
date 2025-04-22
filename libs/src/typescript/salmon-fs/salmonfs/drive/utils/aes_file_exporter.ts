@@ -24,10 +24,13 @@ SOFTWARE.
 
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { IFile } from "../../../fs/file/ifile.js";
+import { HttpSyncClient } from "../../../fs/file/http_sync_client.js";
+import { Credentials } from "../../../fs/file/credentials.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { FileExporter } from "../../../fs/drive/utils/file_exporter.js";
 import { AuthException } from "../../auth/auth_exception.js";
 import { AesFile } from "../../file/aes_file.js";
+import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
 
 /**
  * Exports files from a drive.
@@ -98,9 +101,19 @@ export class AesFileExporter extends FileExporter {
      */
     async getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
-        let fileToExport = sourceFile as AesFile;
-        let fileToExportHandle: any = await fileToExport.getRealFile().getPath();
-        let exportedFileHandle: any = await targetFile.getPath();
+        
+        let sourceFileToExport = sourceFile as AesFile;
+        let realSourceFile = sourceFileToExport.getRealFile();
+        let realSourceFileHandle: any = await realSourceFile.getPath();
+        let realSourceFileType: string = realSourceFile.constructor.name;
+        let realSourceServicePath: string | null = await FileUtils.getServicePath(realSourceFile);
+        let realSourceFileCredentials: Credentials | null = realSourceFile.getCredentials();
+
+        let realTargetFileHandle: any = await targetFile.getPath();
+        let realTargetFileType: string = targetFile.constructor.name;
+        let realTargetServicePath: string | null = await FileUtils.getServicePath(targetFile);
+        let realTargetFileCredentials: Credentials | null = targetFile.getCredentials();
+
         let start: number = partSize * index;
         let length: number;
         if (index == runningThreads - 1)
@@ -111,16 +124,23 @@ export class AesFileExporter extends FileExporter {
 		return {
             message: 'start',
             index: index,
-            fileToExportHandle: fileToExportHandle,
-            exportFileClassType: fileToExport.getRealFile().constructor.name,
+            realSourceFileHandle: realSourceFileHandle,
+            realSourceFileType: realSourceFileType,
+            realSourceServicePath: realSourceServicePath,
+            realSourceServiceUser: realSourceFileCredentials?.getServiceUser(),
+            realSourceServicePassword: realSourceFileCredentials?.getServicePassword(),
+            realTargetFileHandle: realTargetFileHandle,
+            realTargetFileType: realTargetFileType,
+            realTargetServicePath: realTargetServicePath,
+            realTargetServiceUser: realTargetFileCredentials?.getServiceUser(),
+            realTargetServicePassword: realTargetFileCredentials?.getServicePassword(),
             start: start, length: length,
-            exportedFileHandle: exportedFileHandle,
-            exportedFileClassType: targetFile.constructor.name,
-            key: fileToExport.getEncryptionKey(),
+            key: sourceFileToExport.getEncryptionKey(),
             integrity: integrity,
-            hash_key: fileToExport.getHashKey(),
-            chunk_size: fileToExport.getRequestedChunkSize(),
-            bufferSize: bufferSize
+            hash_key: sourceFileToExport.getHashKey(),
+            chunk_size: sourceFileToExport.getRequestedChunkSize(),
+            bufferSize: bufferSize,
+            allowClearTextTraffic: HttpSyncClient.getAllowClearTextTraffic()
         }
     }
 }

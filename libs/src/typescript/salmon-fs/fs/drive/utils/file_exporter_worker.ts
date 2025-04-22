@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import { IFile } from "../../file/ifile.js";
+import { HttpSyncClient } from "../../file/http_sync_client.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
 import { FileUtils } from "./file_utils.js";
@@ -48,8 +49,8 @@ export class FileExporterWorker {
      * @returns {Promise<IFile>} The target file
      */
     async getTargetFile(params: any): Promise<IFile> {
-        return await FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle,
-            params.servicePath, params.credentials);
+        return await FileUtils.getInstance(params.realTargetFileType, params.realTargetFileHandle,
+            params.realTargetServicePath, params.realTargetServiceUser, params.realTargetServicePassword);
     }
 
     async receive(worker: FileExporterWorker, event: any) {
@@ -66,6 +67,8 @@ export class FileExporterWorker {
     async startExport(event: any): Promise<void> {
         try {
             let params = typeof process === 'object' ? event : event.data;
+            if(params.allowClearTextTraffic)
+                HttpSyncClient.setAllowClearTextTraffic(true);
             let onProgressChanged: (position: number, length: number) => void = async function (position, length): Promise<void> {
                 let msg = { message: 'progress', index: params.index, position: position, length: length };
                 if (typeof process === 'object') {

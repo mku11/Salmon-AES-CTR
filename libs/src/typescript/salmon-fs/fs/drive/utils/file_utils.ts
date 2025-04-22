@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import { Credentials } from '../../file/credentials.js';
+import { IFile } from '../../file/ifile.js';
 
 /**
  * File Utilities
@@ -116,11 +117,12 @@ export class FileUtils {
      * @param {string} type The file class type string (ie: 'File')
      * @param {any} param The file constructor parameter
      * @param {string} servicePath The file constructor parameter
-     * @param {Credentials} credentials The file constructor parameter
+     * @param {string} serviceUser The service user name
+     * @param {string} servicePassword The service user name
      * @returns {Promise<any>} A file object (ie: File)
      */
     public static async getInstance(type: string, fileHandle: any, 
-        servicePath: string, credentials: Credentials): Promise<any> {
+        servicePath: string, serviceUser: string, servicePassword: string): Promise<any> {
         switch (type) {
             case 'File':
                 const { File: File } = await import("../../../fs/file/file.js");
@@ -130,11 +132,21 @@ export class FileUtils {
                 return new NodeFile(fileHandle);
             case 'HttpFile':
                 const { HttpFile: HttpFile } = await import("../../../fs/file/http_file.js");
-                return new HttpFile(fileHandle, credentials);
+                return new HttpFile(fileHandle, new Credentials(serviceUser, servicePassword));
             case 'WSFile':
                 const { WSFile } = await import("../../../fs/file/ws_file.js");
-            return new WSFile(fileHandle, servicePath, credentials);
+                return new WSFile(fileHandle, servicePath, new Credentials(serviceUser, servicePassword));
         }
         throw new Error("Unknown class type");
+    }
+
+    public static async getServicePath(realFile: IFile): Promise<string | null> {
+        if(realFile.constructor.name === 'WSFile') {
+            const { WSFile } = await import("../../../fs/file/ws_file.js");
+            class WSFileType extends WSFile {}
+            let ws_file: WSFileType = realFile as WSFileType;
+            return ws_file.getServicePath();
+        }
+        return null;
     }
 }
