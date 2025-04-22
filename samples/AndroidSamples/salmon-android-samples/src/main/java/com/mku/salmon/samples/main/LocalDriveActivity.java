@@ -107,7 +107,7 @@ public class LocalDriveActivity extends AppCompatActivity {
     }
 
     public void createDrive(IFile driveDir) {
-        outputText.setText("");
+        clearLog();
 
         try {
             localDrive = DriveSample.createDrive(driveDir, password.getText().toString(), this::log);
@@ -119,7 +119,7 @@ public class LocalDriveActivity extends AppCompatActivity {
     }
 
     public void openDrive(IFile dir) {
-        outputText.setText("");
+        clearLog();
 
         try {
             localDrive = DriveSample.openDrive(dir, password.getText().toString(), this::log);
