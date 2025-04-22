@@ -188,7 +188,7 @@ public interface IFile
     /// <summary>
     /// Get the service credentials.
     /// </summary>
-    Credentials ServiceCredentials { get; set; }
+    Credentials ServiceCredentials { get; }
 
     /// <summary>
     /// Copy contents of a file to another file.

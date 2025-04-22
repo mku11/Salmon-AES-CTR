@@ -61,7 +61,7 @@ public class HttpFile : IFile
     /// <summary>
     /// Get the service credentials.
     /// </summary>
-    public Credentials ServiceCredentials { get; set; }
+    public Credentials ServiceCredentials { get; private set; }
 
     /// <summary>
     ///  Instantiate a remote file represented by the filepath provided.

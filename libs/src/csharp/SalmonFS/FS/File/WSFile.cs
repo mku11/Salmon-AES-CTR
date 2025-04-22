@@ -73,7 +73,7 @@ public class WSFile : IFile
     /// <summary>
     /// Get the service credentials.
     /// </summary>
-    public Credentials ServiceCredentials { get; set; }
+    public Credentials ServiceCredentials { get; private set; }
 
     /// <summary>
     /// Response from the web service.
