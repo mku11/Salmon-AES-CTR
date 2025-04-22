@@ -61,13 +61,6 @@ class HttpFile(IFile):
         """
         return self.__credentials
 
-    def set_credentials(self, credentials: Credentials):
-        """!
-        Set the HTTP service credentials
-        @param credentials: The credentials
-        """
-        self.__credentials = credentials
-
     def __init__(self, path: str, credentials: Credentials | None = None):
         """!
         Instantiate a real file represented by the filepath and service path provided.
