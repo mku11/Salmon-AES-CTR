@@ -40,6 +40,7 @@ import com.mku.android.fs.file.AndroidFile;
 import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmonfs.drive.AndroidDrive;
 import com.mku.fs.file.HttpFile;
+import com.mku.fs.file.HttpSyncClient;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.WSFile;
 import com.mku.salmonfs.drive.HttpDrive;
@@ -79,9 +80,11 @@ public class SalmonFSAndroidTestHelper {
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL, SalmonFSTestHelper.httpCredentials);
         SalmonFSTestHelper.createTestFiles();
         SalmonFSTestHelper.createHttpFiles();
+
+        HttpSyncClient.setAllowClearTextTraffic(true); // only for testing purposes
     }
 
     public static IFile getFile(String filepath, boolean isDirectory) {
