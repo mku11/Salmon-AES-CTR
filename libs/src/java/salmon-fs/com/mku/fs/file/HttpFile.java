@@ -58,16 +58,13 @@ public class HttpFile implements IFile {
 
 
 	/**
-	 * Get the user credentials
+	 * Get the credentials
 	 * @return The credentials
 	 */
     public Credentials getCredentials() {
         return credentials;
     }
 
-    /**
-     * Salmon Web service credentials
-     */
     private Credentials credentials;
 
 	/**

@@ -226,7 +226,7 @@ public interface IFile {
     void reset();
 
 	/**
-	 * Get the user credentials
+	 * Get the credentials
 	 * @return The credentials
 	 */
     Credentials getCredentials();

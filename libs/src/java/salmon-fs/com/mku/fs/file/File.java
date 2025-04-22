@@ -353,7 +353,7 @@ public class File implements IFile {
     }
 	
 	/**
-	 * Get the user credentials
+	 * Get the credentials
 	 * @return The credentials
 	 */
     public Credentials getCredentials() {
