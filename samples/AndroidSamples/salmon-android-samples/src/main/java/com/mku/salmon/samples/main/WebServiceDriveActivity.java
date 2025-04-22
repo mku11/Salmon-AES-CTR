@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.mku.android.fs.file.AndroidFileSystem;
+import com.mku.fs.file.Credentials;
+import com.mku.fs.file.HttpSyncClient;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.WSFile;
 import com.mku.salmon.samples.R;
@@ -39,7 +41,7 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     private AesDrive wsDrive;
 
     private static final String defaultPassword = "test123";
-    private static final String defaultWsServicePath = "";
+    private static final String defaultWsServicePath = "http://192.168.1.4:8080";
     private static final String defaultUserName = "user";
     private static final String defaultWsPassword = "password";
     private static final String defaultDrivePath = "/example_drive_" + System.currentTimeMillis();
@@ -49,6 +51,9 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+
+        // only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.setAllowClearTextTraffic(true);
 
         setContentView(R.layout.activity_web_service_drive);
 
@@ -132,7 +137,7 @@ public class WebServiceDriveActivity extends AppCompatActivity {
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
-                        new WSFile.Credentials(wsUserName.getText().toString(),
+                        new Credentials(wsUserName.getText().toString(),
                                 wsPassword.getText().toString()));
                 if (!driveDir.exists()) {
                     driveDir.mkdir();
@@ -151,7 +156,7 @@ public class WebServiceDriveActivity extends AppCompatActivity {
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
-                        new WSFile.Credentials(wsUserName.getText().toString(),
+                        new Credentials(wsUserName.getText().toString(),
                                 wsPassword.getText().toString()));
                 wsDrive = DriveSample.openDrive(driveDir, password.getText().toString(), this::log);
             } catch (Exception e) {
