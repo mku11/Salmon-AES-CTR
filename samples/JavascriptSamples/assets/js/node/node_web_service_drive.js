@@ -1,13 +1,18 @@
 import './node_common.js';
 import { DriveSample } from '../samples/drive_sample.js';
-import { WSFile, Credentials } from '../lib/salmon-fs/fs/file/ws_file.js';
+import { WSFile } from '../lib/salmon-fs/fs/file/ws_file.js';
 import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
+import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
+import { Credentials } from '../lib/salmon-fs/fs/file/credentials.js';
 
 let wsServicePath = "http://localhost:8080";
 let wsUser = "user";
 let wsPassword = "password";
 let drivePath = "/example_drive_" + Date.now();
 let password = "test123";
+
+// only for demo purposes, you should be using HTTPS traffic
+HttpSyncClient.setAllowClearTextTraffic(true);
 
 let filesToImport = [new NodeFile("./data/file.txt")];
 

@@ -1,9 +1,16 @@
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 import { HttpFile } from '../lib/salmon-fs/fs/file/http_file.js';
+import { Credentials } from '../lib/salmon-fs/fs/file/credentials.js';
+import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
 
+let serviceUser = "user";
+let servicePassword = "password";
 let threads = 2;
 let httpDrive;
+
+// only for demo purposes, you should be using HTTPS traffic
+HttpSyncClient.setAllowClearTextTraffic(true);
 
 export async function openHttpDrive() {
 	if(httpDrive)
@@ -12,7 +19,7 @@ export async function openHttpDrive() {
 		printReset();
 		let httpDriveURL = document.getElementById("http-drive-url").value;
 		let password = document.getElementById("http-drive-password").value;
-		let dir = new HttpFile(httpDriveURL);
+		let dir = new HttpFile(httpDriveURL, new Credentials(serviceUser, servicePassword));
 		httpDrive = await DriveSample.openDrive(dir, password);
 	} catch (ex) {
 		console.error(ex);

@@ -1,8 +1,13 @@
-import { WSFile, Credentials } from '../lib/salmon-fs/fs/file/ws_file.js';
+import { WSFile } from '../lib/salmon-fs/fs/file/ws_file.js';
+import { Credentials } from '../lib/salmon-fs/fs/file/credentials.js';
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
+import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
 
 let wsDrive;
+
+// only for demo purposes, you should be using HTTPS traffic
+HttpSyncClient.setAllowClearTextTraffic(true);
 
 export async function createWebServiceDrive() {
 	let wsServicePath = document.getElementById("ws-service-path").value;
