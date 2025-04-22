@@ -33,6 +33,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.mku.android.fs.streams.AndroidFileStream;
 import com.mku.android.salmonfs.drive.AndroidDrive;
+import com.mku.fs.file.Credentials;
 import com.mku.fs.file.IFile;
 import com.mku.func.BiConsumer;
 import com.mku.streams.RandomAccessStream;
@@ -496,6 +497,14 @@ public class AndroidFile implements IFile {
         _isFile = null;
         _lastModified = null;
         _length = null;
+    }
+
+    /**
+     * Get the user credentials
+     * @return The credentials
+     */
+    public Credentials getCredentials() {
+        return null;
     }
 
     /**
