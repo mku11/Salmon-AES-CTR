@@ -422,7 +422,7 @@ class SalmonFSTestHelper:
         export_options = AesFileExporter.FileExportOptions()
         export_options.integrity = verify_file_integrity
         export_options.on_progress_changed = print_export_progress
-        export_dir: IFile = SalmonFSTestHelper.generate_folder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, False)
+        export_dir: IFile = SalmonFSTestHelper.generate_folder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, True)
         export_file: IFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, export_dir,
                                                                           export_options)
 

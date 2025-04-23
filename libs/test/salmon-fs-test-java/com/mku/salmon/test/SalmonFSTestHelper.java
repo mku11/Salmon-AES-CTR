@@ -395,7 +395,7 @@ public class SalmonFSTestHelper {
         exportOptions.integrity = verifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
 
-        IFile exportDir = SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        IFile exportDir = SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, true);
         IFile exportFile = fileExporter.exportFile(aesFile, exportDir, exportOptions);
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)

@@ -407,7 +407,7 @@ export class SalmonFSTestHelper {
         let exportOptions = new FileExportOptions();
         exportOptions.integrity = verifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
-        let exportDir = await SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        let exportDir = await SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, true);
         let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, exportDir, exportOptions);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {

@@ -403,7 +403,7 @@ public class SalmonFSTestHelper
         exportOptions.integrity = VerifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
 
-        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, true);
         IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, exportDir, exportOptions);
 
         string hashPostExport = SalmonFSTestHelper.GetChecksum(exportFile);
