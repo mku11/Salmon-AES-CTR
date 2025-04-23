@@ -39,7 +39,8 @@ using System.Threading;
 using SalmonFSAndroidTest;
 using Android.Util;
 using Android.Content.PM;
-
+using Mku.Salmon.Transform;
+using Mku.Android.Salmon.Transform;
 
 namespace Mku.Salmon.Test;
 
@@ -75,7 +76,10 @@ public class MainActivity : Activity
         prefs = PreferenceManager.GetDefaultSharedPreferences(ApplicationContext);
         SetContentView(Resource.Layout.activity_main);
         testFolder = (Button)FindViewById(Resource.Id.TEST_FOLDER_BUTTON);
+		
+		NativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
+		
         testFolder.Click += (s, e) =>
         {
             OpenFilesystem(this, REQUEST_OPEN_FOLDER);
