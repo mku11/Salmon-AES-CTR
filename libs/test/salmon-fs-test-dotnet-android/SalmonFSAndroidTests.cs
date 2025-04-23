@@ -95,6 +95,7 @@ public class SalmonFSAndroidTests
             providerType = (ProviderType)System.Enum.Parse(typeof(ProviderType), aesProviderType);
         log("ProviderType: " + providerType);
 
+		providerType = ProviderType.AesIntrinsics;
         AesStream.AesProviderType = providerType;
     }
 
@@ -119,7 +120,7 @@ public class SalmonFSAndroidTests
         long tstart = Time.Time.CurrentTimeMillis();
         foreach (MethodInfo method in testMethods)
         {
-            //if (method.Name != "ShouldImportAndExportIntegrityBitFlipData")
+            //if (method.Name != "ShouldImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch")
             //    continue;
             log("Running: " + method.Name);
             try
