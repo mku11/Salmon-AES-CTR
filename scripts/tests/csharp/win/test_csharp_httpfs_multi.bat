@@ -2,7 +2,7 @@ set CURRDIR=%CD%
 
 :: to run type VsDevCmd.bat in the windows console before running this script
 
-set HTTP_SERVER_URL=http://localhost:8000
+set HTTP_SERVER_URL=http://localhost
 set TEST_DIR=d:\tmp\salmon\test
 set TEST_MODE=Http
 set ENC_THREADS=2
