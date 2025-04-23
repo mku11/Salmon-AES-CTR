@@ -24,9 +24,11 @@ SOFTWARE.
 import { ReadableStreamWrapper } from "../../../salmon-core/streams/readable_stream_wrapper.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { IFile } from "../../fs/file/ifile.js";
+import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
 import { AesFile } from "../file/aes_file.js";
 import { AesFileReadableStream } from "../streams/aes_file_readable_stream.js";
 import { FileUtils } from "../../fs/drive/utils/file_utils.js";
+
 
 export class AesServiceWorker {
 	static BUFFERS = 4;
@@ -50,6 +52,8 @@ export class AesServiceWorker {
 	async #getResponse(request: Request) {
 		let position: number = this.getPosition(request.headers);
 		let params: any = this.requests[request.url];
+		if(params.allowClearTextTraffic)
+			HttpSyncClient.setAllowClearTextTraffic(true);
 		let file: IFile = await FileUtils.getInstance(params.fileClass, params.fileHandle, 
 			params.servicePath, params.serviceUser, params.servicePassword);
 		let aesFile: AesFile = new AesFile(file);
