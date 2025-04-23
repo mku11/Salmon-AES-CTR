@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace Mku.FS.File;
 /// </summary>
 public class HttpSyncClient : HttpClient
 {
-    private static readonly int DEFAULT_TIMEOUT_MS = 10000;
+    private static readonly int DEFAULT_TIMEOUT_MS = 20000;
     private static readonly int MAX_REDIRECTS = 3;
 
     private HttpMessageHandler MessageHandler { get; set; }
@@ -97,6 +98,7 @@ public class HttpSyncClient : HttpClient
     /// <param name="completionOption">The completion option</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public virtual new HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
     {
         Uri uri = request.RequestUri;
