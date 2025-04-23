@@ -1,6 +1,4 @@
 using Mku.FS.File;
-using Mku.FS.Credentials;
-using Mku.FS.HttpSyncClient;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
 using Mku.SalmonFS.Drive;
@@ -12,8 +10,8 @@ class HttpDriveProgram
 {
     public static void RunMain(string[] args)
     {
-        string httpDriveURL = "http://localhost:8000/test/httpserv/vault";
-        string password = "test123";
+        string httpDriveURL = "http://localhost/testvault";
+        string password = "test";
 		string httpUser = "user";
         string httpPassword = "password";
         int threads = 1;
