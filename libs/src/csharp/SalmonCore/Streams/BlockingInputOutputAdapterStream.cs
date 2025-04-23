@@ -169,8 +169,12 @@ public class BlockingInputOutputAdapterStream : Stream
     /// </summary>
     public override void Close()
     {
-        PipeServer.Close();
-        WaitReceived();
+        if (PipeServer.IsConnected)
+        {
+            Flush();
+            PipeServer.Close();
+            WaitReceived();
+        }
     }
 
 
