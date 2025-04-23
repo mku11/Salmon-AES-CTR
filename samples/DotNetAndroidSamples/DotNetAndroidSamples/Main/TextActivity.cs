@@ -9,6 +9,8 @@ using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
 using Android.App;
 using System.Threading.Tasks;
+using Mku.Salmon.Transform;
+using Mku.Android.Salmon.Transform;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -89,6 +91,7 @@ public class TextActivity : AppCompatActivity
 
     private void Initialize()
     {
+		NativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }

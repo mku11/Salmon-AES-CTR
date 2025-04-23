@@ -14,6 +14,8 @@ using Mku.Salmon.Samples.Utils;
 using System.Threading.Tasks;
 using Android.App;
 using Uri = Android.Net.Uri;
+using Mku.Salmon.Transform;
+using Mku.Android.Salmon.Transform;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -110,6 +112,7 @@ public class HttpDriveActivity : AppCompatActivity
 
     private void Initialize()
     {
+		NativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }
