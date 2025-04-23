@@ -24,6 +24,9 @@ SOFTWARE.
 
 import { Credentials } from '../../file/credentials.js';
 import { IFile } from '../../file/ifile.js';
+import { HttpFile } from '../../file/http_file.js';
+import { WSFile } from '../../file/ws_file.js';
+import { File } from '../../file/file.js';
 
 /**
  * File Utilities
@@ -125,16 +128,13 @@ export class FileUtils {
         servicePath: string, serviceUser: string, servicePassword: string): Promise<any> {
         switch (type) {
             case 'File':
-                const { File: File } = await import("../../../fs/file/file.js");
                 return new File(fileHandle);
             case 'NodeFile':
                 const { NodeFile: NodeFile } = await import("../../../fs/file/node_file.js");
                 return new NodeFile(fileHandle);
             case 'HttpFile':
-                const { HttpFile: HttpFile } = await import("../../../fs/file/http_file.js");
                 return new HttpFile(fileHandle, new Credentials(serviceUser, servicePassword));
             case 'WSFile':
-                const { WSFile } = await import("../../../fs/file/ws_file.js");
                 return new WSFile(fileHandle, servicePath, new Credentials(serviceUser, servicePassword));
         }
         throw new Error("Unknown class type");
@@ -142,9 +142,7 @@ export class FileUtils {
 
     public static async getServicePath(realFile: IFile): Promise<string | null> {
         if(realFile.constructor.name === 'WSFile') {
-            const { WSFile } = await import("../../../fs/file/ws_file.js");
-            class WSFileType extends WSFile {}
-            let ws_file: WSFileType = realFile as WSFileType;
+            let ws_file: WSFile = realFile as WSFile;
             return ws_file.getServicePath();
         }
         return null;
