@@ -27,7 +27,7 @@ class DriveSample
         { // web service
             drive = WSDrive.Create(vaultDir, password, sequencer);
         }
-        Console.WriteLine("drive created: " + drive.RealRoot.AbsolutePath);
+        Console.WriteLine("drive created: " + drive.RealRoot.DisplayPath);
         return drive;
     }
 
@@ -48,7 +48,7 @@ class DriveSample
             drive = HttpDrive.Open(vaultDir, password);
         }
         if (drive != null)
-            Console.WriteLine("drive opened: " + drive.RealRoot.AbsolutePath);
+            Console.WriteLine("drive opened: " + drive.RealRoot.DisplayPath);
         return drive;
     }
 
