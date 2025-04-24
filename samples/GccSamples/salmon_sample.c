@@ -22,7 +22,7 @@ void main(int argc, char** argv) {
 	get_crypt_random(nonce, 8); // 8 bytes for the random nonce
 	
 	// choose the implementation:
-	int implType = AES_IMPL_AES_INTR; // or use AES_IMPL_AES, AES_IMPL_AES_GPU
+	int implType = AES_IMPL_AES; // or use AES_IMPL_AES_INTR for performance
 
 	// initialize
 	salmon_init(implType);
