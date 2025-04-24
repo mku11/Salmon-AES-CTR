@@ -14,8 +14,8 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
 - GPU AES acceleration with OpenCL  
 - Data and seekable stream encryption API  
 - File system API for encrypted virtual drives  
-- Protected nonce sequencers (limited)   
-- Web Service for use with remote virtual drives (experimental)  
+- Protected nonce sequencers (limited)  
+- Support for network drives HTTP (readonly) and Web Service (experimental)  
  
 ## Live Web Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
