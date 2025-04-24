@@ -99,7 +99,7 @@ export class SalmonFSTestHelper {
 
     // Web service
 	static WS_SERVER_DEFAULT_URL = "http://localhost:8080";
-    // const WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
+    // static WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
 	static WS_SERVER_URL = SalmonFSTestHelper.WS_SERVER_DEFAULT_URL;
     static WS_TEST_DIRNAME = "ws";
     static credentials = new Credentials("user", "password");
