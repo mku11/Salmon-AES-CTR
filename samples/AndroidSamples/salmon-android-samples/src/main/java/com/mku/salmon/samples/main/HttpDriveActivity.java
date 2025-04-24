@@ -35,7 +35,7 @@ public class HttpDriveActivity extends AppCompatActivity {
 
     private int threads = 1;
     private static final String defaultPassword = "test123";
-    String defaultHttpDriveURL = "http://192.168.1.4/testvault";
+    String defaultHttpDriveURL = "https://localhost/testvault";
     String httpUser = "user";
     String httpPassword = "password";
     private AesDrive httpDrive;
@@ -46,8 +46,9 @@ public class HttpDriveActivity extends AppCompatActivity {
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
-        // only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.setAllowClearTextTraffic(true);
+        // enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.setAllowClearTextTraffic(true);
 
         setContentView(R.layout.activity_http_drive);
 

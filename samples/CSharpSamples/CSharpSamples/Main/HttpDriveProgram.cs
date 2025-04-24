@@ -10,14 +10,15 @@ class HttpDriveProgram
 {
     public static void RunMain(string[] args)
     {
-        string httpDriveURL = "http://localhost/testvault";
+        string httpDriveURL = "https://localhost/testvault";
         string password = "test";
 		string httpUser = "user";
         string httpPassword = "password";
         int threads = 1;
 		
-		// only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.AllowClearTextTraffic = true;
+		// enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.AllowClearTextTraffic = true;
 		
 		AesStream.AesProviderType = ProviderType.Default;
 

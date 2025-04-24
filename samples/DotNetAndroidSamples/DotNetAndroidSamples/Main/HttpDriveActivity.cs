@@ -34,7 +34,7 @@ public class HttpDriveActivity : AppCompatActivity
 
     private int threads = 1;
     private static readonly string defaultPassword = "test";
-    string defaultHttpDriveURL = "http://192.168.1.4/testvault";
+    string defaultHttpDriveURL = "https://localhost/testvault";
     string httpUser = "user";
     string httpPassword = "password";
 
@@ -44,8 +44,9 @@ public class HttpDriveActivity : AppCompatActivity
     {
         base.OnCreate(bundle);
 
-        // only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.AllowClearTextTraffic = true;
+        // enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.AllowClearTextTraffic = true;
 
         SetContentView(Resource.Layout.activity_http_drive);
 

@@ -6,8 +6,9 @@ import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
 
 let wsDrive;
 
-// only for demo purposes, you should be using HTTPS traffic
-HttpSyncClient.setAllowClearTextTraffic(true);
+// enable only if you're testing with an HTTP server
+// In all other cases you should be using an HTTPS server
+// HttpSyncClient.setAllowClearTextTraffic(true);
 
 export async function createWebServiceDrive() {
 	let wsServicePath = document.getElementById("ws-service-path").value;

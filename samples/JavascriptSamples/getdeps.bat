@@ -12,9 +12,9 @@ set SALMON_CORE_LIB_FILENAME=%SALMON_CORE_LIB%.zip
 set SALMON_FS_LIB_FILENAME=%SALMON_FS_LIB%.zip
 
 :: use local repo
-set SALMON_LIBS_URL=http://localhost/repository/javascript
+:: set SALMON_LIBS_URL=http://localhost/repository/javascript
 :: or official github release
-:: set SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v%SALMON_VERSION%
+set SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v%SALMON_VERSION%
 
 set SALMON_CORE_LIB_URL=%SALMON_LIBS_URL%/%SALMON_CORE_LIB_FILENAME%
 set SALMON_FS_LIB_URL=%SALMON_LIBS_URL%/%SALMON_FS_LIB_FILENAME%

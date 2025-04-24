@@ -39,7 +39,7 @@ public class WebServiceDriveActivity : AppCompatActivity
     private AesDrive wsDrive;
 
     private static readonly string defaultPassword = "test123";
-    private static readonly string defaultWsServicePath = "http://192.168.1.4:8080";
+    private static readonly string defaultWsServicePath = "https://localhost:8443";
     private static readonly string defaultUserName = "user";
     private static readonly string defaultWsPassword = "password";
     private static readonly string defaultDrivePath = "/example_drive_" + Time.Time.CurrentTimeMillis();
@@ -48,8 +48,9 @@ public class WebServiceDriveActivity : AppCompatActivity
     {
         base.OnCreate(bundle);
 
-        // only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.AllowClearTextTraffic = true;
+		// enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.AllowClearTextTraffic = true;
 
         SetContentView(Resource.Layout.activity_web_service_drive);
 

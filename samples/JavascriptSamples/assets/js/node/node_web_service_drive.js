@@ -5,14 +5,15 @@ import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
 import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
 import { Credentials } from '../lib/salmon-fs/fs/file/credentials.js';
 
-let wsServicePath = "http://localhost:8080";
+let wsServicePath = "https://localhost:8443";
 let wsUser = "user";
 let wsPassword = "password";
 let drivePath = "/example_drive_" + Date.now();
 let password = "test123";
 
-// only for demo purposes, you should be using HTTPS traffic
-HttpSyncClient.setAllowClearTextTraffic(true);
+// enable only if you're testing with an HTTP server
+// In all other cases you should be using an HTTPS server
+// HttpSyncClient.setAllowClearTextTraffic(true);
 
 let filesToImport = [new NodeFile("./data/file.txt")];
 

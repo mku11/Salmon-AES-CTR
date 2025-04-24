@@ -41,7 +41,7 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     private AesDrive wsDrive;
 
     private static final String defaultPassword = "test123";
-    private static final String defaultWsServicePath = "http://192.168.1.4:8080";
+    private static final String defaultWsServicePath = "https://localhost:8443";
     private static final String defaultUserName = "user";
     private static final String defaultWsPassword = "password";
     private static final String defaultDrivePath = "/example_drive_" + System.currentTimeMillis();
@@ -52,8 +52,10 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
-        // only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.setAllowClearTextTraffic(true);
+        // enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.setAllowClearTextTraffic(true);
+
 
         setContentView(R.layout.activity_web_service_drive);
 

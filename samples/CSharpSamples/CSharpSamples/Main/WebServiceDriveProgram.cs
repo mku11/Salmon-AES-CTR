@@ -11,14 +11,15 @@ class WebServiceDriveProgram
 {
     public static void RunMain(string[] args)
     {
-        string wsServicePath = "http://localhost:8080";
+        string wsServicePath = "https://localhost:8443";
         string wsUser = "user";
         string wsPassword = "password";
         string drivePath = "/example_drive_" + Time.Time.CurrentTimeMillis();
         string password = "test123";
 
-		// only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.AllowClearTextTraffic = true;
+		// enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.AllowClearTextTraffic = true;
 		
         AesStream.AesProviderType = ProviderType.Default;
 

@@ -8,14 +8,15 @@ import com.mku.salmonfs.drive.AesDrive;
 
 public class WebServiceDriveProgram {
     public static void main(String[] args) throws Exception {
-        String wsServicePath = "http://localhost:8080";
+        String wsServicePath = "https://localhost:8443";
         String wsUser = "user";
         String wsPassword = "password";
         String drivePath = "/example_drive_" + System.currentTimeMillis();
         String password = "test123";
 
-        // only for demo purposes, you should be using HTTPS traffic
-        HttpSyncClient.setAllowClearTextTraffic(true);
+        // enable only if you're testing with an HTTP server
+		// In all other cases you should be using an HTTPS server
+        // HttpSyncClient.setAllowClearTextTraffic(true);
 
         AesStream.setAesProviderType(ProviderType.Default);
 

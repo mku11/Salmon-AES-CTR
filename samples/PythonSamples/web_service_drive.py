@@ -15,13 +15,15 @@ from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 
 from samples.drive_sample import DriveSample
 
-ws_service_path = "http://localhost:8080"
+ws_service_path = "https://localhost:8443"
 ws_user = "user"
 ws_password = "password"
 drive_path = "/example_drive_" + str(round(time.time() * 1000))
 password = "test123"
 
-HttpSyncClient.set_allow_clear_text_traffic(True)  # allow clear traffic only for testing
+# enable only if you're testing with an HTTP server
+#  In all other cases you should be using an HTTPS server
+#  HttpSyncClient.set_allow_clear_text_traffic(True)
 
 # Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
 # NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
