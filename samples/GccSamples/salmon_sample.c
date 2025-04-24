@@ -27,15 +27,9 @@ void main(int argc, char** argv) {
 	// initialize
 	salmon_init(implType);
 
-	// set up the encryption key
-	uint8_t* encKey = key;
-	if (implType == AES_IMPL_AES_INTR)
-	{
-		// if we use the intrinsics we expand the key
-		uint8_t expandedKey[240];
-		salmon_expandKey(key, expandedKey);
-		encKey = expandedKey;
-	}
+	// expand the key
+    uint8_t expandedKey[240];
+    salmon_expandKey(key, expandedKey);
 
 	// The text to encrypt:
 	char* bytes = "This is a plaintext that will be used for testing";
@@ -51,7 +45,7 @@ void main(int argc, char** argv) {
 	// encrypt the byte array
 	uint8_t encText[1024];
 	int bytesEncrypted = salmon_transform(
-		encKey, counter,
+		expandedKey, counter,
 		origPlainText, 0,
 		encText, 0, length);
 
@@ -62,7 +56,7 @@ void main(int argc, char** argv) {
 	uint8_t plainText[1024];
 	// decrypt the byte array
 	int bytesDecrypted = salmon_transform(
-		encKey, counter,
+		expandedKey, counter,
 		encText, 0,
 		plainText, 0, length);
 	plainText[bytesDecrypted] = '\0';
