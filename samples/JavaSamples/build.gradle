@@ -79,6 +79,8 @@ task run(type: JavaExec) {
     description = "Run Main"
     classpath = sourceSets.main.runtimeClasspath
     main = javaMainClass
-    // this will add the library path to the native lib
+    // this will add the native library path to the library path
+	// if you're running the jar file from the command line 
+	// make sure you add the path with vm parameter: -Djava.library.path="/path/to/native/lib"
     systemProperty "java.library.path", "build/libs/natives/lib"
 }
