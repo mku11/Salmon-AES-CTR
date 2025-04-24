@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/salmonfs/sequence/file_sequencer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/salmonfs/sequence/file_sequencer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldSet = (this &amp;&amp; this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _a, _FileSequencer_sequenceFile, _FileSequencer_serializer, _FileSequencer_getSequence;
+import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { Generator } from "../../../salmon-core/salmon/generator.js";
+import { Status, NonceSequence } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
+import { Nonce } from "../../../salmon-core/salmon/nonce.js";
+import { SequenceException } from "../../../salmon-core/salmon/sequence/sequence_exception.js";
+import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
+/**
+ * Generates nonces based on a sequencer backed by a file.
+ */
+export class FileSequencer {
+    /**
+     * Instantiate a nonce file sequencer.
+     *
+     * @param {IFile} sequenceFile The sequence file (json format).
+     * @param {INonceSequenceSerializer} serializer   The serializer to be used.
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    constructor(sequenceFile, serializer) {
+        _FileSequencer_sequenceFile.set(this, void 0);
+        _FileSequencer_serializer.set(this, void 0);
+        __classPrivateFieldSet(this, _FileSequencer_sequenceFile, sequenceFile, "f");
+        __classPrivateFieldSet(this, _FileSequencer_serializer, serializer, "f");
+    }
+    /**
+     * Initialize the file sequencer
+     */
+    async initialize() {
+        if (!await __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").exists()) {
+            let parent = await __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getParent();
+            if (parent == null)
+                throw new Error("Could not get parent");
+            __classPrivateFieldSet(this, _FileSequencer_sequenceFile, await parent.createFile(__classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getName()), "f");
+            await this.saveSequenceFile(new Map());
+        }
+    }
+    /**
+     * Get the sequence file
+     * @returns {IFile} The sequence file
+     */
+    getSequenceFile() {
+        return __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f");
+    }
+    /**
+     * Create a sequence for the drive ID and auth ID provided.
+     *
+     * @param {string} driveId The drive ID.
+     * @param {string} authId  The authorization ID of the drive.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async createSequence(driveId, authId) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        if (sequence)
+            throw new SequenceException("Sequence already exists");
+        let nsequence = new NonceSequence(driveId, authId, null, null, Status.New);
+        configs.set(driveId + ":" + authId, nsequence);
+        await this.saveSequenceFile(configs);
+    }
+    /**
+     * Initialize the sequence.
+     *
+     * @param {string} driveId    The drive ID.
+     * @param {string} authId     The auth ID of the device for the drive.
+     * @param {Uint8Array} startNonce The starting nonce.
+     * @param {Uint8Array} maxNonce   The maximum nonce.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async initializeSequence(driveId, authId, startNonce, maxNonce) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        if (sequence == null)
+            throw new SequenceException("Sequence does not exist");
+        if (sequence.getNextNonce())
+            throw new SequenceException("Cannot reinitialize sequence");
+        sequence.setNextNonce(startNonce);
+        sequence.setMaxNonce(maxNonce);
+        sequence.setStatus(Status.Active);
+        await this.saveSequenceFile(configs);
+    }
+    /**
+     * Set the maximum nonce.
+     *
+     * @param {string} driveId  The drive ID.
+     * @param {string} authId   The auth ID of the device for the drive.
+     * @param {Uint8Array} maxNonce The maximum nonce.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async setMaxNonce(driveId, authId, maxNonce) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        if (sequence == null || sequence.getStatus() == Status.Revoked)
+            throw new SequenceException("Sequence does not exist");
+        let currMaxNonce = sequence.getMaxNonce();
+        if (currMaxNonce == null)
+            throw new SequenceException("Could not find current max nonce");
+        if (BitConverter.toLong(currMaxNonce, 0, Generator.NONCE_LENGTH)
+            &lt; BitConverter.toLong(maxNonce, 0, Generator.NONCE_LENGTH))
+            throw new SequenceException("Max nonce cannot be increased");
+        sequence.setMaxNonce(maxNonce);
+        await this.saveSequenceFile(configs);
+    }
+    /**
+     * Get the next nonce.
+     *
+     * @param {string} driveId The drive ID.
+     * @returns {Promise&lt;Uint8Array | null>} The next nonce
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
+     */
+    async nextNonce(driveId) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        if (sequence == null || sequence.getNextNonce() == null || sequence.getMaxNonce() == null)
+            throw new SequenceException("Device not Authorized");
+        //We get the next nonce
+        let nextNonce = sequence.getNextNonce();
+        let incrNonce = sequence.getNextNonce();
+        if (incrNonce == null)
+            throw new SequenceException("Could not increase nonce");
+        let currMaxNonce = sequence.getMaxNonce();
+        if (currMaxNonce == null)
+            throw new SequenceException("Could not get current max nonce");
+        sequence.setNextNonce(Nonce.increaseNonce(incrNonce, currMaxNonce));
+        await this.saveSequenceFile(configs);
+        return nextNonce;
+    }
+    /**
+     * Get the contents of a sequence file.
+     *
+     * @returns {Promise&lt;string>} The file contents.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async getContents() {
+        let stream = null;
+        let outputStream = null;
+        try {
+            stream = await __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getInputStream();
+            outputStream = new MemoryStream();
+            await stream.copyTo(outputStream);
+        }
+        catch (ex) {
+            console.error(ex);
+            throw new SequenceException("Could not get contents", ex);
+        }
+        finally {
+            if (stream) {
+                try {
+                    await stream.close();
+                }
+                catch (e) {
+                    throw new SequenceException("Could not get contents", e);
+                }
+            }
+            if (outputStream) {
+                try {
+                    await outputStream.flush();
+                    await outputStream.close();
+                }
+                catch (e) {
+                    throw new SequenceException("Could not get contents", e);
+                }
+            }
+        }
+        return new TextDecoder().decode(outputStream.toArray());
+    }
+    /**
+     * Revoke the current sequence for a specific drive.
+     *
+     * @param {string} driveId The drive ID.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async revokeSequence(driveId) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        if (sequence == null)
+            throw new SequenceException("Sequence does not exist");
+        if (sequence.getStatus() == Status.Revoked)
+            throw new SequenceException("Sequence already revoked");
+        sequence.setStatus(Status.Revoked);
+        await this.saveSequenceFile(configs);
+    }
+    /**
+     * Get the sequence by the drive ID.
+     *
+     * @param {string} driveId The drive ID.
+     * @returns {Promise&lt;NonceSequence | null>} The sequence
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async getSequence(driveId) {
+        let contents = await this.getContents();
+        let configs = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").deserialize(contents);
+        let sequence = __classPrivateFieldGet(_a, _a, "m", _FileSequencer_getSequence).call(_a, configs, driveId);
+        return sequence;
+    }
+    /**
+     * Close this file sequencer.
+     */
+    close() {
+    }
+    /**
+     * Save the sequence file.
+     *
+     * @param {Map&lt;string, NonceSequence>} sequences The sequences.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async saveSequenceFile(sequences) {
+        try {
+            let contents = __classPrivateFieldGet(this, _FileSequencer_serializer, "f").serialize(sequences);
+            await this.saveContents(contents);
+        }
+        catch (ex) {
+            console.error(ex);
+            throw new SequenceException("Could not serialize sequences", ex);
+        }
+    }
+    /**
+     * Save the contents of the file
+     * @param {string} contents The contents
+     */
+    async saveContents(contents) {
+        let inputStream = null;
+        let outputStream = null;
+        try {
+            outputStream = await __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getOutputStream();
+            // FileSystemDirectoryHandle.removeEntry() does not always work in time
+            // to avoid NoModificationAllowedError we force truncate
+            await outputStream.setLength(0);
+            inputStream = new MemoryStream(new TextEncoder().encode(contents));
+            let buffer = new Uint8Array(32768);
+            let bytesRead;
+            while ((bytesRead = await inputStream.read(buffer, 0, buffer.length)) > 0) {
+                await outputStream.write(buffer, 0, bytesRead);
+            }
+        }
+        catch (ex) {
+            console.error(ex);
+            throw new SequenceException("Could not save sequence file", ex);
+        }
+        finally {
+            if (outputStream) {
+                await outputStream.flush();
+                try {
+                    await outputStream.close();
+                }
+                catch (e) {
+                    throw new SequenceException("Could not save sequence file", e);
+                }
+            }
+            if (inputStream) {
+                try {
+                    await inputStream.close();
+                }
+                catch (e) {
+                    throw new SequenceException("Could not save sequence file", e);
+                }
+            }
+        }
+        let parent = await __classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getParent();
+        __classPrivateFieldSet(this, _FileSequencer_sequenceFile, await parent.getChild(__classPrivateFieldGet(this, _FileSequencer_sequenceFile, "f").getName()), "f");
+    }
+}
+_a = FileSequencer, _FileSequencer_sequenceFile = new WeakMap(), _FileSequencer_serializer = new WeakMap(), _FileSequencer_getSequence = function _FileSequencer_getSequence(configs, driveId) {
+    let sequence = null;
+    for (let [key, seq] of configs) {
+        if (driveId.toUpperCase() == seq.getId().toUpperCase()) {
+            // there should be only one sequence available
+            if (seq.getStatus() == Status.Active || seq.getStatus() == Status.New) {
+                if (sequence)
+                    throw new SequenceException("Corrupt sequence config");
+                sequence = seq;
+            }
+        }
+    }
+    return sequence;
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Apr 24 2025 11:40:26 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

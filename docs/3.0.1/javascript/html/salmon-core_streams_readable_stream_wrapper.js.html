@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-core/streams/readable_stream_wrapper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-core/streams/readable_stream_wrapper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldSet = (this &amp;&amp; this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _ReadableStreamWrapper_instances, _ReadableStreamWrapper_buffers, _ReadableStreamWrapper_stream, _ReadableStreamWrapper_readableStream, _ReadableStreamWrapper_streamPosition, _ReadableStreamWrapper_totalSize, _ReadableStreamWrapper_buffersCount, _ReadableStreamWrapper_bufferSize, _ReadableStreamWrapper_backOffset, _ReadableStreamWrapper_alignSize, _ReadableStreamWrapper_createBuffers, _ReadableStreamWrapper_hasBackoffset, _ReadableStreamWrapper_getAvailCacheBuffer, _ReadableStreamWrapper_getCacheBuffer, _ReadableStreamWrapper_positionStart, _ReadableStreamWrapper_positionEnd, _ReadableStreamWrapper_clearBuffers, _ReadableStreamWrapper_closeStream;
+import { SeekOrigin } from "./random_access_stream.js";
+import { Buffer } from "./buffer.js";
+/**
+ * Fills a cache buffer with the decrypted data from a part of an encrypted file.
+ * Do not use directly, use ReadableStreamWrapper.create() instead.
+ *
+ * @param {Buffer} cacheBuffer  The cache buffer that will store the decrypted contents
+ * @param {Uint8Array} length   The length of the data requested
+ * @param {RandomAccessStream} stream The stream that will be used to read from
+ */
+export async function fillBufferPart(cacheBuffer, start, offset, length, stream) {
+    await stream.seek(start, SeekOrigin.Begin);
+    let bytesRead = 0;
+    let totalBytesRead = 0;
+    while ((bytesRead = await stream.read(cacheBuffer.getData(), offset + totalBytesRead, length - totalBytesRead)) > 0) {
+        totalBytesRead += bytesRead;
+    }
+    return totalBytesRead;
+}
+/**
+ * ReadableStream wrapper for RandomAccessStream.
+ * Use this class to wrap any RandomAccessStream to a JavaScript ReadableStream to use with 3rd party libraries.
+ */
+export class ReadableStreamWrapper {
+    /**
+     * Set the source stream
+     * @param {RandomAccessStream} stream The stream
+     */
+    setStream(stream) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_stream, stream, "f");
+    }
+    /**
+     * Get the source stream
+     * @returns {RandomAccessStream} The source stream
+     */
+    getStream() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f");
+    }
+    /**
+     * Get the back offset
+     * @returns {number} The back offset
+     */
+    getBackOffset() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f");
+    }
+    /**
+     * Set the back offset
+     * @param backOffset The back offset
+     */
+    setBackOffset(backOffset) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_backOffset, backOffset, "f");
+    }
+    /**
+     * Get the total size of the stream
+     * @returns The total size
+     */
+    getTotalSize() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_totalSize, "f");
+    }
+    /**
+     * Set the total size of the stream
+     * @param {number} totalSize The total size of the stream
+     */
+    setTotalSize(totalSize) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_totalSize, totalSize, "f");
+    }
+    /**
+     * Set the align size
+     * @param {number} alignSize The align size
+     */
+    setAlignSize(alignSize) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_alignSize, alignSize, "f");
+    }
+    /**
+     * Get the buffer size
+     * @returns {number} The buffer size
+     */
+    getBufferSize() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f");
+    }
+    /**
+     * Set the buffer size
+     * @param {number} bufferSize The buffer size
+     */
+    setBufferSize(bufferSize) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_bufferSize, bufferSize, "f");
+    }
+    /**
+     * Get the buffer count
+     * @returns {number} The buffer count
+     */
+    getBufferCount() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f");
+    }
+    /**
+     * Set the buffer count
+     * @param {number} buffersCount The buffer count
+     */
+    setBufferCount(buffersCount) {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_buffersCount, buffersCount, "f");
+    }
+    /**
+     * Construct a wrapper do not use directly, use createReadableStream() instead.
+     */
+    constructor() {
+        _ReadableStreamWrapper_instances.add(this);
+        _ReadableStreamWrapper_buffers.set(this, null);
+        _ReadableStreamWrapper_stream.set(this, null);
+        _ReadableStreamWrapper_readableStream.set(this, null);
+        _ReadableStreamWrapper_streamPosition.set(this, 0);
+        _ReadableStreamWrapper_totalSize.set(this, 0);
+        _ReadableStreamWrapper_buffersCount.set(this, 0);
+        _ReadableStreamWrapper_bufferSize.set(this, 0);
+        _ReadableStreamWrapper_backOffset.set(this, 0);
+        _ReadableStreamWrapper_alignSize.set(this, 0);
+        /**
+         * We reuse the least recently used buffer. Since the buffer count is relative
+         * small there is no need for a fast-access lru queue
+         * so a simple linked list of keeping the indexes is adequately fast.
+         */
+        this.lruBuffersIndex = [];
+        _ReadableStreamWrapper_positionStart.set(this, 0);
+        _ReadableStreamWrapper_positionEnd.set(this, 0);
+    }
+    /**
+     * Creates a native ReadableStream from a RandomAccessStream
+     *
+     * @param {RandomAccessStream} stream   The source stream.
+     * @param {number} buffersCount Number of buffers to use.
+     * @param {Uint8Array} bufferSize   The length of each buffer.
+     * @param {number} backOffset   The backwards offset. Some media libraries might
+     * request data rewinding the stream just a few bytes backwards. This ensures those bytes
+     * are included so we don't reset the stream.
+     * @param {number} alignSize      The align size. Set to a positive number to override the stream aligned size.
+     */
+    static createReadableStream(stream, buffersCount = 1, bufferSize = 524288, backOffset = 32768, alignSize = 0) {
+        let readableStreamWrapper = new ReadableStreamWrapper();
+        __classPrivateFieldSet(readableStreamWrapper, _ReadableStreamWrapper_stream, stream, "f");
+        __classPrivateFieldSet(readableStreamWrapper, _ReadableStreamWrapper_buffersCount, buffersCount, "f");
+        __classPrivateFieldSet(readableStreamWrapper, _ReadableStreamWrapper_bufferSize, bufferSize, "f");
+        __classPrivateFieldSet(readableStreamWrapper, _ReadableStreamWrapper_backOffset, backOffset, "f");
+        __classPrivateFieldSet(readableStreamWrapper, _ReadableStreamWrapper_alignSize, alignSize, "f");
+        let readableStream = ReadableStreamWrapper.createReadableStreamReader(readableStreamWrapper);
+        return readableStream;
+    }
+    static createReadableStreamReader(streamWrapper) {
+        let resetting = false;
+        let readableStream = new ReadableStream({
+            type: 'bytes',
+            async pull(controller) {
+                if (resetting) {
+                    controller.enqueue(new Uint8Array([0]));
+                    return;
+                }
+                if (__classPrivateFieldGet(streamWrapper, _ReadableStreamWrapper_buffers, "f") == null)
+                    await streamWrapper.initialize();
+                let size = streamWrapper.getBufferSize();
+                let buffer = new Uint8Array(size);
+                let bytesRead = await streamWrapper.read(buffer, 0, buffer.length);
+                if (bytesRead > 0)
+                    controller.enqueue(buffer.slice(0, bytesRead));
+                if (bytesRead &lt;= 0) {
+                    controller.close();
+                }
+            }
+        });
+        let streamGetReader = readableStream.getReader;
+        let reader;
+        readableStream.getReader = function (options) {
+            reader = streamGetReader.apply(readableStream, options);
+            return reader;
+        };
+        readableStream.reset = async function () {
+            // make sure the queue is emptied
+            if (reader) {
+                resetting = true;
+                while (true) {
+                    let chunk = await reader.read();
+                    if (!chunk || !chunk.value
+                        || (chunk.value.length == 1 &amp;&amp; chunk.value[0] == 0))
+                        break;
+                }
+                resetting = false;
+            }
+            await streamWrapper.reset();
+        };
+        readableStream.cancel = async function (reason) {
+            await streamWrapper.cancel(reason);
+        };
+        readableStream.skip = async function (position) {
+            return await streamWrapper.skip(position);
+        };
+        readableStream.getPositionStart = function () {
+            return streamWrapper.getPositionStart();
+        };
+        readableStream.setPositionStart = async function (position) {
+            await streamWrapper.setPositionStart(position);
+        };
+        readableStream.setPositionEnd = async function (position) {
+            await streamWrapper.setPositionEnd(position);
+        };
+        __classPrivateFieldSet(streamWrapper, _ReadableStreamWrapper_readableStream, readableStream, "f");
+        readableStream.getStreamWrapper = function () {
+            return streamWrapper;
+        };
+        return readableStream;
+    }
+    async initialize() {
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f") != null) {
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_totalSize, await __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f").getLength(), "f");
+            try {
+                __classPrivateFieldSet(this, _ReadableStreamWrapper_streamPosition, await __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f").getPosition(), "f");
+            }
+            catch (ex) {
+                throw new Error("Could not get stream current position: " + ex);
+            }
+        }
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f") &lt;= 0)
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_buffersCount, ReadableStreamWrapper.DEFAULT_BUFFERS, "f");
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f") > ReadableStreamWrapper.MAX_BUFFERS)
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_buffersCount, ReadableStreamWrapper.MAX_BUFFERS, "f");
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f") &lt;= 0)
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_bufferSize, ReadableStreamWrapper.DEFAULT_BUFFER_SIZE, "f");
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f") &lt; 0)
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_backOffset, ReadableStreamWrapper.DEFAULT_BACK_OFFSET, "f");
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f") &lt;= 0 &amp;&amp; __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f") != null)
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_alignSize, __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f").getAlignSize(), "f");
+        // align the buffers for performance
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f") > 0) {
+            if (__classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f") > 0) {
+                let nBackOffset = Math.floor(__classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f") / __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f")) * __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+                if (nBackOffset &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f"))
+                    nBackOffset += __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+                __classPrivateFieldSet(this, _ReadableStreamWrapper_backOffset, nBackOffset, "f");
+            }
+            let nBufferSize = Math.floor(__classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f") / __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f")) * __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+            if (nBufferSize &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f")) {
+                nBufferSize = __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+            }
+            if (nBufferSize &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f")) {
+                nBufferSize += __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+            }
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_bufferSize, nBufferSize, "f");
+        }
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f") > 0) {
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_bufferSize, __classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f") + __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f"), "f");
+            // we use a minimum 2 buffers since it is very likely
+            // that the previous buffer in use will have the backoffset
+            // data of the new one
+            if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f") == 1)
+                __classPrivateFieldSet(this, _ReadableStreamWrapper_buffersCount, 2, "f");
+        }
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_positionStart, 0, "f");
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_positionEnd, __classPrivateFieldGet(this, _ReadableStreamWrapper_totalSize, "f") - 1, "f");
+        __classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_createBuffers).call(this);
+    }
+    /**
+     * Skip a number of bytes.
+     *
+     * @param {number} bytes the number of bytes to be skipped.
+     * @returns {Promise&lt;number>} The new position
+     */
+    async skip(bytes) {
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+            await this.initialize();
+        bytes += __classPrivateFieldGet(this, _ReadableStreamWrapper_positionStart, "f");
+        let currPos = __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f");
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") + bytes > __classPrivateFieldGet(this, _ReadableStreamWrapper_totalSize, "f"))
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_streamPosition, __classPrivateFieldGet(this, _ReadableStreamWrapper_totalSize, "f"), "f");
+        else
+            __classPrivateFieldSet(this, _ReadableStreamWrapper_streamPosition, __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") + bytes, "f");
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") - currPos;
+    }
+    /**
+     * Reset the stream
+     */
+    reset() {
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_streamPosition, 0, "f");
+    }
+    /**
+     * Reads and decrypts the contents of an encrypted file
+     * @param {Uint8Array} buffer The buffer
+     * @param {number} offset The offset
+     * @param {number} count The count
+     * @returns {Promise&lt;number>} The bytes read
+     */
+    async read(buffer, offset, count) {
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+            await this.initialize();
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") >= __classPrivateFieldGet(this, _ReadableStreamWrapper_positionEnd, "f") + 1)
+            return -1;
+        let minCount;
+        let bytesRead;
+        // truncate the count so getCacheBuffer() reports the correct buffer
+        count = Math.floor(Math.min(count, __classPrivateFieldGet(this, _ReadableStreamWrapper_totalSize, "f") - __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f")));
+        let cacheBuffer = __classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_getCacheBuffer).call(this, __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f"), count);
+        if (cacheBuffer == null) {
+            cacheBuffer = __classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_getAvailCacheBuffer).call(this);
+            // the stream is closed
+            if (cacheBuffer == null)
+                return 0;
+            // for some applications like media players they make a second immediate request
+            // in a position a few bytes before the first request. To make
+            // sure we don't make 2 overlapping requests we start the buffer
+            // a position ahead of the first request.
+            let startPosition = __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f");
+            if (__classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f") > 0) {
+                startPosition = Math.floor(startPosition / __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f")) * __classPrivateFieldGet(this, _ReadableStreamWrapper_alignSize, "f");
+            }
+            let length = __classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f");
+            // if we have the backoffset data in an existing buffer we don't include the backoffset
+            // in the new request because we want to prevent network streams resetting.
+            if (startPosition > 0 &amp;&amp; !__classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_hasBackoffset).call(this, startPosition)) {
+                startPosition -= __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f");
+            }
+            else {
+                length -= __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f");
+            }
+            bytesRead = await this.fillBuffer(cacheBuffer, startPosition, length);
+            if (bytesRead &lt;= 0)
+                return bytesRead;
+            cacheBuffer.setStartPos(startPosition);
+            cacheBuffer.setCount(bytesRead);
+        }
+        minCount = Math.min(count, Math.floor(cacheBuffer.getCount() - __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") + cacheBuffer.getStartPos()));
+        let cOffset = Math.floor(__classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") - cacheBuffer.getStartPos());
+        for (let i = 0; i &lt; minCount; i++)
+            buffer[offset + i] = cacheBuffer.getData()[cOffset + i];
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_streamPosition, __classPrivateFieldGet(this, _ReadableStreamWrapper_streamPosition, "f") + minCount, "f");
+        return minCount;
+    }
+    /**
+     * Fills a cache buffer with the decrypted data from the encrypted source file.
+     * @param { Buffer } cacheBuffer The cache buffer that will store the decrypted contents
+     * @param { number } startPosition The start position
+     * @param { number } length      The length of the data requested
+     * @returns {Promise&lt;number>} The bytes read
+     */
+    async fillBuffer(cacheBuffer, startPosition, length) {
+        let bytesRead;
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f") == null)
+            return 0;
+        bytesRead = await fillBufferPart(cacheBuffer, startPosition, 0, length, __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f"));
+        return bytesRead;
+    }
+    /**
+     * Get the start position of the stream
+     * @returns {number} The start position of the stream
+     */
+    getPositionStart() {
+        return __classPrivateFieldGet(this, _ReadableStreamWrapper_positionStart, "f");
+    }
+    /**
+     * Set the start position of the stream.
+     * @param {number} pos The start position
+     */
+    async setPositionStart(pos) {
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+            await this.initialize();
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_positionStart, pos, "f");
+    }
+    /**
+     * Set the end position of the stream
+     * @param {number} pos The end position of the stream
+     */
+    async setPositionEnd(pos) {
+        if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+            await this.initialize();
+        __classPrivateFieldSet(this, _ReadableStreamWrapper_positionEnd, pos, "f");
+    }
+    /**
+     * Cancel the stream
+     * @param {any} [reason] The reason
+     */
+    async cancel(reason) {
+        await __classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_closeStream).call(this);
+        __classPrivateFieldGet(this, _ReadableStreamWrapper_instances, "m", _ReadableStreamWrapper_clearBuffers).call(this);
+    }
+}
+_ReadableStreamWrapper_buffers = new WeakMap(), _ReadableStreamWrapper_stream = new WeakMap(), _ReadableStreamWrapper_readableStream = new WeakMap(), _ReadableStreamWrapper_streamPosition = new WeakMap(), _ReadableStreamWrapper_totalSize = new WeakMap(), _ReadableStreamWrapper_buffersCount = new WeakMap(), _ReadableStreamWrapper_bufferSize = new WeakMap(), _ReadableStreamWrapper_backOffset = new WeakMap(), _ReadableStreamWrapper_alignSize = new WeakMap(), _ReadableStreamWrapper_positionStart = new WeakMap(), _ReadableStreamWrapper_positionEnd = new WeakMap(), _ReadableStreamWrapper_instances = new WeakSet(), _ReadableStreamWrapper_createBuffers = function _ReadableStreamWrapper_createBuffers() {
+    __classPrivateFieldSet(this, _ReadableStreamWrapper_buffers, new Array(__classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f")), "f");
+    for (let i = 0; i &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length; i++)
+        __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i] = new Buffer(__classPrivateFieldGet(this, _ReadableStreamWrapper_bufferSize, "f"));
+}, _ReadableStreamWrapper_hasBackoffset = function _ReadableStreamWrapper_hasBackoffset(startPosition) {
+    let pos = startPosition - __classPrivateFieldGet(this, _ReadableStreamWrapper_backOffset, "f");
+    if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+        throw new Error("Buffers are not initialized");
+    for (let i = 0; i &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length; i++) {
+        let buffer = __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i];
+        if (buffer != null &amp;&amp; buffer.getCount() > 0
+            &amp;&amp; buffer.getStartPos() &lt;= pos
+            &amp;&amp; startPosition &lt;= buffer.getStartPos() + buffer.getCount()) {
+            return true;
+        }
+    }
+    return false;
+}, _ReadableStreamWrapper_getAvailCacheBuffer = function _ReadableStreamWrapper_getAvailCacheBuffer() {
+    if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+        throw new Error("No buffers found");
+    let index = -1;
+    if (this.lruBuffersIndex.length == __classPrivateFieldGet(this, _ReadableStreamWrapper_buffersCount, "f")) {
+        index = this.lruBuffersIndex[this.lruBuffersIndex.length - 1];
+        this.lruBuffersIndex.pop();
+    }
+    else {
+        for (let i = 0; i &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length; i++) {
+            let buff = __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i];
+            if (buff &amp;&amp; buff.getCount() == 0) {
+                index = i;
+                break;
+            }
+        }
+    }
+    if (index &lt; 0)
+        index = __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length - 1;
+    this.lruBuffersIndex.unshift(index);
+    return __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[index];
+}, _ReadableStreamWrapper_getCacheBuffer = function _ReadableStreamWrapper_getCacheBuffer(position, count) {
+    if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+        return null;
+    for (let i = 0; i &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length; i++) {
+        let buffer = __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i];
+        if (buffer &amp;&amp; position >= buffer.getStartPos() &amp;&amp; position + count &lt;= buffer.getStartPos() + buffer.getCount()) {
+            // promote buffer to the front
+            let index = -1;
+            for (let k = 0; k &lt; this.lruBuffersIndex.length; k++) {
+                if (this.lruBuffersIndex[k] == i) {
+                    index = k;
+                    break;
+                }
+            }
+            if (index >= 0)
+                this.lruBuffersIndex.splice(index, 1);
+            this.lruBuffersIndex.unshift(i);
+            return buffer;
+        }
+    }
+    return null;
+}, _ReadableStreamWrapper_clearBuffers = function _ReadableStreamWrapper_clearBuffers() {
+    if (__classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f") == null)
+        return;
+    for (let i = 0; i &lt; __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f").length; i++) {
+        let buffer = __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i];
+        if (buffer)
+            buffer.clear();
+        __classPrivateFieldGet(this, _ReadableStreamWrapper_buffers, "f")[i] = null;
+    }
+}, _ReadableStreamWrapper_closeStream = 
+/**
+ * Close all back streams.
+ *
+ * @throws IOException Thrown if there is an IO error.
+ */
+async function _ReadableStreamWrapper_closeStream() {
+    if (__classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f"))
+        await __classPrivateFieldGet(this, _ReadableStreamWrapper_stream, "f").close();
+    __classPrivateFieldSet(this, _ReadableStreamWrapper_stream, null, "f");
+};
+/**
+ * Default cache buffer should be high enough for some mpeg videos to work
+ * the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+ */
+ReadableStreamWrapper.DEFAULT_BUFFER_SIZE = 524288;
+/**
+ * The default buffer count
+ */
+ReadableStreamWrapper.DEFAULT_BUFFERS = 1;
+/**
+ * The default backwards buffer offset
+ */
+ReadableStreamWrapper.DEFAULT_BACK_OFFSET = 32768;
+/**
+ * The maximum allowed buffer count
+ */
+ReadableStreamWrapper.MAX_BUFFERS = 6;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Apr 24 2025 11:40:26 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
