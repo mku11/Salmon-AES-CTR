@@ -58,7 +58,7 @@ export class HttpSyncClient {
 	 */
     static async getResponse(urlpath: string, init?: RequestInit): Promise<Response>{
         let url: URL = new URL(urlpath);
-        if(url.protocol !== "https" && !HttpSyncClient.#allowClearTextTraffic)
+        if(url.protocol !== "https:" && !HttpSyncClient.#allowClearTextTraffic)
             throw new Error("Clear text traffic should only be used for testing purpores, " +
                     "use HttpSyncClient.setAllowClearTextTraffic() to override");
 		if(url.hostname == null || url.hostname.length == 0)
