@@ -666,7 +666,7 @@ export class AesStream extends RandomAccessStream {
         if (this.#integrity.getChunkSize() > 0 && await this.getPosition() % this.#integrity.getChunkSize() != 0)
             throw new IOException("Error during write", new IntegrityException("All write operations should be aligned to the chunks size: "
                 + this.#integrity.getChunkSize()));
-        else if (this.#integrity.getChunkSize() == 0 && await this.getPosition() % AESCTRTransformer.BLOCK_SIZE != 0)
+        else if (this.#integrity.getChunkSize() <= 0 && await this.getPosition() % AESCTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("Error during write", new IntegrityException("All write operations should be aligned to the block size: "
                 + AESCTRTransformer.BLOCK_SIZE));
 

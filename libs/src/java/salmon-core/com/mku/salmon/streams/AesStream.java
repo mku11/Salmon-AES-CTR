@@ -720,7 +720,7 @@ public class AesStream extends RandomAccessStream {
             throw new IOException(
                     new IntegrityException("All write operations should be aligned to the chunks size: "
                             + integrity.getChunkSize()));
-        else if (integrity.getChunkSize() == 0 && getPosition() % AesCTRTransformer.BLOCK_SIZE != 0)
+        else if (integrity.getChunkSize() <= 0 && getPosition() % AesCTRTransformer.BLOCK_SIZE != 0)
             throw new IOException(
                     new IntegrityException("All write operations should be aligned to the block size: "
                             + AesCTRTransformer.BLOCK_SIZE));

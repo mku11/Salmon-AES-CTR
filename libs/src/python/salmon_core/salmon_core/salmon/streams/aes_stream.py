@@ -581,7 +581,7 @@ class AesStream(RandomAccessStream):
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the chunks size: "
                                    + str(self.__integrity.get_chunk_size()))
-        elif self.__integrity.get_chunk_size() == 0 \
+        elif self.__integrity.get_chunk_size() <= 0 \
                 and self.get_position() % Generator.BLOCK_SIZE != 0:
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the block size: "

@@ -577,7 +577,7 @@ public class AesStream : RandomAccessStream
             throw new IOException("Could not write to stream",
                     new Integrity.IntegrityException("All write operations should be aligned to the chunks size: "
                             + salmonIntegrity.ChunkSize));
-        else if (salmonIntegrity.ChunkSize == 0 && Position % AESCTRTransformer.BLOCK_SIZE != 0)
+        else if (salmonIntegrity.ChunkSize <= 0 && Position % AESCTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("Could not write to stream",
                     new Integrity.IntegrityException("All write operations should be aligned to the block size: "
                             + AESCTRTransformer.BLOCK_SIZE));
