@@ -1,9 +1,13 @@
 CURRDIR=$(pwd)
+find ../../ -name "*.sh" -not -path "*/node_modules/*" -exec dos2unix {} \;
+find ../../ -name "gradlew" -not -path "*/node_modules/*" -exec dos2unix {} \;
+
+dos2unix $CURRDIR/settings.cfg
 source $CURRDIR/settings.cfg
 
 echo Synchronizing project settings
 echo SALMON_VERSION: $SALMON_VERSION
-echo SALMON_VERSION: $SALMON_APP_VERSION
+echo SALMON_APP_VERSION: $SALMON_APP_VERSION
 
 # PROJECTS
 PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
