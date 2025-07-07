@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-	<SalmonVersion>3.0.1</SalmonVersion>
+	<SalmonVersion>3.0.2</SalmonVersion>
   </PropertyGroup>
 
   <ItemGroup>

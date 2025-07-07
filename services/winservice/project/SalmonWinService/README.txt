@@ -1,5 +1,5 @@
 SalmonWinService
-version: 3.0.1
+version: 3.0.2
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   

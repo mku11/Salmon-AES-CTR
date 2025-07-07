@@ -1,5 +1,5 @@
 CURRDIR=$(pwd)
-SALMON_VERSION=3.0.1
+SALMON_VERSION=3.0.2
 
 pip install ../../output/python/salmon_core_py.$SALMON_VERSION.tar.gz
 pip install ../../output/python/salmon_fs_py.$SALMON_VERSION.tar.gz

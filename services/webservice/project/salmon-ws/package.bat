@@ -1,5 +1,5 @@
 @ECHO OFF
-set SALMON_VERSION=3.0.1
+set SALMON_VERSION=3.0.2
 
 set CURRDIR=%CD%
 set JAVA_WS=java-ws

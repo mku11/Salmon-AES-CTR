@@ -1,4 +1,4 @@
-set SALMON_VERSION=3.0.1
+set SALMON_VERSION=3.0.2
 rmdir packages /S /Q
 mkdir packages
 rmdir assets\js\lib /S /Q
