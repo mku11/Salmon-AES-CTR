@@ -18,8 +18,8 @@ find . -name "gradlew" -exec git update-index --chmod=+x {} \;
 
 Also change to LF for all unix scripts:
 ```
-find . -name "*.sh" -exec dos2unix {} \;
-find . -name "gradlew" -exec dos2unix {} \;
+find . -name "*.sh" -not -path "*/node_modules/*" -exec dos2unix {} \;
+find . -name "gradlew" -not -path "*/node_modules/*" -exec dos2unix {} \;
 ```
 
 To refresh a branch from the remote repo:
