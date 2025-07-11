@@ -279,7 +279,7 @@ class IFile(ABC):
                     new_filename = options.auto_rename(self)
                 else:
                     if options.on_failed:
-                        options.on_failed(self, Exception("Another file exists"))
+                        options.on_failed(self, Exception("Another directory/file exists"))
                     return
             copy_options = IFile.CopyOptions()
             copy_options.new_filename = new_filename
@@ -293,10 +293,16 @@ class IFile(ABC):
                 if options.on_progress_changed:
                     options.on_progress_changed(self, 1, 1)
                 return
+            
             if new_file and new_file.exists() and options.auto_rename and options.auto_rename_folders:
                 new_file = dest.create_directory(options.auto_rename(self))
             elif new_file is None or not new_file.exists():
                 new_file = dest.create_directory(new_filename)
+            elif new_file and new_file.exists() and new_file.is_file():
+                if options.on_failed:
+                    options.on_failed(self, Exception("Another file exists"))
+                return
+
             if options.on_progress_changed:
                 options.on_progress_changed(self, 1, 1)
 
@@ -331,7 +337,7 @@ class IFile(ABC):
                     new_filename = options.auto_rename(self)
                 else:
                     if options.on_failed:
-                        options.on_failed(self, Exception("Another file exists"))
+                        options.on_failed(self, Exception("Another directory/file exists"))
                     return
 
             move_options: IFile.MoveOptions = IFile.MoveOptions()
@@ -342,11 +348,18 @@ class IFile(ABC):
         elif self.is_directory():
             if options.on_progress_changed:
                 options.on_progress_changed(self, 0, 1)
-            if (new_file and new_file.exists() and options.auto_rename and options.auto_rename_folders) \
-                    or not new_file or not new_file.exists():
-                move_options: IFile.MoveOptions = IFile.MoveOptions()
-                move_options.new_filename = options.auto_rename(self)
-                new_file = self.move(dest, move_options)
+            if dest.get_display_path().startswith(self.get_display_path()):
+                if options.on_progress_changed:
+                    options.on_progress_changed(self, 1, 1)
+                return
+
+            if new_file and new_file.exists() and options.auto_rename and options.auto_rename_folders:
+                new_file = dest.create_directory(options.auto_rename(self))
+            elif new_file is None or not new_file.exists():
+                new_file = dest.create_directory(new_filename)
+            elif new_file and new_file.exists() and new_file.is_file():
+                if options.on_failed:
+                    options.on_failed(self, Exception("Another file exists"))
                 return
 
             if options.on_progress_changed:

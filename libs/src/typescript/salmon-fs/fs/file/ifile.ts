@@ -247,7 +247,7 @@ export async function copyRecursively(src: IFile, destDir: IFile, options?: Recu
                 newFilename = await options.autoRename(src);
             } else {
                 if (options.onFailed)
-                    options.onFailed(src, new Error("Another file exists"));
+                    options.onFailed(src, new Error("Another directory/file exists"));
                 return;
             }
         }
@@ -267,10 +267,16 @@ export async function copyRecursively(src: IFile, destDir: IFile, options?: Recu
                 options.onProgressChanged(src, 1, 1);
             return;
         }
-        if (newFile  && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
+        if (newFile && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
             newFile = await destDir.createDirectory(await options.autoRename(src));
         else if (newFile == null || !await newFile.exists())
             newFile = await destDir.createDirectory(newFilename);
+		else if (newFile != null && await newFile.exists() && await newFile.isFile()) {
+			if (options.onFailed != null)
+				options.onFailed(this, new Error("Another file exists"));
+			return;
+		}
+			
         if (options.onProgressChanged)
             options.onProgressChanged(src, 1, 1);
         for (let child of await src.listFiles()) {
@@ -312,7 +318,7 @@ export async function moveRecursively(file: IFile, destDir: IFile, options?: Rec
                 newFilename = await options.autoRename(file);
             } else {
                 if (options.onFailed)
-                    options.onFailed(file, new Error("Another file exists"));
+                    options.onFailed(file, new Error("Another directory/file exists"));
                 return;
             }
         }
@@ -332,15 +338,17 @@ export async function moveRecursively(file: IFile, destDir: IFile, options?: Rec
                 options.onProgressChanged(file, 1, 1);
             return;
         }
-        if ((newFile  && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
-            || newFile == null || !await newFile.exists()) {
-            if (options.autoRename) {
-                let moveOptions: MoveOptions = new MoveOptions();
-                moveOptions.newFilename = await options.autoRename(file);
-                newFile = await file.move(destDir, moveOptions);
-            }
-            return;
-        }
+		
+        if (newFile && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
+            newFile = await destDir.createDirectory(await options.autoRename(src));
+        else if (newFile == null || !await newFile.exists())
+            newFile = await destDir.createDirectory(newFilename);
+		else if (newFile != null && await newFile.exists() && await newFile.isFile()) {
+			if (options.onFailed != null)
+				options.onFailed(this, new Error("Another file exists"));
+			return;
+		}
+		
         if (options.onProgressChanged)
             options.onProgressChanged(file, 1, 1);
 

@@ -436,7 +436,11 @@ public class AndroidFile : IFile
             copyContentOptions.onProgressChanged = onProgressChanged;
             bool res = IFile.CopyFileContents(this, newFile, copyContentOptions);
             if (res && delete)
-                this.Delete();
+			{
+				if(!this.Delete()) {
+					throw new Exception("Could not delete file/directory");
+				}
+			}
             return newFile;
         }
     }

@@ -298,7 +298,7 @@ public interface IFile {
                     newFilename = options.autoRename.apply(this);
                 } else {
                     if (options.onFailed != null)
-                        options.onFailed.accept(this, new Exception("Another file exists"));
+                        options.onFailed.accept(this, new Exception("Another directory/file exists"));
                     return;
                 }
             }
@@ -324,6 +324,12 @@ public interface IFile {
                 newFile = destDir.createDirectory(options.autoRename.apply(this));
             else if (newFile == null || !newFile.exists())
                 newFile = destDir.createDirectory(newFilename);
+			else if (newFile != null && newFile.exists() && newFile.isFile()) {
+				if (options.onFailed != null)
+					options.onFailed.accept(this, new Exception("Another file exists"));
+				return;
+			}
+				
             if (options.onProgressChanged != null)
                 options.onProgressChanged.accept(this, 1L, 1L);
 
@@ -373,7 +379,7 @@ public interface IFile {
                     newFilename = options.autoRename.apply(this);
                 } else {
                     if (options.onFailed != null)
-                        options.onFailed.accept(this, new Exception("Another file exists"));
+                        options.onFailed.accept(this, new Exception("Another directory/file exists"));
                     return;
                 }
             }
@@ -395,13 +401,16 @@ public interface IFile {
                     options.onProgressChanged.accept(this, 1L, 1L);
                 return;
             }
-            if ((newFile != null && newFile.exists() && options.autoRename != null && options.autoRenameFolders)
-                    || newFile == null || !newFile.exists()) {
-                MoveOptions moveOptions = new MoveOptions();
-                moveOptions.newFilename = options.autoRename.apply(this);
-                newFile = move(destDir, moveOptions);
-                return;
-            }
+            if (newFile != null && newFile.exists() && options.autoRename != null && options.autoRenameFolders)
+                newFile = destDir.createDirectory(options.autoRename.apply(this));
+            else if (newFile == null || !newFile.exists())
+                newFile = destDir.createDirectory(newFilename);
+			else if (newFile != null && newFile.exists() && newFile.isFile()) {
+				if (options.onFailed != null)
+					options.onFailed.accept(this, new Exception("Another file exists"));
+				return;
+			}
+			
             if (options.onProgressChanged != null)
                 options.onProgressChanged.accept(this, 1L, 1L);
 

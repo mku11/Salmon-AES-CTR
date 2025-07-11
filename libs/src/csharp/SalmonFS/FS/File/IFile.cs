@@ -241,7 +241,7 @@ public interface IFile
                 else
                 {
                     if (options.onFailed != null)
-                        options.onFailed(this, new Exception("Another file exists"));
+                        options.onFailed(this, new Exception("Another directory/file exists"));
                     return;
                 }
             }
@@ -267,10 +267,17 @@ public interface IFile
                     options.onProgressChanged(this, 1L, 1L);
                 return;
             }
+			
             if (newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
                 newFile = dest.CreateDirectory(options.autoRename(this));
             else if (newFile == null || !newFile.Exists)
                 newFile = dest.CreateDirectory(newFilename);
+			else if (newFile != null && newFile.Exists && newFile.IsFile) {
+				if (options.onFailed != null)
+					options.onFailed(this, new Exception("Another file exists"));
+				return;
+			}
+			
             if (options.onProgressChanged != null)
                 options.onProgressChanged(this, 1, 1);
 
@@ -317,7 +324,7 @@ public interface IFile
                 else
                 {
                     if (options.onFailed != null)
-                        options.onFailed(this, new Exception("Another file exists"));
+                        options.onFailed(this, new Exception("Another directory/file exists"));
                     return;
                 }
             }
@@ -337,14 +344,24 @@ public interface IFile
         {
             if (options.onProgressChanged != null)
                 options.onProgressChanged(this, 0, 1);
-            if ((newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
-                || newFile == null || !newFile.Exists)
+            
+            if (dest.DisplayPath.StartsWith(this.DisplayPath))
             {
-                MoveOptions moveOptions = new MoveOptions();
-                moveOptions.newFilename = options.autoRename(this);
-                newFile = Move(dest, moveOptions);
+                if (options.onProgressChanged != null)
+                    options.onProgressChanged(this, 1L, 1L);
                 return;
             }
+			
+            if (newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
+                newFile = dest.CreateDirectory(options.autoRename(this));
+            else if (newFile == null || !newFile.Exists)
+                newFile = dest.CreateDirectory(newFilename);
+			else if (newFile != null && newFile.Exists && newFile.IsFile) {
+				if (options.onFailed != null)
+					options.onFailed(this, new Exception("Another file exists"));
+				return;
+			}
+			
             if (options.onProgressChanged != null)
                 options.onProgressChanged(this, 1, 1);
 

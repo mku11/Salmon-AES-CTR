@@ -432,8 +432,11 @@ public class AndroidFile implements IFile {
             IFile.CopyContentsOptions copyContentOptions = new IFile.CopyContentsOptions();
             copyContentOptions.onProgressChanged = onProgressChanged;
             boolean res = IFile.copyFileContents(this, newFile, copyContentOptions);
-            if (res && delete)
-                this.delete();
+            if (res && delete) {
+                if(!this.delete()) {
+					throw new IOException("Could not delete file/directory");
+				}
+			}
             reset();
             return newFile;
         }
