@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.Consumer;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Class searches for files in an VirtualDrive by filename.
@@ -77,7 +77,7 @@ public class FileSearcher {
             options = new SearchOptions();
         running = true;
         this.quit = false;
-        HashMap<String, IVirtualFile> searchResults = new HashMap<>();
+        LinkedHashMap<String, IVirtualFile> searchResults = new LinkedHashMap<>();
         if (options.onSearchEvent != null)
             options.onSearchEvent.accept(SearchEvent.SearchingFiles);
         searchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
@@ -123,7 +123,7 @@ public class FileSearcher {
      */
     private void searchDir(IVirtualFile dir, String terms, boolean any,
                            Consumer<IVirtualFile> onResultFound,
-                           HashMap<String, IVirtualFile> searchResults) {
+                           LinkedHashMap<String, IVirtualFile> searchResults) {
         if (quit)
             return;
         IVirtualFile[] files = dir.listFiles();
