@@ -243,10 +243,10 @@ public class AndroidFile implements IFile {
                 String parentFilePath = this.getPath().substring(0, idx);
                 parentDocumentFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(),
                         android.net.Uri.parse(parentFilePath));
+				return new AndroidFile(parentDocumentFile, null);
             }
         }
-        AndroidFile parent = new AndroidFile(parentDocumentFile, null);
-        return parent;
+        return null;
     }
 
     /**
