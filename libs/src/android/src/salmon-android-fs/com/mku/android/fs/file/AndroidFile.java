@@ -52,6 +52,7 @@ public class AndroidFile implements IFile {
      * The directory separator
      */
     public static final String separator = "/";
+    public static final String uriSeparator = "%2F";
 
     private DocumentFile documentFile;
     private AndroidFile parent;
@@ -80,7 +81,7 @@ public class AndroidFile implements IFile {
      * @param documentFile The Android DocumentFile that will be associated to
      * @param parent The parent if available
      */
-    public AndroidFile(DocumentFile documentFile, AndroidFile parent) {
+    protected AndroidFile(DocumentFile documentFile, AndroidFile parent) {
         this.documentFile = documentFile;
         this.parent = parent;
     }
@@ -91,7 +92,7 @@ public class AndroidFile implements IFile {
      * @param parent  The parent file.
      * @param name  The file name.
      */
-    public AndroidFile(AndroidFile parent, String name) {
+    protected AndroidFile(AndroidFile parent, String name) {
         this.parent = parent;
         this.name = name;
     }
@@ -236,8 +237,14 @@ public class AndroidFile implements IFile {
         if (parent != null)
             return parent;
         DocumentFile parentDocumentFile = documentFile.getParentFile();
-        if (parentDocumentFile == null)
-            return null;
+        if (parentDocumentFile == null) {
+            int idx = this.getPath().lastIndexOf(uriSeparator);
+            if(idx >= 0) {
+                String parentFilePath = this.getPath().substring(0, idx);
+                parentDocumentFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(),
+                        android.net.Uri.parse(parentFilePath));
+            }
+        }
         AndroidFile parent = new AndroidFile(parentDocumentFile, null);
         return parent;
     }
@@ -372,7 +379,7 @@ public class AndroidFile implements IFile {
             // store the name before the move
             this.name = getName();
             Uri uri = DocumentsContract.moveDocument(AndroidFileSystem.getContext().getContentResolver(),
-                    documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
+                    documentFile.getUri(), android.net.Uri.parse(getParent().getPath()), androidDir.documentFile.getUri());
             IFile file = androidDir.getChild(getName());
             if (file != null && options.newFilename != null)
                 file.renameTo(options.newFilename);
@@ -467,9 +474,13 @@ public class AndroidFile implements IFile {
      */
     public boolean renameTo(String newFilename) throws FileNotFoundException {
         reset();
-        DocumentsContract.renameDocument(AndroidFileSystem.getContext().getContentResolver(),
+        boolean isDir = isDirectory();
+        Uri uri = DocumentsContract.renameDocument(AndroidFileSystem.getContext().getContentResolver(),
                 documentFile.getUri(), newFilename);
-        documentFile = ((AndroidFile) getParent().getChild(newFilename)).documentFile;
+        if(isDir)
+            documentFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(), uri);
+        else
+            documentFile = DocumentFile.fromSingleUri(AndroidFileSystem.getContext(), uri);
         name = newFilename;
         return true;
     }
