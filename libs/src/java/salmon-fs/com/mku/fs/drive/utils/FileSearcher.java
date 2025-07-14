@@ -39,7 +39,7 @@ public class FileSearcher {
      * Event status types.
      */
     public enum SearchEvent {
-        SearchingFiles, SearchingFinished
+        SearchingIndex, SearchingFiles, SearchingFinished
     }
 
     public void stop() {
