@@ -241,9 +241,13 @@ public class AndroidFile implements IFile {
             int idx = this.getPath().lastIndexOf(uriSeparator);
             if(idx >= 0) {
                 String parentFilePath = this.getPath().substring(0, idx);
-                parentDocumentFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(),
-                        android.net.Uri.parse(parentFilePath));
-				return new AndroidFile(parentDocumentFile, null);
+				try {
+					parentDocumentFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(),
+							android.net.Uri.parse(parentFilePath));
+					return new AndroidFile(parentDocumentFile, null);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
             }
         }
         return null;
