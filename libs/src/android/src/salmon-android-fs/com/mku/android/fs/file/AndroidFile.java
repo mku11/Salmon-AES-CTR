@@ -388,7 +388,7 @@ public class AndroidFile implements IFile {
             androidDir.reset();
             reset();
             if (options.onProgressChanged != null)
-                options.onProgressChanged.accept(1L, file.getLength());
+                options.onProgressChanged.accept(file.getLength(), file.getLength());
             return file;
         } else {
             return copy(newDir, options.newFilename, true, options.onProgressChanged);
