@@ -241,10 +241,10 @@ public class AndroidFile : IFile
 					string parentFilePath = this.Path.Substring(0, idx);
 					parentDocumentFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(),
 							Uri.Parse(parentFilePath));
+					return new AndroidFile(parentDocumentFile, null);
 				}
 			}
-            AndroidFile parent = new AndroidFile(parentDocumentFile, null);
-            return parent;
+            return null;
         }
     }
 
