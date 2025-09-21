@@ -47,6 +47,11 @@ public class AndroidFile : IFile
     /// Directory separator.
     /// </summary>
     public static readonly string Separator = "/";
+	
+	/// <summary>
+	/// Uri separator
+	/// </summary>
+	public static readonly string UriSeparator = "%2F";
 
     public DocumentFile DocumentFile { get; private set; }
     private AndroidFile parent;
@@ -70,7 +75,7 @@ public class AndroidFile : IFile
     /// </summary>
     /// <param name="DocumentFile">The Android DocumentFile that will be associated to</param>
     /// <param name="parent">The parent if available</param>
-    public AndroidFile(DocumentFile DocumentFile, AndroidFile parent)
+    protected AndroidFile(DocumentFile DocumentFile, AndroidFile parent)
     {
         this.DocumentFile = DocumentFile;
         this.parent = parent;
@@ -81,7 +86,7 @@ public class AndroidFile : IFile
     /// </summary>
     /// <param name="parent">The parent file.</param>
     /// <param name="name">The file name.</param>
-    public AndroidFile(AndroidFile parent, String name)
+    protected AndroidFile(AndroidFile parent, String name)
     {
         this.parent = parent;
         this.name = name;
@@ -230,8 +235,14 @@ public class AndroidFile : IFile
             if (this.parent != null)
                 return this.parent;
             DocumentFile parentDocumentFile = DocumentFile.ParentFile;
-            if (parentDocumentFile == null)
-                return null;
+			if (parentDocumentFile == null) {
+				int idx = this.Path.LastIndexOf(UriSeparator);
+				if(idx >= 0) {
+					string parentFilePath = this.Path.Substring(0, idx);
+					parentDocumentFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(),
+							Uri.Parse(parentFilePath));
+				}
+			}
             AndroidFile parent = new AndroidFile(parentDocumentFile, null);
             return parent;
         }
@@ -374,7 +385,7 @@ public class AndroidFile : IFile
             // store the name before the move
             this.name = Name;
             Uri uri = DocumentsContract.MoveDocument(AndroidFileSystem.GetContext().ContentResolver,
-                    DocumentFile.Uri, DocumentFile.ParentFile.Uri, androidDir.DocumentFile.Uri);
+                    DocumentFile.Uri, Uri.Parse(Parent.Path), androidDir.DocumentFile.Uri);
             IFile file = androidDir.GetChild(Name);
             if (file != null && options.newFilename != null)
                 file.RenameTo(options.newFilename);
@@ -471,8 +482,13 @@ public class AndroidFile : IFile
     public bool RenameTo(string newFilename)
     {
         Reset();
-        DocumentsContract.RenameDocument(AndroidFileSystem.GetContext().ContentResolver, DocumentFile.Uri, newFilename);
-        DocumentFile = ((AndroidFile)Parent.GetChild(newFilename)).DocumentFile;
+        bool isDir = IsDirectory;
+        Uri uri = DocumentsContract.RenameDocument(AndroidFileSystem.GetContext().ContentResolver,
+                DocumentFile.Uri, newFilename);
+        if(isDir)
+            DocumentFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(), uri);
+        else
+            DocumentFile = DocumentFile.FromSingleUri(AndroidFileSystem.GetContext(), uri);
         name = newFilename;
         return true;
     }
