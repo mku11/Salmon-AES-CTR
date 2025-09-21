@@ -273,7 +273,7 @@ export async function copyRecursively(src: IFile, destDir: IFile, options?: Recu
             newFile = await destDir.createDirectory(newFilename);
 		else if (newFile != null && await newFile.exists() && await newFile.isFile()) {
 			if (options.onFailed != null)
-				options.onFailed(this, new Error("Another file exists"));
+				options.onFailed(src, new Error("Another file exists"));
 			return;
 		}
 			
@@ -340,12 +340,12 @@ export async function moveRecursively(file: IFile, destDir: IFile, options?: Rec
         }
 		
         if (newFile && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
-            newFile = await destDir.createDirectory(await options.autoRename(src));
+            newFile = await destDir.createDirectory(await options.autoRename(file));
         else if (newFile == null || !await newFile.exists())
             newFile = await destDir.createDirectory(newFilename);
 		else if (newFile != null && await newFile.exists() && await newFile.isFile()) {
 			if (options.onFailed != null)
-				options.onFailed(this, new Error("Another file exists"));
+				options.onFailed(file, new Error("Another file exists"));
 			return;
 		}
 		
