@@ -25,6 +25,7 @@ SOFTWARE.
 using Mku.FS.File;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace Mku.FS.Drive.Utils;
@@ -92,14 +93,16 @@ public class FileSearcher
             options = new SearchOptions();
         running = true;
         this.quit = false;
-        Dictionary<string, IVirtualFile> searchResults = new Dictionary<string, IVirtualFile>();
+        OrderedDictionary searchResults = new OrderedDictionary();
         if (options.onSearchEvent != null)
             options.onSearchEvent(SearchEvent.SearchingFiles);
         SearchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
         if (options.onSearchEvent != null)
             options.onSearchEvent(SearchEvent.SearchingFinished);
         running = false;
-        return searchResults.Values.ToArray();
+		IVirtualFile[] searchResultsArr = new IVirtualFile[searchResults.Values.Count];
+		searchResults.Values.CopyTo(searchResultsArr, 0);
+        return searchResultsArr;
     }
 
     /// <summary>
@@ -142,7 +145,7 @@ public class FileSearcher
     ///  <param name="OnResultFound">Callback interface to receive notifications when results found.</param>
     ///  <param name="searchResults">The array to store the search results.</param>
     private void SearchDir(IVirtualFile dir, string terms, bool any, Action<IVirtualFile> OnResultFound,
-                           Dictionary<string, IVirtualFile> searchResults)
+                           OrderedDictionary searchResults)
     {
         if (quit)
             return;
@@ -158,7 +161,7 @@ public class FileSearcher
             }
             else
             {
-                if (searchResults.ContainsKey(file.RealPath))
+                if (searchResults.Contains(file.RealPath))
                     continue;
                 try
                 {

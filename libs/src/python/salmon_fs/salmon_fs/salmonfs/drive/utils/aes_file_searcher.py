@@ -30,6 +30,7 @@ SOFTWARE.
 
 from enum import Enum
 from typing import Callable, Any
+from collections import OrderedDict
 import sys
 from typeguard import typechecked
 
@@ -89,7 +90,7 @@ class AesFileSearcher:
             options = AesFileSearcher.SearchOptions()
         self.__running = True
         self.__quit = False
-        search_results: dict[str, AesFile] = {}
+        search_results: OrderedDict[str, AesFile] = {}
         if options.on_search_event:
             options.on_search_event(AesFileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, options.any_term, options.on_result_found, search_results)
@@ -120,7 +121,7 @@ class AesFileSearcher:
 
     def __search_dir(self, v_dir: AesFile, terms: str, anyterm: bool,
                      on_result_found: Callable[[AesFile], Any] | None,
-                     search_results: dict[str, AesFile]):
+                     search_results: OrderedDict[str, AesFile]):
         """!
         Search a directory for all filenames matching the terms supplied.
         @param v_dir: The directory to start the search.

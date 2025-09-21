@@ -63,7 +63,7 @@ export class FileSearcher {
             options = new SearchOptions();
         this.#running = true;
         this.#quit = false;
-        let searchResults: { [key: string]: IVirtualFile } = {};
+        let searchResults: Map<string,IVirtualFile> = new Map<string,IVirtualFile>();
         if (options.onSearchEvent)
             options.onSearchEvent(SearchEvent.SearchingFiles);
         await this.#searchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
@@ -102,7 +102,7 @@ export class FileSearcher {
      */
     async #searchDir(dir: IVirtualFile, terms: string, any: boolean,
         onResultFound: ((file: IVirtualFile) => void) | null,
-        searchResults: { [key: string]: IVirtualFile }): Promise<void> {
+        searchResults: Map<string,IVirtualFile>): Promise<void> {
         if (this.#quit)
             return;
         let files: IVirtualFile[] = await dir.listFiles();
@@ -119,7 +119,7 @@ export class FileSearcher {
                 try {
                     let hits: number = this.#getSearchResults(await file.getName(), termsArray, any);
                     if (hits > 0) {
-                        searchResults[file.getRealPath()] = file;
+                        searchResults.set(file.getRealPath(), file);
                         if (onResultFound)
                             onResultFound(file);
                     }
