@@ -43,6 +43,11 @@ public class FileSearcher
     /// </summary>
     public enum SearchEvent
     {
+		/// <summary>
+        /// Searching index
+        /// </summary>
+		SearchingIndex,
+		
         /// <summary>
         /// Searching files
         /// </summary>
