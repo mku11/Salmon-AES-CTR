@@ -239,9 +239,13 @@ public class AndroidFile : IFile
 				int idx = this.Path.LastIndexOf(UriSeparator);
 				if(idx >= 0) {
 					string parentFilePath = this.Path.Substring(0, idx);
-					parentDocumentFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(),
+					try {
+						parentDocumentFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(),
 							Uri.Parse(parentFilePath));
 					return new AndroidFile(parentDocumentFile, null);
+				} catch (Exception ex) {
+					Console.Error.WriteLine(ex);
+				}
 				}
 			}
             return null;
