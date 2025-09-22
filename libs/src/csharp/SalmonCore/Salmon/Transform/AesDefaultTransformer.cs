@@ -30,7 +30,7 @@ namespace Mku.Salmon.Transform;
 /// <summary>
 ///  Salmon AES transformer based on c# System.Security.Cryptography
 /// </summary>
-public class DefaultTransformer : AESCTRTransformer
+public class AesDefaultTransformer : AESCTRTransformer
 {
 
     /// <summary>

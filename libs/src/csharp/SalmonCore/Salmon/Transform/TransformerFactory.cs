@@ -43,11 +43,11 @@ public class TransformerFactory
         switch (type)
         {
             case ProviderType.Default:
-                return new DefaultTransformer();
+                return new AesDefaultTransformer();
             case ProviderType.Aes:
             case ProviderType.AesIntrinsics:
             case ProviderType.AesGPU:
-                return new NativeTransformer((int)type);
+                return new AesNativeTransformer((int)type);
         }
         throw new SecurityException("Unknown Transformer type");
     }

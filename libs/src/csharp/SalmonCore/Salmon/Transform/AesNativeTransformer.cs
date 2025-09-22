@@ -30,7 +30,7 @@ namespace Mku.Salmon.Transform;
 /// Generic Native AES transformer. Extend this with your specific 
 /// native transformer.
 /// </summary>
-public class NativeTransformer : AESCTRTransformer
+public class AesNativeTransformer : AESCTRTransformer
 {
     /// <summary>
     /// The native proxy to use for loading libraries for different platforms and operating systems.
@@ -49,7 +49,7 @@ public class NativeTransformer : AESCTRTransformer
     /// Construct a NativeTransformer for using the native aes c library
     /// </summary>
     /// <param name="implType">The AES native implementation see ProviderType enum</param>
-    public NativeTransformer(int implType)
+    public AesNativeTransformer(int implType)
     {
         ImplType = implType;
     }
