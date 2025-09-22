@@ -375,7 +375,7 @@ export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOp
     if (await file.isFile()) {
         if(options.onProgressChanged)
             options.onProgressChanged(file, 0, 1);
-        if (!file.delete()) {
+        if (!await file.delete()) {
             if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete file"));
         }
@@ -385,7 +385,7 @@ export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOp
         for (let child of await file.listFiles()) {
             await deleteRecursively(child, options);
         }
-        if (await !file.delete()) {
+        if (!await file.delete()) {
             if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete directory"));
         }
