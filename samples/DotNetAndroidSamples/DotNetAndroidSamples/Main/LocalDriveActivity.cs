@@ -92,7 +92,6 @@ public class LocalDriveActivity : AppCompatActivity
         outputText = (EditText)FindViewById(Resource.Id.OUTPUT_TEXT);
         password.Text = defaultPassword;
 
-        AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
 
         Initialize();
@@ -116,7 +115,7 @@ public class LocalDriveActivity : AppCompatActivity
 
     private void Initialize()
     {
-		NativeTransformer.NativeProxy = new AndroidNativeProxy();
+		AesNativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }

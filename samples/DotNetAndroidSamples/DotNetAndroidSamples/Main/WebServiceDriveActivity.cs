@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Android.App;
 using Uri = Android.Net.Uri;
 using System.Threading.Tasks;
+using Mku.Salmon.Transform;
+using Mku.Android.Salmon.Transform;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -115,7 +117,6 @@ public class WebServiceDriveActivity : AppCompatActivity
         outputText = (EditText)FindViewById(Resource.Id.OUTPUT_TEXT);
         password.Text = defaultPassword;
 
-        AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
 
         Initialize();
@@ -139,6 +140,7 @@ public class WebServiceDriveActivity : AppCompatActivity
 
     private void Initialize()
     {
+		AesNativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }

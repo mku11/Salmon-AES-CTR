@@ -91,7 +91,7 @@ public class TextActivity : AppCompatActivity
 
     private void Initialize()
     {
-		NativeTransformer.NativeProxy = new AndroidNativeProxy();
+		AesNativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }

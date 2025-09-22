@@ -37,7 +37,6 @@ public class DataStreamActivity : AppCompatActivity
     {
         base.OnCreate(bundle);
 
-        AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
 
         SetContentView(Resource.Layout.activity_data_stream);
@@ -87,7 +86,7 @@ public class DataStreamActivity : AppCompatActivity
 
     public void Initialize()
     {
-		NativeTransformer.NativeProxy = new AndroidNativeProxy();
+		AesNativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
         AesStream.AesProviderType = ProviderType.Default;
     }
