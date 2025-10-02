@@ -432,7 +432,11 @@ public interface IFile
             filenameNoExt = filename.Substring(0, filename.Length - ext.Length - 1);
         else
             filenameNoExt = filename;
-        string newFilename = filenameNoExt + " (" + DateTime.Now.ToString("HHmmssfff") + ")";
+		string newFilename = filenameNoExt;
+		int index = newFilename.LastIndexOf(" (");
+		if (index >= 0)
+			newFilename = newFilename.Substring(0,index);
+        newFilename += " (" + DateTime.Now.ToString("HHmmssfff") + ")";
         if (ext.Length > 0)
             newFilename += "." + ext;
         return newFilename;
