@@ -77,7 +77,7 @@ public class MainActivity : Activity
         SetContentView(Resource.Layout.activity_main);
         testFolder = (Button)FindViewById(Resource.Id.TEST_FOLDER_BUTTON);
 		
-		NativeTransformer.NativeProxy = new AndroidNativeProxy();
+		AesNativeTransformer.NativeProxy = new AndroidNativeProxy();
         AndroidFileSystem.Initialize(this);
 		
         testFolder.Click += (s, e) =>
