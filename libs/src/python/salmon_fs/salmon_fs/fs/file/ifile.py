@@ -416,7 +416,11 @@ class IFile(ABC):
             filename_no_ext = filename[0:len(filename) - len(ext) - 1]
         else:
             filename_no_ext = filename
-        new_filename: str = filename_no_ext + " (" + datetime.today().strftime("%H%m%S%f")[:-3] + ")"
+        new_filename: str = filename_no_ext
+        if " (" in new_filename:
+            index = new_filename.index(" (")
+            new_filename = new_filename[0:index]
+        new_filename += " (" + datetime.today().strftime("%H%m%S%f")[:-3] + ")"
         if len(ext) > 0:
             new_filename += "." + ext
         return new_filename
