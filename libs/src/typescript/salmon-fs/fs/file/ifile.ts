@@ -415,7 +415,11 @@ export function autoRename(filename: string): string {
     else
         filenameNoExt = filename;
     let date: Date = new Date();
-    let newFilename: string = filenameNoExt + " (" + date.getHours().toString().padStart(2, "0")
+    let newFilename: string = filenameNoExt;
+    let index = newFilename.lastIndexOf(" (")
+    if (index >= 0)
+        newFilename = newFilename.substring(0,index);
+    newFilename += " (" + date.getHours().toString().padStart(2, "0")
         + date.getHours().toString().padStart(2, "0") + date.getMinutes().toString().padStart(2, "0")
         + date.getSeconds().toString().padStart(2, "0") + date.getMilliseconds().toString().padStart(3, "0") + ")";
     if (ext.length > 0)
