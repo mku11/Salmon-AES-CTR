@@ -479,7 +479,11 @@ public interface IFile {
             filenameNoExt = filename.substring(0, filename.length() - ext.length() - 1);
         else
             filenameNoExt = filename;
-        String newFilename = filenameNoExt + " (" + new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) + ")";
+        String newFilename = filenameNoExt;
+		int index = newFilename.lastIndexOf(" (");
+		if (index >= 0)
+			newFilename = newFilename.substring(0,index);
+		newFilename += " (" + new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) + ")";
         if (ext.length() > 0)
             newFilename += "." + ext;
         return newFilename;
