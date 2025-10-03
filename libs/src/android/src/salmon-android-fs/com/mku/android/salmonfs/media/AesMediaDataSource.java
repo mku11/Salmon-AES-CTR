@@ -23,11 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import android.app.Activity;
 import android.media.MediaDataSource;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.mku.func.Consumer;
 import com.mku.android.salmonfs.drive.AndroidDrive;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.AesStream;
@@ -44,18 +43,27 @@ import java.io.InputStream;
 public class AesMediaDataSource extends MediaDataSource {
     private static final String TAG = AesMediaDataSource.class.getName();
 
-    private final Activity activity;
     private final InputStream stream;
-    private final AesFile aesFile;
-    private final boolean enableMultiThreaded = true;
-
+    private AesFile aesFile;
+	private Consumer<String> onError;
+	
     private boolean integrityFailed;
     private long size;
 
     /**
      * Construct a seekable source for the android media player from an encrypted file.
      *
-     * @param activity   Activity this data source will be used with. This is usually the activity the MediaPlayer is attached to
+     * @param aesFile    AesFile that will be used as a source
+     */
+    public AesMediaDataSource(AesFile aesFile) throws Exception {
+        this.aesFile = aesFile;
+        this.size = aesFile.getLength();
+        this.stream = new InputStreamWrapper(aesFile.getInputStream());
+    }
+	
+	/**
+     * Construct a seekable source for the android media player from an encrypted file using cached buffers and parallel processing.
+     *
      * @param aesFile    AesFile that will be used as a source
      * @param buffers    The buffers
      * @param bufferSize Buffer size
@@ -63,20 +71,34 @@ public class AesMediaDataSource extends MediaDataSource {
      * @param backOffset The backwards offset to use when reading buffers
      * @throws Exception Thrown if error occured
      */
-    public AesMediaDataSource(Activity activity, AesFile aesFile,
+    public AesMediaDataSource(AesFile aesFile,
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
-        this.activity = activity;
         this.aesFile = aesFile;
         this.size = aesFile.getLength();
-
-        if (enableMultiThreaded)
-            this.stream = new AesFileInputStream(aesFile, buffers, bufferSize, threads, backOffset);
-        else {
-            AesStream fStream = aesFile.getInputStream();
-            this.stream = new InputStreamWrapper(fStream);
-        }
+        this.stream = new AesFileInputStream(aesFile, buffers, bufferSize, threads, backOffset);
+       
     }
-
+	
+	/**
+     * Construct a seekable source for the android media player from an encrypted stream.
+     *
+     * @param aesStream    AesStream that will be used as a source
+     * @throws Exception Thrown if error occured
+     */
+    public AesMediaDataSource(AesStream aesStream) throws Exception {
+        this.size = aesStream.getLength();
+        this.stream = new InputStreamWrapper(aesStream);
+    }
+	
+	/**
+     * Notify when error occurs
+     *
+     * @param onError The callback
+	 */
+	public void setOnError(Consumer<String> onError) {
+		this.onError = onError;
+	}
+	
     /**
      * Decrypts and reads the contents of an encrypted file
      *
@@ -86,15 +108,12 @@ public class AesMediaDataSource extends MediaDataSource {
      * @param size     The length of the data requested
      */
     public int readAt(long position, byte[] buffer, int offset, int size) throws IOException {
-//        Log.d(TAG, "readAt: position=" + position + ",offset=" + offset + ",size=" + size);
         stream.reset();
         stream.skip(position);
         try {
             int bytesRead = stream.read(buffer, offset, size);
-//            Log.d(TAG, "bytesRead: " + bytesRead);
             if (bytesRead != size) {
-                Log.e(TAG, "read not same as size: " + bytesRead + " != " + size
-                        + ", position: " + position);
+				Log.d(TAG, "Read underbuffered: " + bytesRead + " != " + size + ", position: " + position);
             }
             return bytesRead;
         } catch (IOException ex) {
@@ -102,12 +121,8 @@ public class AesMediaDataSource extends MediaDataSource {
             if (ex.getCause() instanceof IntegrityException && !integrityFailed) {
                 // showing integrity error only once
                 integrityFailed = true;
-                if (activity != null) {
-                    activity.runOnUiThread(() -> {
-                        Toast.makeText(activity, "File is corrupt or tampered",
-                                Toast.LENGTH_LONG).show();
-                    });
-                }
+                if (onError != null)
+                    onError.accept("File is corrupt or tampered");
             }
             throw ex;
         }
@@ -129,7 +144,6 @@ public class AesMediaDataSource extends MediaDataSource {
      */
     public void close() throws IOException {
         stream.close();
-        // Log.d(TAG, "closed");
     }
 }
 
