@@ -25,6 +25,7 @@ SOFTWARE.
 using Android.Media;
 using Android.Util;
 using Mku.Salmon.Integrity;
+using Mku.Salmon.Streams;
 using Android.App;
 using System.IO;
 using System;
@@ -45,38 +46,51 @@ public class AesMediaDataSource : MediaDataSource
 {
     private static readonly string TAG = nameof(AesMediaDataSource);
 
-    private readonly Activity activity;
     private readonly System.IO.Stream stream;
     private readonly AesFile salmonFile;
-    private readonly bool enableMultiThreaded = true;
+	public Action<string> OnError;
 
     private bool integrityFailed;
     private long size;
 
     /// <summary>
-    /// Construct a seekable source for the media player from an encrypted file source
+    /// Construct a seekable source for the media player from an encrypted file.
     /// </summary>
-    /// <param name="activity">Activity associated</param>
+    /// <param name="salmonFile">Salmon file to use as source</param>
+    public AesMediaDataSource(AesFile salmonFile)
+    {
+        this.salmonFile = salmonFile;
+        this.size = salmonFile.Length;
+        this.stream = salmonFile.GetInputStream().AsReadStream();
+    }
+	
+    /// <summary>
+    /// Construct a seekable source for the media player from an encrypted file using cached buffers and parallel processing.
+    /// </summary>
     /// <param name="salmonFile">Salmon file to use as source</param>
     /// <param name="buffers">Then number of buffers</param>
     /// <param name="bufferSize">Buffer size</param>
     /// <param name="threads">Threads for parallel processing</param>
     /// <param name="backOffset">Backwards offset</param>
-    public AesMediaDataSource(Activity activity, AesFile salmonFile,
+    public AesMediaDataSource(AesFile salmonFile,
                                  int buffers, int bufferSize, int threads, int backOffset)
     {
-        this.activity = activity;
         this.salmonFile = salmonFile;
         this.size = salmonFile.Length;
-
-        if (enableMultiThreaded)
-            this.stream = new AesFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
-        else
-        {
-            stream = salmonFile.GetInputStream().AsReadStream();
-        }
+		this.stream = new AesFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
     }
 
+
+    /// <summary>
+    /// Construct a seekable source for the media player from an encrypted stream.
+    /// </summary>
+    /// <param name="salmonStream">AesStream that will be used as a source</param>
+    public AesMediaDataSource(AesStream salmonStream)
+    {
+        this.size = salmonFile.Length;
+        this.stream = new InputStreamWrapper(salmonStream);
+    }
+	
     /// <summary>
     /// Decrypts and reads the contents of an encrypted file
     /// </summary>
@@ -96,8 +110,7 @@ public class AesMediaDataSource : MediaDataSource
             //            Log.d(TAG, "bytesRead: " + bytesRead);
             if (bytesRead != size)
             {
-                Log.Error(TAG, "read not same as size: " + bytesRead + " != " + size
-                        + ", position: " + position);
+                Log.Debug(TAG, "Read underbuffered: " + bytesRead + " != " + size + ", position: " + position);
             }
             return bytesRead;
         }
@@ -108,14 +121,8 @@ public class AesMediaDataSource : MediaDataSource
             {
                 // showing integrity error only once
                 integrityFailed = true;
-                if (activity != null)
-                {
-                    activity.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(AndroidFileSystem.GetContext(), "File is corrupt or tampered",
-                                ToastLength.Long).Show();
-                    });
-                }
+                if (OnError != null)
+                    OnError("File is corrupt or tampered");
             }
             throw;
         }
