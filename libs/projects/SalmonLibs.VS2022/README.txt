@@ -4,11 +4,13 @@ For additional requirements for each subproject see README.md in its respective 
 2. If you want to build the AES intrinsics for Intel x86 (optional) you will need Microsoft Visual Studio C++ package (Visual Studio installer).
 3. To build the android native library you have to build first the gradle project under: libs/projects/salmon-libs-gradle-android/. Make sure you folow the instructions in the README.md file to build the release version of the library.
 
+Build:
+To include building for the android library:
+set ANDROID_HOME=C:\Path\To\Android
+You can build from the windows command line in windows:
 Restore nuget packages:
 msbuild -t:restore 
-
 Build:
-You can build from the windows command line in windows:
 msbuild /property:Configuration=Release
 
 In linux you can build only the C# projects
