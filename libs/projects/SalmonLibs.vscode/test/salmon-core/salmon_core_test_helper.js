@@ -33,8 +33,11 @@ import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { SeekOrigin } from '../../lib/salmon-core/streams/random_access_stream.js';
 import { AESCTRTransformer } from '../../lib/salmon-core/salmon/transform/aes_ctr_transformer.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
+import { Platform, OSType } from '../../lib/salmon-core/platform/platform.js';
+import { NativeProxy } from '../../lib/salmon-core/salmon/bridge/native_proxy.js';
 
 export class SalmonCoreTestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
@@ -69,15 +72,35 @@ export class SalmonCoreTestHelper {
     static encryptor;
     static decryptor;
 
-	static setTestParams(threads=1) {
+	static prjPath = "../../../../projects";
+    static winPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll";
+    // static macPath = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib";
+    static macPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib";
+    static linuxPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so";
+	
+	static setTestParams(threads=1, providerType=ProviderType.Default) {
 		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+        AesStream.setAesProviderType(providerType);
 	}
 	
     static initialize() {
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
+		
+		let platformOS = Platform.getOS();
+		switch(platformOS) {
+			case OSType.Linux:
+				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.linuxPath);
+				break;
+			case OSType.Windows:
+				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.winPath);
+				break;
+			case OSType.Darwin:
+				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.macPath);
+				break;
+		}
     }
 	
     static close() {

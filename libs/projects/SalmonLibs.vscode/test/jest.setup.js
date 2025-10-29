@@ -4,6 +4,7 @@ jest.retryTimes(0);
 
 import { SalmonCoreTestHelper } from "./salmon-core/salmon_core_test_helper.js";
 import { SalmonFSTestHelper, TestMode, TestRunnerMode } from "./salmon-fs/salmon_fs_test_helper.js";
+import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
 
 // TestMode:
 // Node: to test node files (node.js only)
@@ -18,6 +19,7 @@ var testRunnerMode = TestRunnerMode.NodeJS;
 // point to the correct location
 var testDir = "d:\\tmp\\salmon\\test";
 var threads = 1;
+var providerType = ProviderType.Aes;
 
 for(let arg of process.argv) {
     let opt = arg.split("=");
@@ -31,8 +33,10 @@ for(let arg of process.argv) {
         SalmonFSTestHelper.HTTP_SERVER_URL = opt[1];
 	if(opt[0] == "ENC_THREADS" && opt[1])
 		threads = opt[1];
+	if(opt[0] == "AES_PROVIDER_TYPE" && opt[1])
+		providerType = ProviderType[opt[1]];
 }
-SalmonCoreTestHelper.setTestParams(threads);
+SalmonCoreTestHelper.setTestParams(threads, providerType);
 await SalmonFSTestHelper.setTestParams(testDir, testMode, testRunnerMode, threads);
 console.log("testDir: ", testDir);
 console.log("testMode: ", testMode);

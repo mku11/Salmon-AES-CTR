@@ -40,9 +40,6 @@ import { RangeExceededException } from '../../lib/salmon-core/salmon/range_excee
 describe('salmon-core', () => {
     beforeAll(() => {
         // see jest.setup.js and browser.setup.js for setting params
-
-        // only default provider is supported
-        AesStream.setAesProviderType(ProviderType.Default);
         SalmonCoreTestHelper.initialize();
     });
 
