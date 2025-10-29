@@ -30,7 +30,7 @@ export interface INativeProxy {
      * Initializes the native library with the specified AES implementation.
      * @param {number} aesImpl
      */
-    init(aesImpl: number): void;
+    init(aesImpl: number): Promise<void>;
 
     /**
      * Expands the specified AES encryption key.

@@ -82,7 +82,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
      * @throws SalmonSecurityException Thrown when error with security
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
-        AesNativeTransformer.getNativeProxy().init(this.#implType);
+        await AesNativeTransformer.getNativeProxy().init(this.#implType);
         let expandedKey: Uint8Array = new Uint8Array(AESCTRTransformer.EXPANDED_KEY_SIZE);
         AesNativeTransformer.getNativeProxy().expandKey(key, expandedKey);
         this.setExpandedKey(expandedKey);

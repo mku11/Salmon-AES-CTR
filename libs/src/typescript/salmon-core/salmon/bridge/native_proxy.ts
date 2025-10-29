@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Platform, PlatformType } from "../../platform/platform.js";
 import { INativeProxy } from "./inative_proxy";
 
 /**
@@ -29,8 +30,11 @@ import { INativeProxy } from "./inative_proxy";
  */
 export class NativeProxy implements INativeProxy {
     static #loaded: boolean;
-    static #libraryPath: string;
+    static #libraryPath: string = "salmon.dll";
     static #lib: any;
+	static #init: any;
+	static #expandKey: any;
+	static #transform: any;
 
     /**
      * 
@@ -42,20 +46,38 @@ export class NativeProxy implements INativeProxy {
 
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
+	 * Note: for nodejs this will load the native salmon library
+	 * For the browser it will initialize the WebGPU equivalent.
      *
      * @param {number} aesImpl The implementation type see ProviderType
      */
-    public init(aesImpl: number): void {
-        this.loadLibrary();
-        NativeProxy.#lib.init(aesImpl);
+    public async init(aesImpl: number): Promise<void> {
+        await this.loadLibrary();
+        NativeProxy.#init(aesImpl);
     }
 
     /**
      * Load the native library
      */
-    protected loadLibrary(): void{
+    protected async loadLibrary(): Promise<void> {
         if(NativeProxy.#loaded)
             return;
+        try {
+            if (Platform.getPlatform() == PlatformType.NodeJs) {
+                const koffi = Platform.require('koffi');
+				NativeProxy.#lib = koffi.load(NativeProxy.#libraryPath);
+				NativeProxy.#init = NativeProxy.#lib.func('void salmon_init(int aesImplType)');
+                NativeProxy.#expandKey = NativeProxy.#lib.func('void salmon_expandKey(const unsigned char* key, unsigned char* expandedKey)');
+                NativeProxy.#transform = NativeProxy.#lib.func('int salmon_transform('+
+                    'const unsigned char* expandedKey, unsigned char* counter,'+
+                    'const unsigned char *srcBuffer, int srcOffset,'+
+                    'unsigned char *destBuffer, int destOffset, int count)');
+            } else {
+				throw new Error("Native acceleration not supported");
+            }
+        } catch (ex: any) {
+            console.error(ex);
+        }
         NativeProxy.#loaded = true;
     }
 
@@ -66,7 +88,7 @@ export class NativeProxy implements INativeProxy {
      * @param {Uint8Array} expandedKey The expanded key
      */
     public expandKey(key: Uint8Array, expandedKey: Uint8Array): void {
-        throw new Error("Not supported");
+        NativeProxy.#expandKey(key, expandedKey);
     }
 
     /**
@@ -82,6 +104,6 @@ export class NativeProxy implements INativeProxy {
      * @returns {number} The number of bytes transformed
      */
     public transform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): number {
-        throw new Error("Not supported");
+        return NativeProxy.#transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }
