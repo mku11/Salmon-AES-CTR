@@ -31,6 +31,7 @@ import { AuthException } from "../../auth/auth_exception.js";
 import { FileImporter } from "../../../fs/drive/utils/file_importer.js";
 import { AesFile } from "../../file/aes_file.js";
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
+import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 
 /**
  * Imports files to a drive.
@@ -73,7 +74,7 @@ export class AesFileImporter extends FileImporter {
         // we force the whole content to use 1 thread if:
         if(
             // we are in the browser and the target is a local file (chromes crswap clash between writers)
-            targetFile.getRealFile().constructor.name === 'File' && typeof process !== 'object') {
+            targetFile.getRealFile().constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
             return await sourceFile.getLength();
         }
         return await (targetFile as AesFile).getMinimumPartSize();

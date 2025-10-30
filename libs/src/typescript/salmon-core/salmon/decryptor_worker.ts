@@ -22,17 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Platform, PlatformType } from "../platform/platform.js";
 import { decryptData } from "./decryptor_helper.js";
 
 async function receive(event: any) {
-    let params = typeof process === 'object' ? event : event.data;
+    let params = Platform.getPlatform() == PlatformType.NodeJs ? event : event.data;
     let destBuffer = new Uint8Array(params.out_size);
 	try {
 		let { startPos, endPos } = await decryptData(params.data, params.start, params.length, destBuffer, 
 			params.key, params.nonce, params.format, 
 			params.integrity, params.hashKey, params.chunkSize, params.bufferSize);
 		let msg = { startPos: startPos, endPos: endPos, outData: destBuffer };
-		if (typeof process === 'object') {
+		if (Platform.getPlatform() == PlatformType.NodeJs) {
 			const { parentPort } = await import("worker_threads");
 			if (parentPort) {
 				parentPort.postMessage(msg);
@@ -41,7 +42,7 @@ async function receive(event: any) {
 		else
 			postMessage(msg);
 	} catch (ex) {
-		if (typeof process === 'object') {
+		if (Platform.getPlatform() == PlatformType.NodeJs) {
             const { parentPort } = await import("worker_threads");
             if (parentPort) {
                 parentPort.postMessage(ex);
@@ -52,7 +53,7 @@ async function receive(event: any) {
 	}
 }
 
-if (typeof process === 'object') {
+if (Platform.getPlatform() == PlatformType.NodeJs) {
     const { parentPort } = await import("worker_threads");
     if (parentPort)
         parentPort.addListener('message', receive);

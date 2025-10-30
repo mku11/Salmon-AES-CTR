@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Platform, PlatformType } from "../../../salmon-core/platform/platform.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { IFile } from "../../fs/file/ifile.js";
 import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
@@ -56,7 +57,7 @@ async function close() {
 
 async function startRead(event: any): Promise<void> {
     try {
-        let params = typeof process === 'object' ? event : event.data;
+        let params = Platform.getPlatform() == PlatformType.NodeJs ? event : event.data;
         if(params.allowClearTextTraffic)
             HttpSyncClient.setAllowClearTextTraffic(true);
         let chunkBytesRead: number = 0;
@@ -81,7 +82,7 @@ async function startRead(event: any): Promise<void> {
             cacheBuffer: cacheBuffer.getData(),
             start: params.start
         };
-        if (typeof process === 'object') {
+        if (Platform.getPlatform() == PlatformType.NodeJs) {
             const { parentPort } = await import("worker_threads");
             if (parentPort) {
                 parentPort.postMessage(msgComplete);
@@ -94,7 +95,7 @@ async function startRead(event: any): Promise<void> {
         let type = ex.getCause != undefined ? ex.getCause().constructor.name : ex.constructor.name;
         let exMsg = ex.getCause != undefined ? ex.getCause() : ex;
         let msgError = { message: 'error', error: exMsg, type: type };
-        if (typeof process === 'object') {
+        if (Platform.getPlatform() == PlatformType.NodeJs) {
             const { parentPort } = await import("worker_threads");
             if (parentPort) {
                 parentPort.postMessage(msgError);
@@ -105,7 +106,7 @@ async function startRead(event: any): Promise<void> {
     }
 }
 
-if (typeof process === 'object') {
+if (Platform.getPlatform() == PlatformType.NodeJs) {
     const { parentPort } = await import("worker_threads");
     if (parentPort)
         parentPort.addListener('message', receive);

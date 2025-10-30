@@ -33,6 +33,7 @@ import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
 import { Credentials } from "../../fs/file/credentials.js";
 import { IFile } from "../../fs/file/ifile.js";
 import { FileUtils } from "../../fs/drive/utils/file_utils.js";
+import { Platform, PlatformType } from "../../../salmon-core/platform/platform.js";
 
 /**
  * ReadableStream wrapper for seeking and reading an encrypted AesFile.
@@ -151,7 +152,7 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
                 let servicePath: string | null = await FileUtils.getServicePath(realFile);
                 let credentials: Credentials | null = realFile.getCredentials();
                 
-                if (typeof process !== 'object') {
+                if (Platform.getPlatform() == PlatformType.Browser) {
 
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.getWorkerPath(), { type: 'module' });

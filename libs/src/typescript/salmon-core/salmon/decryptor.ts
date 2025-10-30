@@ -31,6 +31,7 @@ import { AesStream } from "./streams/aes_stream.js";
 import { SecurityException } from "./security_exception.js";
 import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
 import { decryptData } from "./decryptor_helper.js";
+import { Platform, PlatformType } from "../platform/platform.js";
 
 /**
  * Utility class that decrypts byte arrays.
@@ -165,7 +166,7 @@ export class Decryptor {
         this.#promises = [];
         for (let i = 0; i < runningThreads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
-                if (typeof process !== 'object') {
+                if (Platform.getPlatform() == PlatformType.Browser) {
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                     this.#workers[i].removeEventListener('error', null);

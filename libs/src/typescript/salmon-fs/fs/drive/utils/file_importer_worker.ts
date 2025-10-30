@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 import { IFile } from "../../file/ifile.js";
 import { HttpSyncClient } from "../../file/http_sync_client.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
@@ -71,12 +72,12 @@ export class FileImporterWorker {
 
     async startImport(event: any): Promise<void> {
         try {
-            let params = typeof process === 'object' ? event : event.data;
+            let params = Platform.getPlatform() == PlatformType.NodeJs ? event : event.data;
             if(params.allowClearTextTraffic)
                 HttpSyncClient.setAllowClearTextTraffic(true);
             let onProgressChanged: (position: number, length: number) => void = async function (position, length): Promise<void> {
                 let msg = { message: 'progress', index: params.index, position: position, length: length };
-                if (typeof process === 'object') {
+                if (Platform.getPlatform() == PlatformType.NodeJs) {
                     const { parentPort } = await import("worker_threads");
                     if (parentPort) {
                         parentPort.postMessage(msg);
@@ -94,7 +95,7 @@ export class FileImporterWorker {
             await importFilePart(fileToImport, importedFile, params.start, params.length, totalBytesRead,
                 onProgressChanged, params.bufferSize, this.stopped);
             let msgComplete = { message: 'complete', totalBytesRead: totalBytesRead[0] };
-            if (typeof process === 'object') {
+            if (Platform.getPlatform() == PlatformType.NodeJs) {
                 const { parentPort } = await import("worker_threads");
                 if (parentPort) {
                     parentPort.postMessage(msgComplete);
@@ -117,7 +118,7 @@ export class FileImporterWorker {
                 exMsg = ex;
             
             let msgError = { message: 'error', error: exMsg, type: type };
-            if (typeof process === 'object') {
+            if (Platform.getPlatform() == PlatformType.NodeJs) {
                 const { parentPort } = await import("worker_threads");
                 if (parentPort) {
                     parentPort.postMessage(msgError);

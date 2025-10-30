@@ -27,6 +27,7 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
 import { IOException } from "../../../../salmon-core/streams/io_exception.js";
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
+import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 
 /**
  * Abstract class for importing files to a drive.
@@ -196,7 +197,7 @@ export abstract class FileImporter {
             this.#promises = [];
             for (let i = 0; i < runningThreads; i++) {
                 this.#promises.push(new Promise(async (resolve, reject) => {
-                    if (typeof process !== 'object') {
+                    if (Platform.getPlatform() == PlatformType.Browser) {
                         if(this.#workers[i] == null) {
                             this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                         }

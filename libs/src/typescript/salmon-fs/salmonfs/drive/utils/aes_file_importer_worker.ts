@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 import { IFile } from "../../../fs/file/ifile.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { FileImporterWorker } from "../../../fs/drive/utils/file_importer_worker.js";
@@ -45,7 +46,7 @@ export class AesFileImporterWorker extends FileImporterWorker {
 }
 
 let worker = new AesFileImporterWorker();
-if (typeof process === 'object') {
+if (Platform.getPlatform() == PlatformType.NodeJs) {
     const { parentPort } = await import("worker_threads");
     if (parentPort)
         parentPort.addListener('message', (event: any) => worker.receive(worker, event));

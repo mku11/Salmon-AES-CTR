@@ -31,6 +31,7 @@ import { FileExporter } from "../../../fs/drive/utils/file_exporter.js";
 import { AuthException } from "../../auth/auth_exception.js";
 import { AesFile } from "../../file/aes_file.js";
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
+import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 
 /**
  * Exports files from a drive.
@@ -53,7 +54,7 @@ export class AesFileExporter extends FileExporter {
         // we force the whole content to use 1 thread if:
         if(
             // we are in the browser and the target is a local file (chromes crswap clash between writers)
-            targetFile.constructor.name === 'File' && typeof process !== 'object') {
+            targetFile.constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
             return await (sourceFile as AesFile).getLength();
         }
         return await (sourceFile as AesFile).getMinimumPartSize();
