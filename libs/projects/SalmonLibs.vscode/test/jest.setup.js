@@ -19,7 +19,7 @@ var testRunnerMode = TestRunnerMode.NodeJS;
 // point to the correct location
 var testDir = "d:\\tmp\\salmon\\test";
 var threads = 1;
-var providerType = ProviderType.Aes;
+var providerType = ProviderType.Default;
 
 for(let arg of process.argv) {
     let opt = arg.split("=");

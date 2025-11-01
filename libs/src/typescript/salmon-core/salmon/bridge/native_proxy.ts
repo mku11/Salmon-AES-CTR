@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { Platform, PlatformType } from "../../platform/platform.js";
 import { INativeProxy } from "./inative_proxy";
+import { WebGPU } from "./webgpu.js";
 
 /**
  * Proxy class for use with windows native library.
@@ -73,7 +74,11 @@ export class NativeProxy implements INativeProxy {
                     'const unsigned char *srcBuffer, int srcOffset,'+
                     'unsigned char *destBuffer, int destOffset, int count)');
             } else {
-				throw new Error("Native acceleration not supported");
+                if(!await WebGPU.isSupported())
+				    throw new Error("Native acceleration not supported");
+                NativeProxy.#init = ()=> {
+                    await WebGPU.init();
+                }
             }
         } catch (ex: any) {
             console.error(ex);

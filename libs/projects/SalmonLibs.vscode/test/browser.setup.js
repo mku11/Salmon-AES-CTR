@@ -1,5 +1,6 @@
 import { SalmonCoreTestHelper } from "./salmon-core/salmon_core_test_helper.js";
 import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon_fs_test_helper.js";
+import { ProviderType } from "../../lib/salmon-core/salmon/streams/provider_type.js";
 
 // TestMode:
 // Local: to test Local browser files (browser only)
@@ -9,6 +10,7 @@ import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon
 var testMode = TestMode.Local;
 var testRunnerMode = TestRunnerMode.Browser;
 var testThreads = 1;
+var testProviderType = ProviderType.Default;
 var testDirHandle;
 var testSuite;
 	
@@ -41,8 +43,9 @@ if(enableLogReport) {
 window.execute = async function () {
     testSuite = document.getElementById("testSuite").value;
 	testThreads = Number.parseInt(document.getElementById("test-threads").value);
+    testProviderType = ProviderType[document.getElementById("test-provider-type").value];
 	testMode = TestMode[document.getElementById("test-mode").value];
-    SalmonCoreTestHelper.setTestParams(testThreads);
+    SalmonCoreTestHelper.setTestParams(testThreads, testProviderType);
     if(testSuite !== "salmon-core") {
         if(!testDirHandle) {
             console.log("Select a Test Folder first");
