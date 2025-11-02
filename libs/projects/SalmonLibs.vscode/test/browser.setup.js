@@ -2,6 +2,8 @@ import { SalmonCoreTestHelper } from "./salmon-core/salmon_core_test_helper.js";
 import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon_fs_test_helper.js";
 import { ProviderType } from "../../lib/salmon-core/salmon/streams/provider_type.js";
 
+const WAIT_BETWEEN_CASES_MS = 200;
+
 // TestMode:
 // Local: to test Local browser files (browser only)
 // WebService: to run on a web service drive (browser or node.js)
@@ -106,6 +108,13 @@ async function describe(testSuite, callback) {
     detectTestCases(testSuite);
 }
 
+const setAsyncTimeout = (fn, timeout = 0) => new Promise(resolve => {
+    setTimeout(() => {
+        fn();
+        resolve();
+    }, timeout);
+});
+
 async function submitNext(testSuite, testCaseNum) {
     if (testCaseNum >= testCases[testSuite].length) {
         if (testSuite in afterTestSuite)
@@ -117,23 +126,27 @@ async function submitNext(testSuite, testCaseNum) {
     let success = true;
     let testCaseFilter = testCaseList.value;
     if (testCaseFilter === 'All' || testCaseFilter === testCases[testSuite][testCaseNum].testCaseName) {
-        console.log("\nRunning test: " + testCases[testSuite][testCaseNum].testCaseName);
-        if(testSuite in beforeTest)
-            await beforeTest[testSuite]();
-        try {
-            await testCases[testSuite][testCaseNum].callback();
-        } catch (ex) {
-            success = false;
-            console.error(ex);
-        }
-        if(testSuite in afterTest)
-            await afterTest[testSuite]();
-        console.log("Test case: " + testCases[testSuite][testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
-        totalTestCases++;
-        passedTestCases += success ? 1 : 0;
-    }
-    if (success || !stopOnError)
+        setAsyncTimeout(async function() {
+            console.log("\nRunning test: " + testCases[testSuite][testCaseNum].testCaseName);
+            if(testSuite in beforeTest)
+                await beforeTest[testSuite]();
+            try {
+                await testCases[testSuite][testCaseNum].callback();
+            } catch (ex) {
+                success = false;
+                console.error(ex);
+            }
+            if(testSuite in afterTest)
+                await afterTest[testSuite]();
+            console.log("Test case: " + testCases[testSuite][testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
+            totalTestCases++;
+            passedTestCases += success ? 1 : 0;
+            if (success || !stopOnError)
+                await submitNext(testSuite, testCaseNum + 1);
+        }, WAIT_BETWEEN_CASES_MS);
+    } else {
         await submitNext(testSuite, testCaseNum + 1);
+    }
 }
 
 class Expect {
