@@ -76,9 +76,7 @@ export class NativeProxy implements INativeProxy {
             } else {
                 if(!await WebGPU.isSupported())
 				    throw new Error("Native acceleration not supported");
-                NativeProxy.#init = ()=> {
-                    await WebGPU.init();
-                }
+                NativeProxy.#init = WebGPU.init;
             }
         } catch (ex: any) {
             console.error(ex);
