@@ -47,6 +47,7 @@ function addTestCaseToList(testCaseName) {
 }
 
 function updateTestCaseList() {
+    testCaseList.innerHTML='';
     addTestCaseToList("All");
     for(let testCase of testCases[testSuiteList.value]) {
         addTestCaseToList(testCase["testCaseName"]);
