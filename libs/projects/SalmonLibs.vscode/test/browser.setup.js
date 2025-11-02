@@ -15,19 +15,16 @@ var testDirHandle;
 var testSuite;
 	
 // browser test runner somewhat compatible with jest assertions
-var beforeTest = null;
-var afterTest = null;
-var beforeTestSuite = null;
-var afterTestSuite = null;
+var beforeTest = {};
+var afterTest = {};
+var beforeTestSuite = {};
+var afterTestSuite = {};
 
 var testSuites = {};
-var testCases = [];
+var testCases = {};
 var stopOnError = false;
 var totalTestCases = 0;
 var passedTestCases = 0;
-
-// set to run specific case
-// var testFilter = "shouldAuthorizePositive";
 
 var logReport = null;
 var enableLogReport = true;
@@ -39,6 +36,24 @@ if(enableLogReport) {
 } else {
     output.style.display = "none";
 }
+
+function addTestCaseToList(testCaseName) {
+    var option = document.createElement('option');
+    option.value = testCaseName;
+    option.innerHTML = testCaseName;
+    testCaseList.appendChild(option);
+}
+
+function updateTestCaseList() {
+    addTestCaseToList("All");
+    for(let testCase of testCases[testSuiteList.value]) {
+        addTestCaseToList(testCase["testCaseName"]);
+    }
+}
+
+let testSuiteList = document.getElementById("testSuite");
+let testCaseList = document.getElementById("testCase");
+testSuiteList.onchange = (event) => updateTestCaseList();
 
 window.execute = async function () {
     testSuite = document.getElementById("testSuite").value;
@@ -65,57 +80,55 @@ async function selectTestFolder() {
 }
 
 async function it(testCaseName, callback) {
-    testCases.push({
+    testCases[testSuite].push({
         testCaseName: testCaseName, callback: callback
     });
 }
 
 async function beforeEach(callback) {
-    beforeTest = callback;
+    beforeTest[testSuite] = callback;
 }
 
 async function afterEach(callback) {
-    afterTest = callback;
+    afterTest[testSuite] = callback;
 }
 
 async function beforeAll(callback) {
-    beforeTestSuite = callback;
+    beforeTestSuite[testSuite] = callback;
 }
 
 async function afterAll(callback) {
-    afterTestSuite = callback;
+    afterTestSuite[testSuite] = callback;
 }
 
 async function describe(testSuite, callback) {
     testSuites[testSuite] = callback;
-    beforeTest = null;
-    afterTest = null;
-    beforeTestSuite = null;
-    afterTestSuite = null;
+    detectTestCases(testSuite);
 }
 
 async function submitNext(testSuite, testCaseNum) {
-    if (testCaseNum >= testCases.length) {
-        if (afterTestSuite)
-            await afterTestSuite();
+    if (testCaseNum >= testCases[testSuite].length) {
+        if (testSuite in afterTestSuite)
+            await afterTestSuite[testSuite]();
         console.log("Test suite complete: " + testSuite);
         console.log("Test cases passed: " + passedTestCases + "/" + totalTestCases);
         return;
     }
     let success = true;
-    if (typeof testFilter === 'undefined' || testFilter == null || testFilter === testCases[testCaseNum].testCaseName) {
-        console.log("\nRunning test: " + testCases[testCaseNum].testCaseName);
-        if(beforeTest)
-            await beforeTest();
+    let testCaseFilter = testCaseList.value;
+    if (testCaseFilter === 'All' || testCaseFilter === testCases[testSuite][testCaseNum].testCaseName) {
+        console.log("\nRunning test: " + testCases[testSuite][testCaseNum].testCaseName);
+        if(testSuite in beforeTest)
+            await beforeTest[testSuite]();
         try {
-            await testCases[testCaseNum].callback();
+            await testCases[testSuite][testCaseNum].callback();
         } catch (ex) {
             success = false;
             console.error(ex);
         }
-        if(afterTest)
-            await afterTest();
-        console.log("Test case: " + testCases[testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
+        if(testSuite in afterTest)
+            await afterTest[testSuite]();
+        console.log("Test case: " + testCases[testSuite][testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
         totalTestCases++;
         passedTestCases += success ? 1 : 0;
     }
@@ -170,16 +183,20 @@ function expect(actual) {
     return new Expect(actual);
 }
 
+async function detectTestCases(testRunningSuite) {
+    testSuite = testRunningSuite;
+    let callback = testSuites[testSuite];
+    testCases[testSuite] = [];
+    await callback();
+}
+
 async function executeTestSuite(testSuite) {
     if (logReport)
         logReport.value = "";
-    let callback = testSuites[testSuite];
-    testCases = [];
     passedTestCases = 0;
     totalTestCases = 0;
-    await callback();
-    if (beforeTestSuite)
-        await beforeTestSuite();
+    if (testSuite in beforeTestSuite)
+        await beforeTestSuite[testSuite]();
     await submitNext(testSuite, 0);
 }
 
@@ -220,3 +237,5 @@ window.setLogArea = setLogArea;
 const {} = await import('./salmon-core/salmon_core.test.js');
 const {} = await import('./salmon-fs/salmon_fs_http.test.js');
 const {} = await import('./salmon-fs/salmon_fs.test.js');
+
+updateTestCaseList();
