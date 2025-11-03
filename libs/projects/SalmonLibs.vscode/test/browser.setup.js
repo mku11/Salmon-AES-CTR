@@ -52,11 +52,24 @@ function updateTestCaseList() {
     for(let testCase of testCases[testSuiteList.value]) {
         addTestCaseToList(testCase["testCaseName"]);
     }
+    testCaseList.value = localStorage.getItem(testCaseList.id) || testCaseList.value;
+    if (testCaseList.value === "")
+        testCaseList.value = "All";
 }
 
 let testSuiteList = document.getElementById("testSuite");
 let testCaseList = document.getElementById("testCase");
-testSuiteList.onchange = (event) => updateTestCaseList();
+let testProviderTypeList = document.getElementById("test-provider-type");
+let testThreadList = document.getElementById("test-threads");
+let testModeList = document.getElementById("test-mode");
+testSuiteList.onchange = (event) => { 
+    updateTestCaseList();
+    localStorage.setItem(testSuiteList.id, testSuiteList.value);
+}
+testCaseList.onchange = (event) => localStorage.setItem(testCaseList.id, testCaseList.value);
+testThreadList.onchange = (event) => localStorage.setItem(testThreadList.id, testThreadList.value);
+testProviderTypeList.onchange = (event) => localStorage.setItem(testProviderTypeList.id, testProviderTypeList.value);
+testModeList.onchange = (event) => localStorage.setItem(testModeList.id, testModeList.value);
 
 window.execute = async function () {
     testSuite = document.getElementById("testSuite").value;
@@ -253,3 +266,9 @@ const {} = await import('./salmon-fs/salmon_fs_http.test.js');
 const {} = await import('./salmon-fs/salmon_fs.test.js');
 
 updateTestCaseList();
+
+testSuiteList.value = localStorage.getItem(testSuiteList.id) || testSuiteList.value;
+testCaseList.value = localStorage.getItem(testCaseList.id) || testCaseList.value;
+testThreadList.value = localStorage.getItem(testThreadList.id) || testThreadList.value;
+testProviderTypeList.value = localStorage.getItem(testProviderTypeList.id) || testProviderTypeList.value;
+testModeList.value = localStorage.getItem(testModeList.id) || testModeList.value;
