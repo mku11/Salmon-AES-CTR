@@ -68,10 +68,27 @@ export class WebGPU {
     /**
      * Initializes web gpu
      */
-    static init() {
+    static init_webgpu() {
         WebGPU.#shaderModule = WebGPU.#device.createShaderModule({ code: WebGPU.#shaderCode });
         WebGPU.#pipeline = WebGPU.#device.createComputePipeline({ 
             layout: "auto", compute: { module: WebGPU.#shaderModule, entryPoint: "main"}
         });
+    }
+    
+    /**
+     * Transform the data using AES-256 CTR mode.
+     * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand()
+     * @param counter 	 The counter.
+     * @param srcBuffer  The source array to transform.
+     * @param srcOffset  The source offset.
+     * @param destBuffer The source array to transform.
+     * @param destOffset The destination offset
+     * @param count 	 The number of bytes to transform
+     * @return The number of bytes transformed.
+     */
+    static aes_webgpu_transform_ctr(expandedKey: Uint8Array, counter: Uint8Array,
+        srcBuffer: Uint8Array, srcOffset: number,
+        destBuffer: Uint8Array, destOffset: number, count: number): number {
+            throw new Error("Web gpu not implemented");
     }
 }

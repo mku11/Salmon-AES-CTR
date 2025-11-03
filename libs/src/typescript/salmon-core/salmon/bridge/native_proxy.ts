@@ -25,6 +25,7 @@ SOFTWARE.
 import { Platform, PlatformType } from "../../platform/platform.js";
 import { INativeProxy } from "./inative_proxy";
 import { WebGPU } from "./webgpu.js";
+import { salmon_init, salmon_expandKey, salmon_transform } from "./salmon.js";
 
 /**
  * Proxy class for use with windows native library.
@@ -74,9 +75,9 @@ export class NativeProxy implements INativeProxy {
                     'const unsigned char *srcBuffer, int srcOffset,'+
                     'unsigned char *destBuffer, int destOffset, int count)');
             } else {
-                if(!await WebGPU.isSupported())
-				    throw new Error("Native acceleration not supported");
-                NativeProxy.#init = WebGPU.init;
+                NativeProxy.#init = salmon_init;
+                NativeProxy.#expandKey = salmon_expandKey;
+                NativeProxy.#transform = salmon_transform;
             }
         } catch (ex: any) {
             console.error(ex);
