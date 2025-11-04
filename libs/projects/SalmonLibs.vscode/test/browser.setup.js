@@ -149,6 +149,8 @@ async function submitNext(testSuite, testCaseNum) {
             } catch (ex) {
                 success = false;
                 console.error(ex);
+                if(ex.getCause && ex.getCause())
+                    console.error(ex.getCause());
             }
             if(testSuite in afterTest)
                 await afterTest[testSuite]();
