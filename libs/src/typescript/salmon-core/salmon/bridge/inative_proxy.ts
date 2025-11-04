@@ -52,5 +52,5 @@ export interface INativeProxy {
      */
     transform(key: Uint8Array, counter: Uint8Array,
         srcBuffer: Uint8Array, srcOffset: number,
-        destBuffer: Uint8Array, destOffset: number, count: number): number;
+        destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
 }

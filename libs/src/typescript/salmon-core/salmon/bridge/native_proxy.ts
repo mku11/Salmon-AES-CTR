@@ -55,7 +55,7 @@ export class NativeProxy implements INativeProxy {
      */
     public async init(aesImpl: number): Promise<void> {
         await this.loadLibrary();
-        NativeProxy.#init(aesImpl);
+        await NativeProxy.#init(aesImpl);
     }
 
     /**
@@ -107,7 +107,7 @@ export class NativeProxy implements INativeProxy {
      * @param {number} count The number of bytes to transform
      * @returns {number} The number of bytes transformed
      */
-    public transform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): number {
-        return NativeProxy.#transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+    public async transform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
+        return await NativeProxy.#transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }

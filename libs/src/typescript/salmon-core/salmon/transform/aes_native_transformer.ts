@@ -107,7 +107,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
             throw new SecurityException("No key found, run init first");
         if (ctr == null)
             throw new SecurityException("No counter found, run init first");
-        return AesNativeTransformer.#nativeProxy.transform(key, ctr,
+        return await AesNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -130,7 +130,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
             throw new SecurityException("No key found, run init first");
         if (ctr == null)
             throw new SecurityException("No counter found, run init first");
-        return AesNativeTransformer.#nativeProxy.transform(key, ctr,
+        return await AesNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

@@ -46,10 +46,10 @@ let aesImpl = AES_IMPL_AES_INTR;
  * @param aesImplType The AES implementation:
  *  see: AES_IMPL_AES_INTR, AES_IMPL_TINY_AES, AES_IMPL_AES_GPU
  */
-export function salmon_init(aesImplType: number) {
+export async function salmon_init(aesImplType: number) {
 	aesImpl = aesImplType;
 	if (aesImpl == AES_IMPL_AES_GPU)
-		WebGPU.init_webgpu();
+		await WebGPU.init_webgpu();
 }
 
 /**
@@ -72,10 +72,10 @@ export function salmon_expandKey(key: Uint8Array, expandedKey: Uint8Array) {
  * @param count The number of bytes to transform.
  * @return The number of bytes transformed.
  */
-export function salmon_transform(
+export async function salmon_transform(
 	expandedKey: Uint8Array, counter: Uint8Array,
 	srcBuffer: Uint8Array, srcOffset: number,
-	destBuffer: Uint8Array, destOffset: number, count: number): number {
+	destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
 	if (aesImpl == AES_IMPL_AES) {
 		return aes_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
@@ -83,7 +83,7 @@ export function salmon_transform(
 		throw new Error("Aes Intrinsics not supported for Browser");
 	}
 	else if (aesImpl == AES_IMPL_AES_GPU) {
-		return WebGPU.aes_webgpu_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+		return await WebGPU.aes_webgpu_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
 	return 0;
 }
