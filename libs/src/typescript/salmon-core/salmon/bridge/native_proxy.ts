@@ -24,7 +24,6 @@ SOFTWARE.
 
 import { Platform, PlatformType } from "../../platform/platform.js";
 import { INativeProxy } from "./inative_proxy";
-import { WebGPU } from "./webgpu.js";
 import { salmon_init, salmon_expandKey, salmon_transform } from "./salmon.js";
 
 /**
