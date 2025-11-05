@@ -38,6 +38,7 @@ import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
 import { Platform, OSType } from '../../lib/salmon-core/platform/platform.js';
 import { NativeProxy } from '../../lib/salmon-core/salmon/bridge/native_proxy.js';
+import { WebGPU } from '../../lib/salmon-core/salmon/bridge/webgpu.js';
 
 export class SalmonCoreTestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
@@ -82,6 +83,8 @@ export class SalmonCoreTestHelper {
 		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
         AesStream.setAesProviderType(providerType);
+        if(providerType == ProviderType.AesGPU)
+            WebGPU.enableLog(true);
 	}
 	
     static initialize() {
