@@ -231,21 +231,21 @@ async function executeTestSuite(testSuite) {
 
 function redirectLog() {
     var consoleLog = console.log;
-    console.log = function (message) {
+    console.log = function (...message) {
         if (message == undefined)
             message = "";
         if (logReport) {
-            logReport.value += message + "\n";
+            logReport.value += message.join(" ") + "\n";
         }
         consoleLog.apply(console, arguments);
     };
 
     var consoleError = console.error;
-    console.error = function (message) {
+    console.error = function (...message) {
         if (message == undefined)
             message = "";
         if (logReport) {
-            logReport.value += message + "\n";
+            logReport.value += message.join(" ") + "\n";
         }
         consoleError.apply(console, arguments);
     };
