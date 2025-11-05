@@ -23,9 +23,11 @@ SOFTWARE.
 */
 
 import { Platform, PlatformType } from "../../platform/platform.js";
-import { salmon_shader } from "./salmon_shader.js";
+import { getSalmonAESShader } from "./salmon_aes_shader.js";
+import { WebGPULogger } from "./webgpu_logger.js";
+
 const BLOCKS_PER_WORKITEM = 1;
-const DBG_MAX_SIZE = 8*1024;
+const DEBUG = true;
 
 /**
  * Utility class for platform specifics.
@@ -35,6 +37,7 @@ export class WebGPU {
     static #bindGroupLayout: any | null = null;
     static #computePipeline: any | null = null;
     static #commandEncoder: any | null = null;
+    static #logger: WebGPULogger | null = null;
    
     /**
      * Checks support of gpu in browser
@@ -72,61 +75,35 @@ export class WebGPU {
      */
     static async init_webgpu() {
         let device = await WebGPU.#getDevice();
-        // 4: Create a GPUBindGroupLayout to define the bind group structure, create a GPUBindGroup from it,
-        // then use it to create a GPUComputePipeline
-
+        
+        let bindGroupLayoutEntries = [
+            // key
+            this.#createBindLayoutEntry(0, "read-only-storage"),
+            // ctr
+            this.#createBindLayoutEntry(1, "read-only-storage"),
+            // src
+            this.#createBindLayoutEntry(2, "read-only-storage"),
+            // dest
+            this.#createBindLayoutEntry(3, "storage"),
+            // params
+            this.#createBindLayoutEntry(4, "uniform")
+        ];
+        if (DEBUG) {
+            WebGPU.#logger = new WebGPULogger(device);
+            WebGPU.#logger.addDebugBindLayoutEntry(bindGroupLayoutEntries);
+        }
         WebGPU.#bindGroupLayout = device.createBindGroupLayout({
             label: 'tranformBindGroupLayout',
-            entries: [
-            {
-                binding: 0,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "read-only-storage",
-                },
-            },{
-                binding: 1,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "read-only-storage",
-                },
-            },{
-                binding: 2,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "read-only-storage",
-                },
-            },{
-                binding: 3,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "storage",
-                },
-            },{
-                binding: 4,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "uniform",
-                },
-            },{
-                binding: 5,
-                // @ts-ignore
-                visibility: GPUShaderStage.COMPUTE,
-                buffer: {
-                type: "storage",
-                },
-            }
-            ],
+            entries: bindGroupLayoutEntries,
         });
-        let salmonShader = "const CHUNK_SIZE = " + 16 * BLOCKS_PER_WORKITEM + ";\n";
-        salmonShader += salmon_shader;
-        // 2: Create a shader module from the shader template literal
+
+        let salmonShader = getSalmonAESShader(16 * BLOCKS_PER_WORKITEM);
+        if (WebGPU.#logger) {
+            salmonShader = WebGPU.#logger.createDebugShader(salmonShader, bindGroupLayoutEntries);
+        }
+        
         const shaderModule = device.createShaderModule({
+            label: 'salmonShader',
             code: salmonShader,
         });
 
@@ -141,7 +118,6 @@ export class WebGPU {
             },
         });
 
-        // 5: Create GPUCommandEncoder to issue commands to the GPU
         WebGPU.#commandEncoder = device.createCommandEncoder();
     }
     
@@ -202,61 +178,37 @@ export class WebGPU {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
-        const bufferDbg = device.createBuffer({
-            label: 'bufferDbg',
-            size: 4 * DBG_MAX_SIZE,
-            // @ts-ignore
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-        });
-
-        const stagingBufferDbg = device.createBuffer({
-            label: 'stagingBufferDbg',
-            size: 4 * DBG_MAX_SIZE,
+        const stagingBufferDest = device.createBuffer({
+            label: 'stagingBufferDest',
+            size: 4 * destBuffer.length,
             // @ts-ignore
             usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
         });
-
+       
         device.queue.writeBuffer(bufferKey, 0, tKeyBuffer, 0, tKeyBuffer.length);
         device.queue.writeBuffer(bufferCtr, 0, tCtrBuffer, 0, tCtrBuffer.length);
         device.queue.writeBuffer(bufferSrc, 0, tSrcBuffer, 0, tSrcBuffer.length);
         device.queue.writeBuffer(bufferParams, 0, paramsBuffer, 0, paramsBuffer.length);
 
+        const bindGroupEntries = [
+            // key
+            this.#createBindEntry(0, bufferKey),
+            // ctr
+            this.#createBindEntry(1, bufferCtr),
+            // src
+            this.#createBindEntry(2, bufferSrc),
+            // dest
+            this.#createBindEntry(3, bufferDest),
+            // params
+            this.#createBindEntry(4, bufferParams)
+        ];
+        if (WebGPU.#logger) {
+            WebGPU.#logger.addDebugBindEntry(bindGroupEntries);
+        }
         const bindGroup = device.createBindGroup({
             label: 'transformBindGroup',
             layout: WebGPU.#bindGroupLayout,
-            entries: [
-            {
-                binding: 0,
-                resource: {
-                buffer: bufferKey,
-                },
-            },{
-                binding: 1,
-                resource: {
-                buffer: bufferCtr,
-                },
-            },{
-                binding: 2,
-                resource: {
-                buffer: bufferSrc,
-                },
-            },{
-                binding: 3,
-                resource: {
-                buffer: bufferDest,
-                },
-            },{
-                binding: 4,
-                resource: {
-                buffer: bufferParams,
-                },
-            },{
-                binding: 5,
-                resource: {
-                buffer: bufferDbg,
-                },
-            }
-            ],
+            entries: bindGroupEntries,
         });
 
         const passEncoder = WebGPU.#commandEncoder.beginComputePass();
@@ -265,28 +217,39 @@ export class WebGPU {
         passEncoder.dispatchWorkgroups(1);
         passEncoder.end();
 
+        if(WebGPU.#logger) {
+            WebGPU.#logger.setCommandEncoder(this.#commandEncoder);
+        }
+
+        // dest buffer copy
         WebGPU.#commandEncoder.copyBufferToBuffer(
-            bufferDbg,
+            bufferDest,
             0,
-            stagingBufferDbg,
+            stagingBufferDest,
             0,
-            4 * DBG_MAX_SIZE
+            4 * destBuffer.length
         );
 
         device.queue.submit([WebGPU.#commandEncoder.finish()]);
-
-        await stagingBufferDbg.mapAsync(
+        if(WebGPU.#logger) {
+            console.log("webgpu dbg:", await WebGPU.#logger.getLog());
+        }
+        
+        await stagingBufferDest.mapAsync(
             // @ts-ignore
             GPUMapMode.READ,
             0,
-            4 * DBG_MAX_SIZE
+            4 * destBuffer.length
         );
-
-        const copyArrayBuffer = stagingBufferDbg.getMappedRange(0,4 * DBG_MAX_SIZE);
+        const copyArrayBuffer = stagingBufferDest.getMappedRange(0,4 * destBuffer.length);
         const data = copyArrayBuffer.slice();
-        stagingBufferDbg.unmap();
-        console.log("webgpu dbg:", new Uint32Array(data));
-        return 0;
+        stagingBufferDest.unmap();
+        let output = new Uint32Array(data);
+        console.log("output:", output);
+        for(let i=0; i<destBuffer.length; i++)
+            destBuffer[i]=output[i];
+
+        return count;
     }
 
     static #toUint32(arr: Uint8Array): Uint32Array {
@@ -294,5 +257,23 @@ export class WebGPU {
         for(let i=0; i<arr.length; i++)
             narr[i]=arr[i];
         return narr;
+    }
+
+    static #createBindEntry(idx: number, buffer: any): any {
+        return {
+            binding: idx,
+            resource: {
+                buffer: buffer
+            },
+        }
+    }
+
+    static #createBindLayoutEntry(idx: number, btype: string): any {
+        return {
+            binding: idx,
+            // @ts-ignore
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: { type: btype},
+        }
     }
 }
