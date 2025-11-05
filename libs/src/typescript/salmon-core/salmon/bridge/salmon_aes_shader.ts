@@ -71,6 +71,8 @@ fn add_round_key(
 		{
 			subKey = roundKey[round*16 + 4 * i + j];
 			state[i*4 + j] = u32(state[i*4 + j] ^ subKey);
+			// truncate to byte capacity
+			state[i*4 + j] %= 256;
 		}
 	}
 }
@@ -120,6 +122,10 @@ fn mix_columns(
 			h = state[i*4 + c] >> 7;
 			b[c] = state[i*4 + c] << 1;
 			b[c] ^= h * 0x1B;
+
+			// truncate to byte capacity
+			a[c] %= 256;
+			b[c] %= 256;
 		}
 		state[i*4 + 0] = b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1];
 		state[i*4 + 1] = b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2];
@@ -185,7 +191,11 @@ fn aes_transform(
 ) {
 	for (var r: u32 = 0; r <= ROUNDS; r++)
 	{
-		if (0 < r && r <= ROUNDS) {
+		// FIXME: this AND operator causes loops to skip
+		// it seems to be an issue with WebGPU
+		// fortunately it's redundant
+		// if (0 < r && r <= ROUNDS) {
+		if (0 < r) {
 			sub_bytes(data);
 			shift_rows(data);
 			if (r != ROUNDS) {
@@ -237,20 +247,16 @@ fn aes_transform_ctr (
 		for (var j: u32 = 0; j < AES_BLOCK_SIZE; j++) {
 			encCounter[j] = counter[j];
 		}
-
 		aes_transform(expandedKey, &encCounter);
+		console.log("encCounter", encCounter[0:16]);
 		for (var k: u32 = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
-            // print(destBuffer[destOffset + i + k], gid);
 			totalBytes++;
 		}
 		if (increment_counter(1, counter) < 0) {
 			return -1;
         }
 	}
-    // print(100);
-    // print(destBuffer[0]);
-    // print(vdestBuffer[0]);
 	return totalBytes;
 }
 
@@ -269,12 +275,6 @@ var<storage, read_write> destBuffer: array<u32>;
 @group(0) @binding(4)
 var<uniform> params : vec3<u32>;
 
-// @group(0) @binding(5)
-// var<storage, read_write> dbg: array<u32>;
-
-// global id is unique for each thread/item
-var<private> glid : u32;
-
 @compute @workgroup_size(2)
 fn main(
   @builtin(global_invocation_id)
@@ -282,15 +282,10 @@ fn main(
 
   @builtin(local_invocation_id)
   local_id : vec3u,
-) {
-    glid = u32(global_id.x);
-  // Avoid accessing the buffer out of bounds
-//   if (global_id.x >= 8u) {
-//     return;
-//   }
-//   print(10u, global_id.x);
-//   print(key[0], global_id.x);
-//   print(params[2], global_id.x);
+) {	
+	// make sure we debug only for a specific global_id
+	// if you have more dimensions you need to specify all of them
+	enable_log(global_id.x == 0);
 
     let srcOffset = params[0];
     let destOffset = params[1];
@@ -322,30 +317,11 @@ fn main(
 		for(var i: u32 = 0; i < cn; i++) {
 			src[i]=srcBuffer[srcOffset + idx + j + i];
         }
-        // print(ctr[0]);
-        // print(cn);
-        // print(src[0]);
 		aes_transform_ctr(&k, &ctr, &src, 0, &dest, 0, cn);
 		for(var i: u32 = 0; i < cn; i++) {
 			destBuffer[destOffset + idx + j + i] = dest[i];
         }
 	}
-    print(200);
-    // print(destBuffer[0]);
 }
-
-// we segment the debug buffer to identify messages
-// from each thread/item in every workgroup:
-// fn print(
-//   msg: u32
-// ) {
-//     // first element is to keep track the number of messages
-//     // max number of messages for each workgroup is:
-//     let MAX_MESSAGES: u32 = 512;
-//     let offset = glid * MAX_MESSAGES;
-//     let idx = dbg[offset];
-//     dbg[offset + 1 + idx] = msg;
-//     dbg[offset] = idx + 1;
-// }
 `;
 }

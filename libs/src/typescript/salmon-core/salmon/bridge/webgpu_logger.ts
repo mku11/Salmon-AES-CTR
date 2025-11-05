@@ -22,19 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// mark the start and begin of integer value sequences in the log
+const INTSEQ_START_MARK = 256;
+const INTSEQ_END_MARK = 257;
+
+// max characters per line for the log
+const MAX_LINE_CHARS = 128;
+
 export class WebGPULogger {
   #device: any | null = null;
   #maxSize = 8 * 1024;
   #shader: string | null = null;
   #bindLayoutEntry: any | null;
-  #bindEntry: any | null;
   #buffer: any | null;
   #stgBuffer: any | null;
-  #decoder: TextDecoder = new TextDecoder();
 
   /**
    * Initializes the logger
    * @param device The webgpu device
+   * Enable debugging for the global_id you want to debug inside your main function:
+   *    fn main() {
+   *      // make sure we debug only for a specific global_id
+   *      enable_log(global_id.x == 0);
+   *    }
+   * 
+   * The following log function is now available anywhere inside your wsgl script:
+   *    // print scalar
+   *      var test: u32 = 10;   
+   *      console.log("scalar:", test);
+   *
+   *    // print array element
+   *      var test = array<u32, 4>(1,2,3,4);
+   *      console.log("arr element:", test[2]);
+   * 
+   *    // print subarray from 1st to 3rd element
+   *      var test = array<u32, 4>(1,2,3,4);
+   *      console.log("subarray:", test[1:3]);
    */
   constructor(device: any) {
     this.#device = device;
@@ -49,25 +72,94 @@ export class WebGPULogger {
   createDebugShader(shader: string, bindGroupLayoutEntries: any[]): string {
     if (this.#shader)
       throw new Error("Debug shader already added");
-    this.#shader = shader + "\n" + `
-    @group(0) @binding(${bindGroupLayoutEntries.length-1})
-    var<storage, read_write> dbg: array<u32>;
+    let dgbShader = shader + "\n" + `
+    // DEBUGGING
+    @group(0) @binding(${bindGroupLayoutEntries.length - 1})
+    var<storage, read_write> dbgLog: array<u32>;
+    
+    var<private> enableLog: bool = false;
+    fn enable_log(
+      value: bool,
+    ) {
+      enableLog = value;
+    }
 
+    // max number of chars for a line:
+    const MAX_LINE_CHARS: u32 = ${MAX_LINE_CHARS};
+    const INTSEQ_START_MARK: u32 = ${INTSEQ_START_MARK};
+    const INTSEQ_END_MARK: u32 = ${INTSEQ_END_MARK};
+    
     // we segment the debug buffer to identify messages
     // from each thread/item in every workgroup:
-    fn print(
-      msg: u32
+    fn log(
+      msg: array<u32,MAX_LINE_CHARS>
     ) {
-        // first element is to keep track the number of messages
-        // max number of messages for each workgroup is:
-        let MAX_MESSAGES: u32 = 512;
-        let offset = glid * MAX_MESSAGES;
-        let idx = dbg[offset];
-        dbg[offset + 1 + idx] = msg;
-        dbg[offset] = idx + 1;
+        if(!enableLog) {
+          return;
+        }
+        // first element of the segment is to keep 
+        // track the position of the last byte written
+        var idx = dbgLog[0] + 1;
+        var isSequence: bool = false;
+        for(var i: u32 = 0; i < MAX_LINE_CHARS; i++) {
+          if(msg[i] == 0 && !isSequence) {
+            break;
+          }
+          if(msg[i] == INTSEQ_START_MARK) {
+            isSequence = true;
+          }
+          if(msg[i] == INTSEQ_END_MARK) {
+            isSequence = false;
+          }
+          dbgLog[idx] = msg[i];
+          idx+=1;  
+        }
+        dbgLog[0] = idx - 1;
     }
     `;
+    this.#shader = this.#subst(dgbShader);
     return this.#shader;
+  }
+
+  #subst(shader: string): string {
+    let sshader = shader.replace(/(console.log.*?)\((.*?)\);/ig, function (m, fn, ps) {
+      let params = ps.split(",");
+      let els = [];
+      for (let param of params) {
+        param = param.trim();
+        if (param.startsWith("'") || param.startsWith('"')) {
+          param = param.slice(1,param.length-1);
+          let len = param.length;
+          if (len > MAX_LINE_CHARS - 4) {
+            len = MAX_LINE_CHARS - 4;
+          }
+          for (let i = 0; i < len; i++)
+            els.push(param.charCodeAt(i));
+        } else if (!param.includes(":")) { // scalar u32,i32, no floats
+          els.push(INTSEQ_START_MARK);
+          els.push("u32(" + param + ")");
+          els.push(INTSEQ_END_MARK);
+        } else { // array of u32,i32, no floats
+          els.push(INTSEQ_START_MARK);
+          let parts = param.split(/\[|\]/);
+          let vname = parts[0];
+          let [start, end] = parts[1].split(/:/).map(Number);
+          if (end > MAX_LINE_CHARS - 2) {
+            end = MAX_LINE_CHARS - 2;
+          }
+          for (let i = start; i < end; i++)
+            els.push(vname + "[" + i + "]");
+          els.push(INTSEQ_END_MARK);
+        }
+      }
+      els.push('\n'.charCodeAt(0));
+      while (els.length < MAX_LINE_CHARS) {
+        els.push(0);
+      }
+      let arg = "array<u32,MAX_LINE_CHARS>(" + els.join(",") + ")";
+      return "log(" + arg + ");";
+    });
+    return sshader;
   }
 
   /**
@@ -91,9 +183,6 @@ export class WebGPULogger {
    * @param bindEntries 
    */
   addDebugBindEntry(bindEntries: any[]) {
-    if (this.#bindEntry)
-      throw new Error("Debug bind entry already added");
-
     this.#buffer = this.#device.createBuffer({
       label: 'bufferDbg',
       size: 4 * this.#maxSize,
@@ -108,13 +197,13 @@ export class WebGPULogger {
       usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     });
 
-    this.#bindEntry = {
+    let bindEntry = {
       binding: bindEntries.length,
       resource: {
         buffer: this.#buffer
       }
     };
-    bindEntries.push(this.#bindEntry);
+    bindEntries.push(bindEntry);
   }
 
   /**
@@ -135,7 +224,7 @@ export class WebGPULogger {
    * Get the WebGPU log
    * @returns The log
    */
-  async getLog(): Promise<Uint32Array> {
+  async getLog(): Promise<string> {
     await this.#stgBuffer.mapAsync(
       // @ts-ignore
       GPUMapMode.READ,
@@ -146,7 +235,26 @@ export class WebGPULogger {
     const dbgData = dbgArrayBuffer.slice();
     this.#stgBuffer.unmap();
     let data = new Uint32Array(dbgData);
-    // let log: string = this.#decoder.decode(data);
-    return data;
+    let res = "";
+    let isSequence = false;
+    for(let i=1; i<data.length; i++) {
+      if(data[i] == 0 && !isSequence)
+        break;
+      if(data[i] == INTSEQ_START_MARK && !isSequence) {
+        isSequence = true;
+        res += " ";
+        continue;
+      }
+      if(isSequence) {
+        if (data[i] == INTSEQ_END_MARK) {
+          isSequence = false;
+          continue;
+        } else
+          res += data[i] + " ";
+      } else {
+        res += String.fromCodePoint(data[i]);
+      }
+    }
+    return res;
   }
 }

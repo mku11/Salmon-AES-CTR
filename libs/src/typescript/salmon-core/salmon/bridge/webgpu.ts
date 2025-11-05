@@ -27,7 +27,6 @@ import { getSalmonAESShader } from "./salmon_aes_shader.js";
 import { WebGPULogger } from "./webgpu_logger.js";
 
 const BLOCKS_PER_WORKITEM = 1;
-const DEBUG = true;
 
 /**
  * Utility class for platform specifics.
@@ -36,8 +35,8 @@ export class WebGPU {
     static #device: any | null = null;
     static #bindGroupLayout: any | null = null;
     static #computePipeline: any | null = null;
-    static #commandEncoder: any | null = null;
     static #logger: WebGPULogger | null = null;
+    static #debug: boolean = false;
    
     /**
      * Checks support of gpu in browser
@@ -46,6 +45,12 @@ export class WebGPU {
     static async isSupported(): Promise<boolean> {
         let device = await WebGPU.#getDevice();
         return device != null;
+    }
+
+    static enableLog(value: boolean) {
+        WebGPU.#debug = value;
+        if(value)
+            console.log("WebGPU logger enable: DO NOT USE IN PRODUCTION!");
     }
 
     /**
@@ -88,7 +93,7 @@ export class WebGPU {
             // params
             this.#createBindLayoutEntry(4, "uniform")
         ];
-        if (DEBUG) {
+        if (WebGPU.#debug) {
             WebGPU.#logger = new WebGPULogger(device);
             WebGPU.#logger.addDebugBindLayoutEntry(bindGroupLayoutEntries);
         }
@@ -117,8 +122,6 @@ export class WebGPU {
             entryPoint: "main",
             },
         });
-
-        WebGPU.#commandEncoder = device.createCommandEncoder();
     }
     
     /**
@@ -137,6 +140,7 @@ export class WebGPU {
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
 
         let device = await WebGPU.#getDevice();
+        let commandEncoder = device.createCommandEncoder();
 
         let tKeyBuffer = WebGPU.#toUint32(expandedKey);
         let tCtrBuffer = WebGPU.#toUint32(counter);
@@ -211,18 +215,18 @@ export class WebGPU {
             entries: bindGroupEntries,
         });
 
-        const passEncoder = WebGPU.#commandEncoder.beginComputePass();
+        const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(WebGPU.#computePipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(1);
         passEncoder.end();
 
         if(WebGPU.#logger) {
-            WebGPU.#logger.setCommandEncoder(this.#commandEncoder);
+            WebGPU.#logger.setCommandEncoder(commandEncoder);
         }
 
         // dest buffer copy
-        WebGPU.#commandEncoder.copyBufferToBuffer(
+        commandEncoder.copyBufferToBuffer(
             bufferDest,
             0,
             stagingBufferDest,
@@ -230,9 +234,13 @@ export class WebGPU {
             4 * destBuffer.length
         );
 
-        device.queue.submit([WebGPU.#commandEncoder.finish()]);
+        device.queue.submit([commandEncoder.finish()]);
         if(WebGPU.#logger) {
-            console.log("webgpu dbg:", await WebGPU.#logger.getLog());
+            console.log("webgpu dbg:");
+            let log: string = await WebGPU.#logger.getLog();
+            let lines = log.split("\n");
+            for(let line of lines)
+                console.log(line);
         }
         
         await stagingBufferDest.mapAsync(
