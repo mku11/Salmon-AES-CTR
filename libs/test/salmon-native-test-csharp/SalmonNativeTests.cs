@@ -37,21 +37,11 @@ public class SalmonNativeTests
     static int ENC_THREADS = 1;
     static int DEC_THREADS = 1;
 
-    static SalmonNativeTests()
+    [ClassInitialize]
+    public void ClassInitialize()
     {
-        try
-        {
-            Password.Password.PbkdfImplType = PbkdfType.Default;
-        }
-        catch (SecurityException e)
-        {
-            throw new Exception("Could not run native test", e);
-        }
-    }
-
-    [TestInitialize]
-    public void Init()
-    {
+		SalmonCoreTestHelper.Initialize();
+		
 		ProviderType providerType = ProviderType.Aes;
 		String aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
 		if(aesProviderType != null && !aesProviderType.Equals(""))
@@ -65,6 +55,12 @@ public class SalmonNativeTests
 		AesStream.AesProviderType = providerType;
 		ENC_THREADS = threads;
 		DEC_THREADS = threads;
+    }
+	
+    [ClassCleanup]
+    public static void ClassCleanup()
+    {
+        SalmonCoreTestHelper.Close();
     }
 
     [TestMethod]
