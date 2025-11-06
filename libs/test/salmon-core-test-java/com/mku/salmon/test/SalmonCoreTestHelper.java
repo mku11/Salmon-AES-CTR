@@ -656,4 +656,21 @@ public class SalmonCoreTestHelper {
                                        byte[] hashKey, byte[] includeData) {
         return Integrity.calculateHash(hashProvider, bytes, offset, length, hashKey, includeData);
     }
+	
+    public static String getChecksumStream(InputStream stream) throws NoSuchAlgorithmException, IOException {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[256 * 1024];
+            int bytesRead;
+            while ((bytesRead = stream.read(buffer, 0, buffer.length)) > 0) {
+                md.update(buffer, 0, bytesRead);
+            }
+            byte[] digest = md.digest();
+            String hexString = BitConverter.toHex(digest);
+            return hexString;
+        } finally {
+            if (stream != null)
+                stream.close();
+        }
+    }
 }

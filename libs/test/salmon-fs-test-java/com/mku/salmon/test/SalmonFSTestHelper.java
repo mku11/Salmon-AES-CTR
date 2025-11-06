@@ -310,24 +310,7 @@ public class SalmonFSTestHelper {
 
     public static String getChecksum(IFile realFile) throws NoSuchAlgorithmException, IOException {
         InputStream stream = realFile.getInputStream().asReadStream();
-        return getChecksumStream(stream);
-    }
-
-    public static String getChecksumStream(InputStream stream) throws NoSuchAlgorithmException, IOException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] buffer = new byte[256 * 1024];
-            int bytesRead;
-            while ((bytesRead = stream.read(buffer, 0, buffer.length)) > 0) {
-                md.update(buffer, 0, bytesRead);
-            }
-            byte[] digest = md.digest();
-            String hexString = BitConverter.toHex(digest);
-            return hexString;
-        } finally {
-            if (stream != null)
-                stream.close();
-        }
+        return SalmonCoreTestHelper.getChecksumStream(stream);
     }
 
     public static void importAndExport(IFile vaultDir, String pass, IFile importFile,
@@ -358,7 +341,7 @@ public class SalmonFSTestHelper {
             aesFile.setVerifyIntegrity(true);
 
         assertTrue(aesFile.exists());
-        String hashPostImport = SalmonFSTestHelper.getChecksumStream(aesFile.getInputStream().asReadStream());
+        String hashPostImport = SalmonCoreTestHelper.getChecksumStream(aesFile.getInputStream().asReadStream());
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostImport);
 
@@ -871,7 +854,7 @@ public class SalmonFSTestHelper {
         assertTrue(file.exists());
 
         RandomAccessStream stream = file.getInputStream();
-        String digest = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
+        String digest = SalmonCoreTestHelper.getChecksumStream(stream.asReadStream());
         stream.close();
         assertEquals(digest, localChkSum);
     }
@@ -939,7 +922,7 @@ public class SalmonFSTestHelper {
 
         List<String> hashPreExport = new ArrayList<>();
         for (AesFile file : files)
-            hashPreExport.add(SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(file.getInputStream())));
+            hashPreExport.add(SalmonCoreTestHelper.getChecksumStream(new InputStreamWrapper(file.getInputStream())));
 
         // export files
         FileCommander.BatchExportOptions exportOptions = new FileCommander.BatchExportOptions();
@@ -971,7 +954,7 @@ public class SalmonFSTestHelper {
 
         for (int i = 0; i < files.length; i++) {
             RandomAccessStream stream = filesExported[i].getInputStream();
-            String hashPostImport = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
+            String hashPostImport = SalmonCoreTestHelper.getChecksumStream(stream.asReadStream());
             stream.close();
             assertEquals(hashPostImport, hashPreExport.get(i));
         }
