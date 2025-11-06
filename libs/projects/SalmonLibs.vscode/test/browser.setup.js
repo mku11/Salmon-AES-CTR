@@ -83,7 +83,7 @@ window.execute = async function () {
 	testMode = TestMode[document.getElementById("test-mode").value];
     testEnableGPU = document.getElementById("test-enable-gpu").value == "true" ? true : false;
     SalmonCoreTestHelper.setTestParams(testThreads, testProviderType, testEnableGPU);
-    if(testSuite !== "salmon-core" && testSuite !== "salmon-core-perf") {
+    if(testSuite !== "salmon-core" && testSuite !== "salmon-perf") {
         if(!testDirHandle) {
             console.log("Select a Test Folder first");
             return;

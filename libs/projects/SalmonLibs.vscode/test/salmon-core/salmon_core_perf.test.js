@@ -28,7 +28,7 @@ import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from './salmon_core_test_helper.js';
 
-describe('salmon-core-perf', () => {
+describe('salmon-perf', () => {
     var TEST_PERF_SIZE = 8 * 1024 * 1024;
 	
     beforeAll(() => {

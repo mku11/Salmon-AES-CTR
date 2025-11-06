@@ -9,6 +9,8 @@ export NODE_OPTIONS=--experimental-vm-modules
 ./test_javascript_fs_multi.sh
 ./test_javascript_httpfs.sh
 ./test_javascript_httpfs_multi.sh
+./test_javascript_native.sh
+./test_javascript_native_multi.sh
 ./test_javascript_wsfs.sh
 ./test_javascript_wsfs_multi.sh
 

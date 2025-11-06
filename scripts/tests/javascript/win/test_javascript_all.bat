@@ -21,6 +21,12 @@ if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 call test_javascript_httpfs_multi.bat
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 
+call test_javascript_native.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_native_multi.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
 call test_javascript_wsfs.bat
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 
