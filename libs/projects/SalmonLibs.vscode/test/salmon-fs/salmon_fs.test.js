@@ -533,7 +533,7 @@ describe('salmon-fs', () => {
     it('shouldReadFromFileMultithreaded', async () => {
 
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        let file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        let file = SalmonFSTestHelper.TEST_IMPORT_FILE;
 
         let pos = 3 * Integrity.DEFAULT_CHUNK_SIZE + 3;
 
