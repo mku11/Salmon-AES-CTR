@@ -70,7 +70,7 @@ export class FileSearcher {
         if (options.onSearchEvent)
             options.onSearchEvent(SearchEvent.SearchingFinished);
         this.#running = false;
-        return Object.values(searchResults);
+        return Array.from(searchResults.values());
     }
 
     /**
