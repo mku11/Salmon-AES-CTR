@@ -20,7 +20,7 @@ var testRunnerMode = TestRunnerMode.NodeJS;
 var testDir = "d:\\tmp\\salmon\\test";
 var threads = 1;
 var providerType = ProviderType.Default;
-var enableGPU = true;
+var enableGPU = false;
 
 for(let arg of process.argv) {
     let opt = arg.split("=");
