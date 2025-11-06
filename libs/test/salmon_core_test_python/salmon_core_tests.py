@@ -538,14 +538,14 @@ class SalmonCoreTests(TestCase):
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                                 EncryptionFormat.Salmon, True,
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                                32)
+                                                                8 * 1024)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                                 EncryptionFormat.Salmon, True,
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                                32)
+                                                                8 * 1024)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -602,7 +602,7 @@ class SalmonCoreTests(TestCase):
                                                                            SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                            SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                                            EncryptionFormat.Salmon, True,
-                                                                           SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32)
+                                                                           SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
