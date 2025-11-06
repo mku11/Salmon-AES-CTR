@@ -32,6 +32,8 @@ from abc import ABC
 from datetime import datetime
 from typing import Callable, Any
 from typeguard import typechecked
+import time
+import random
 
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
@@ -420,7 +422,8 @@ class IFile(ABC):
         if " (" in new_filename:
             index = new_filename.index(" (")
             new_filename = new_filename[0:index]
-        new_filename += " (" + datetime.today().strftime("%H%m%S%f")[:-2] + ")"
+        copy_suffix = datetime.today().strftime("%H%m%S%f")[:-3] + str(round(random.random()*100))
+        new_filename += " (" + copy_suffix + ")"
         if len(ext) > 0:
             new_filename += "." + ext
         return new_filename

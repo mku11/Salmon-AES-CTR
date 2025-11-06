@@ -33,6 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Random;
 
 /**
  * A real file. This class is used internally by the virtual disk to
@@ -483,9 +484,9 @@ public interface IFile {
 		int index = newFilename.lastIndexOf(" (");
 		if (index >= 0)
 			newFilename = newFilename.substring(0,index);
-		//FIXME: Workaround: There can be other files created at the same millisecond so we wait
-		try { Thread.sleep(1); } catch (Exception ex) {}
-		newFilename += " (" + new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) + ")";
+		String copySuffix = new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) 
+			+ (int) Math.round(new Random().nextFloat()*100);
+		newFilename += " (" + copySuffix + ")";
         if (ext.length() > 0)
             newFilename += "." + ext;
         return newFilename;
