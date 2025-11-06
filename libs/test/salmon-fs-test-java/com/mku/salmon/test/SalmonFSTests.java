@@ -415,7 +415,7 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void ShouldEncryptAndReadFileInputStream() throws Exception {
+    public void shouldEncryptAndReadFileInputStream() throws Exception {
         byte[] data = new byte[256];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
@@ -462,7 +462,7 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void ShouldPerformOperationsRealFiles() throws IOException {
+    public void shouldPerformOperationsRealFiles() throws IOException {
         boolean caught = false;
         IFile dir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         IFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
@@ -578,7 +578,7 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void ShouldReadFromFileMultithreaded() throws Exception {
+    public void shouldReadFromFileMultithreaded() throws Exception {
         IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         IFile file = SalmonFSTestHelper.TEST_IMPORT_FILE;
 

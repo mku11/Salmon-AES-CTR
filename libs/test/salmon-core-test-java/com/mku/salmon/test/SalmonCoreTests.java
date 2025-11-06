@@ -542,7 +542,7 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldEncryptAndDecryptArrayGeneric() throws Exception {
+    public void shouldEncryptAndDecryptArrayGeneric() throws Exception {
         byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024 + 4);
         long t1 = System.currentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
@@ -560,7 +560,7 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldEncryptAndDecryptArrayIntegrity() throws Exception {
+    public void shouldEncryptAndDecryptArrayIntegrity() throws Exception {
         byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024 + 3);
         long t1 = System.currentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
@@ -578,16 +578,16 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldEncryptAndDecryptArrayIntegrityCustomChunkSize() throws Exception {
+    public void shouldEncryptAndDecryptArrayIntegrityCustomChunkSize() throws Exception {
         byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024);
         long t1 = System.currentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t2 = System.currentTimeMillis();
         byte[] decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t3 = System.currentTimeMillis();
 
         assertArrayEquals(data, decData);
@@ -596,7 +596,7 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldEncryptAndDecryptArrayIntegrityNoApply() throws Exception {
+    public void shouldEncryptAndDecryptArrayIntegrityNoApply() throws Exception {
         byte[] data = SalmonCoreTestHelper.TEST_TEXT.getBytes();
         byte[] key = Generator.getSecureRandomBytes(32);
         byte[] nonce = Generator.getSecureRandomBytes(8);
@@ -636,12 +636,12 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize() throws Exception {
+    public void shouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize() throws Exception {
         byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024);
         long t1 = System.currentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t2 = System.currentTimeMillis();
         byte[] decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
@@ -654,18 +654,18 @@ public class SalmonCoreTests {
     }
 
     @Test
-    public void ShouldCopyMemory() throws IOException {
+    public void shouldCopyMemory() throws IOException {
         SalmonCoreTestHelper.CopyMemory(4 * 1024 * 1024);
     }
 
     @Test
-    public void ShouldCopyFromToMemoryStream() throws Exception {
+    public void shouldCopyFromToMemoryStream() throws Exception {
         SalmonCoreTestHelper.copyFromMemStream(1 * 1024 * 1024, 0);
         SalmonCoreTestHelper.copyFromMemStream(1 * 1024 * 1024, 32768);
     }
 
     @Test
-    public void ShouldCopyFromMemoryStreamToSalmonStream() throws Exception {
+    public void shouldCopyFromMemoryStreamToSalmonStream() throws Exception {
         SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 true, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
