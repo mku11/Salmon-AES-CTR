@@ -79,12 +79,17 @@ export class SalmonCoreTestHelper {
     static macPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib";
     static linuxPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so";
 	
+    static ENABLE_WEBGPU = true;
+    static ENABLE_WEBGPU_LOG = false;
+
 	static setTestParams(threads=1, providerType=ProviderType.Default) {
 		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
         AesStream.setAesProviderType(providerType);
-        if(providerType == ProviderType.AesGPU)
-            WebGPU.enableLog(true);
+        if(providerType == ProviderType.AesGPU) {
+            WebGPU.enable(SalmonCoreTestHelper.ENABLE_WEBGPU);
+            WebGPU.enableLog(SalmonCoreTestHelper.ENABLE_WEBGPU_LOG);
+        }
 	}
 	
     static initialize() {

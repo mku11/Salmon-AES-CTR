@@ -23,27 +23,21 @@ SOFTWARE.
 */
 
 // mark the start and begin of integer value sequences in the log
-const INTSEQ_START_MARK = 256;
-const INTSEQ_END_MARK = 257;
+// we reserve two large unsigned integers for marking purposes
+const INTSEQ_START_MARK = -1 >>> 0;
+const INTSEQ_END_MARK = -2 >>> 0;
 
 // max characters per line for the log
 const MAX_LINE_CHARS = 128;
 
-export class WebGPULogger {
-  #device: any | null = null;
-  #maxSize = 8 * 1024;
-  #shader: string | null = null;
-  #bindLayoutEntry: any | null;
-  #buffer: any | null;
-  #stgBuffer: any | null;
-
   /**
-   * Initializes the logger
-   * @param device The webgpu device
+   * Logger for WebGPU
    * Enable debugging for the global_id you want to debug inside your main function:
    *    fn main() {
-   *      // make sure we debug only for a specific global_id
-   *      enable_log(global_id.x == 0);
+   *      // make sure you debug only for a specific workitem/global_id
+	 *      // if you don't the last workitem/global_id will overwrite the log
+	 *      // if you have more dimensions you need to specify all of them
+   *      enable_log(global_id.x == 0); // log only the 1st workitem 
    *    }
    * 
    * The following log function is now available anywhere inside your wsgl script:
@@ -58,6 +52,18 @@ export class WebGPULogger {
    *    // print subarray from 1st to 3rd element
    *      var test = array<u32, 4>(1,2,3,4);
    *      console.log("subarray:", test[1:3]);
+   */
+export class WebGPULogger {
+  #device: any | null = null;
+  #maxSize = 8 * 1024;
+  #shader: string | null = null;
+  #bindLayoutEntry: any | null;
+  #buffer: any | null;
+  #stgBuffer: any | null;
+
+  /**
+   * Initializes the logger
+   * @param device The webgpu device
    */
   constructor(device: any) {
     this.#device = device;

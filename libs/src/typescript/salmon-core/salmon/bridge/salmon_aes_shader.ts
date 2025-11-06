@@ -27,7 +27,7 @@ SOFTWARE.
  * @param chunkSize The chunk size
  * @returns The shader for aes tranformation
  */
-export function getSalmonAESShader(chunkSize: number): string { 
+export function getSalmonAESShader(chunkSize: number, workgroupSize: number): string { 
 return `
 const CHUNK_SIZE = ${chunkSize};
 const ROUNDS = 14;
@@ -248,7 +248,6 @@ fn aes_transform_ctr (
 			encCounter[j] = counter[j];
 		}
 		aes_transform(expandedKey, &encCounter);
-		console.log("encCounter", encCounter[0:16]);
 		for (var k: u32 = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
 			totalBytes++;
@@ -275,7 +274,7 @@ var<storage, read_write> destBuffer: array<u32>;
 @group(0) @binding(4)
 var<uniform> params : vec3<u32>;
 
-@compute @workgroup_size(2)
+@compute @workgroup_size(${workgroupSize})
 fn main(
   @builtin(global_invocation_id)
   global_id : vec3u,
@@ -283,10 +282,6 @@ fn main(
   @builtin(local_invocation_id)
   local_id : vec3u,
 ) {	
-	// make sure we debug only for a specific global_id
-	// if you have more dimensions you need to specify all of them
-	enable_log(global_id.x == 0);
-
     let srcOffset = params[0];
     let destOffset = params[1];
     let count = params[2];
@@ -296,6 +291,13 @@ fn main(
 	if(idx >= count) {
 		return;
 	}
+
+	// Logging: make sure you log only for a specific workitem/global_id
+	// if you don't the last workitem/global_id will overwrite the log
+	// so if you have multiple dimensions you need to specify all of them
+	// enable_log(global_id.x == 0); // log only the 1st workitem/thread
+	// console.log("srcBuffer:", srcBuffer[0:16]);
+	// console.log("count:", count);
 
     var k = array<u32, 240>();
 	var ctr = array<u32, 16>();

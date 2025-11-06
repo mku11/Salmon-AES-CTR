@@ -26,12 +26,19 @@ import { Platform, PlatformType } from "../../platform/platform.js";
 import { getSalmonAESShader } from "./salmon_aes_shader.js";
 import { WebGPULogger } from "./webgpu_logger.js";
 
+// AES Blocks to process per GPU thread
 const BLOCKS_PER_WORKITEM = 1;
+
+// GPU Threads per workgroup
+// you can usually go up to 256
+// but not to exceed device.limits.maxComputeInvocationsPerWorkgroup
+const WORKITEMS_PER_WORKGROUP = 64;
 
 /**
  * Utility class for platform specifics.
  */
 export class WebGPU {
+    static #enable: boolean = false;
     static #device: any | null = null;
     static #bindGroupLayout: any | null = null;
     static #computePipeline: any | null = null;
@@ -45,6 +52,12 @@ export class WebGPU {
     static async isSupported(): Promise<boolean> {
         let device = await WebGPU.#getDevice();
         return device != null;
+    }
+
+    static enable(value: boolean) {
+        WebGPU.#enable = value;
+        if(value)
+            console.log("WebGPU logger enable: DO NOT USE IN PRODUCTION!");
     }
 
     static enableLog(value: boolean) {
@@ -79,6 +92,9 @@ export class WebGPU {
      * Initializes web gpu
      */
     static async init_webgpu() {
+        if(!WebGPU.#enable)
+            throw new Error("WebGPU is experimental and might not be"
+        + " safe to use with encryption. Use WebGPU.setEnable(true) to proceed at your own risk!");
         let device = await WebGPU.#getDevice();
         
         let bindGroupLayoutEntries = [
@@ -102,7 +118,7 @@ export class WebGPU {
             entries: bindGroupLayoutEntries,
         });
 
-        let salmonShader = getSalmonAESShader(16 * BLOCKS_PER_WORKITEM);
+        let salmonShader = getSalmonAESShader(16 * BLOCKS_PER_WORKITEM, WORKITEMS_PER_WORKGROUP);
         if (WebGPU.#logger) {
             salmonShader = WebGPU.#logger.createDebugShader(salmonShader, bindGroupLayoutEntries);
         }
@@ -138,8 +154,14 @@ export class WebGPU {
     static async aes_webgpu_transform_ctr(expandedKey: Uint8Array, counter: Uint8Array,
         srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-
+        
         let device = await WebGPU.#getDevice();
+                // calculate the max amount of workgroups
+        let workgroups = Math.ceil(count / (16 * BLOCKS_PER_WORKITEM * WORKITEMS_PER_WORKGROUP));
+        if (workgroups > device.limits.maxComputeWorkgroupsPerDimension) {
+            workgroups = device.limits.maxComputeWorkgroupsPerDimension;
+            count = workgroups * 16 * BLOCKS_PER_WORKITEM * WORKITEMS_PER_WORKGROUP;
+        }
         let commandEncoder = device.createCommandEncoder();
 
         let tKeyBuffer = WebGPU.#toUint32(expandedKey);
@@ -218,7 +240,7 @@ export class WebGPU {
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(WebGPU.#computePipeline);
         passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.dispatchWorkgroups(1);
+        passEncoder.dispatchWorkgroups(workgroups);
         passEncoder.end();
 
         if(WebGPU.#logger) {
@@ -253,7 +275,7 @@ export class WebGPU {
         const data = copyArrayBuffer.slice();
         stagingBufferDest.unmap();
         let output = new Uint32Array(data);
-        console.log("output:", output);
+        // console.log("output:", output);
         for(let i=0; i<destBuffer.length; i++)
             destBuffer[i]=output[i];
 
