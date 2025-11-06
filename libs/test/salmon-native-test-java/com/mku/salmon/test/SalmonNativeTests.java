@@ -26,12 +26,11 @@ SOFTWARE.
 
 import com.mku.salmon.Decryptor;
 import com.mku.salmon.Encryptor;
-import com.mku.salmon.password.Password;
-import com.mku.salmon.password.PbkdfType;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.salmon.streams.ProviderType;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
@@ -39,16 +38,11 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class SalmonNativeTests {
-
     static int ENC_THREADS = 1;
     static int DEC_THREADS = 1;
 
-    static {
-        Password.setPbkdfType(PbkdfType.Default);
-    }
-
-    @BeforeEach
-    public void init() {
+    @BeforeAll
+    static void beforeAll() {
         ProviderType providerType = ProviderType.Aes;
         String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
         if (aesProviderType != null && !aesProviderType.equals(""))
@@ -63,6 +57,12 @@ public class SalmonNativeTests {
         ENC_THREADS = threads;
         DEC_THREADS = threads;
     }
+	
+	@AfterAll
+    static void afterAll() {
+        SalmonCoreTestHelper.close();
+    }
+
 
     @Test
     public void shouldEncryptAndDecryptNativeTextCompatible() throws Exception {
@@ -99,12 +99,16 @@ public class SalmonNativeTests {
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
+        Encryptor encryptor = new Encryptor(ENC_THREADS);
+        byte[] encBytes = encryptor.encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        encryptor.close();
         assertArrayEquals(encBytesDef, encBytes);
 
-        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
+        Decryptor decryptor = new Decryptor(DEC_THREADS);
+        byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        decryptor.close();
         assertArrayEquals(bytes, decBytes);
     }
 
@@ -122,11 +126,14 @@ public class SalmonNativeTests {
         byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         assertArrayEquals(bytes, decBytesDef);
-
-        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        Encryptor encryptor = new Encryptor(ENC_THREADS);
+        byte[] encBytes = encryptor.encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        encryptor.close();
         assertArrayEquals(encBytesDef, encBytes);
+
         Decryptor decryptor = new Decryptor(DEC_THREADS, 32 + 2);
         byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        decryptor.close();
         assertArrayEquals(bytes, decBytes);
     }
 }
