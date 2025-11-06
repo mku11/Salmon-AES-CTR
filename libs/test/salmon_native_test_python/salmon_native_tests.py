@@ -47,27 +47,12 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 
 @typechecked
 class SalmonNativeTests(TestCase):
-    prj_path = "../../projects"
-    win_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
-    # mac_path = prj_path + "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
-    mac_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib"
-    linux_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
-
     ENC_THREADS = 1
     DEC_THREADS = 1
 
-    Password.set_pbkdf_type(PbkdfType.Default)
-
     def setUp(self):
-        # set native library path
-        platform_os: str = platform.system().upper()
-        if "WINDOWS" in platform_os:
-            NativeProxy.set_library_path(SalmonNativeTests.win_path)
-        elif "MAC" in platform_os or "DARWIN" in platform_os:
-            NativeProxy.set_library_path(SalmonNativeTests.mac_path)
-        elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(SalmonNativeTests.linux_path)
-
+        SalmonCoreTestHelper.initialize()
+        
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
             "AES_PROVIDER_TYPE") else ProviderType.Aes
         print("ProviderType: " + str(provider_type))
@@ -79,7 +64,11 @@ class SalmonNativeTests(TestCase):
         AesStream.set_aes_provider_type(provider_type)
         SalmonNativeTests.ENC_THREADS = threads
         SalmonNativeTests.DEC_THREADS = threads
-
+    
+    @classmethod
+    def tearDownClass(cls):
+        SalmonCoreTestHelper.close()
+        
     def test_encrypt_and_decrypt_native_text_compatible(self):
         plain_text = SalmonCoreTestHelper.TEST_TEXT  # [0:16]
         for i in range(0, 13):
@@ -121,14 +110,16 @@ class SalmonNativeTests(TestCase):
                                                                       False)
         self.assertEqual(v_bytes, dec_bytes_def)
 
-        enc_bytes = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        encryptor = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU)
+        enc_bytes = encryptor.encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                      EncryptionFormat.Generic)
+        encryptor.close()
         self.assertEqual(enc_bytes_def, enc_bytes)
 
-        dec_bytes = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        decryptor = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU)
+        dec_bytes = decryptor.decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                      EncryptionFormat.Generic)
+        decryptor.close()
         self.assertEqual(v_bytes, dec_bytes)
 
     def test_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
@@ -146,12 +137,14 @@ class SalmonNativeTests(TestCase):
                                                                       False)
         self.assertEqual(v_bytes, dec_bytes_def)
 
-        enc_bytes = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        encryptor = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU)
+        enc_bytes = encryptor.encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                      EncryptionFormat.Generic)
+        encryptor.close()
         self.assertEqual(enc_bytes_def, enc_bytes)
 
-        dec_bytes = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        decryptor = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU)
+        dec_bytes = decryptor.decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                      EncryptionFormat.Generic)
+        decryptor.close()
         self.assertEqual(v_bytes, dec_bytes)
