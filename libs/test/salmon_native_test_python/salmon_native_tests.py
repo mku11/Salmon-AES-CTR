@@ -36,12 +36,9 @@ sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../test/salmon_core_test_python')
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
-from salmon_core.salmon.password.pbkdf_type import PbkdfType
-from salmon_core.salmon.password.password import Password
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.decryptor import Decryptor
 from salmon_core.salmon.encryptor import Encryptor
-from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
