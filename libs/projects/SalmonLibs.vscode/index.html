@@ -6,6 +6,7 @@
 <label for="testSuite">Test Suite</label>
 <select name="Test Suite" id="testSuite" style="margin: 2pt">
   <option value="salmon-core">salmon-core</option>
+  <option value="salmon-core-perf">salmon-core-perf</option>
   <option value="salmon-httpfs">salmon-httpfs</option>
   <option value="salmon-fs">salmon-fs</option>
 </select>
@@ -31,6 +32,11 @@ Mode:
 <select id="test-mode">
 	<option value="Local">Local</option>
 	<option value="WebService">WebService</option>
+</select>
+Enable GPU:
+<select id="test-enable-gpu">
+	<option value="true">Yes</option>
+	<option value="false">No</option>
 </select>
 <button onclick="javascript:execute()" id="execute">Execute</button>
 </div>

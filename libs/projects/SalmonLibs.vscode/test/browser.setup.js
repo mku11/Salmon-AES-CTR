@@ -62,6 +62,7 @@ let testCaseList = document.getElementById("testCase");
 let testProviderTypeList = document.getElementById("test-provider-type");
 let testThreadList = document.getElementById("test-threads");
 let testModeList = document.getElementById("test-mode");
+let testEnableGPU = document.getElementById("test-enable-gpu");
 testSuiteList.onchange = (event) => { 
     updateTestCaseList();
     sessionStorage.setItem(testSuiteList.id, testSuiteList.value);
@@ -70,14 +71,16 @@ testCaseList.onchange = (event) => sessionStorage.setItem(testCaseList.id, testC
 testThreadList.onchange = (event) => sessionStorage.setItem(testThreadList.id, testThreadList.value);
 testProviderTypeList.onchange = (event) => sessionStorage.setItem(testProviderTypeList.id, testProviderTypeList.value);
 testModeList.onchange = (event) => sessionStorage.setItem(testModeList.id, testModeList.value);
+testEnableGPU.onchange = (event) => sessionStorage.setItem(testEnableGPU.id, testEnableGPU.value);
 
 window.execute = async function () {
     testSuite = document.getElementById("testSuite").value;
 	testThreads = Number.parseInt(document.getElementById("test-threads").value);
     testProviderType = ProviderType[document.getElementById("test-provider-type").value];
 	testMode = TestMode[document.getElementById("test-mode").value];
-    SalmonCoreTestHelper.setTestParams(testThreads, testProviderType);
-    if(testSuite !== "salmon-core") {
+    testEnableGPU = document.getElementById("test-enable-gpu").value == "true" ? true : false;
+    SalmonCoreTestHelper.setTestParams(testThreads, testProviderType, testEnableGPU);
+    if(testSuite !== "salmon-core" && testSuite !== "salmon-core-perf") {
         if(!testDirHandle) {
             console.log("Select a Test Folder first");
             return;
@@ -144,8 +147,11 @@ async function submitNext(testSuite, testCaseNum) {
             console.log("\nRunning test: " + testCases[testSuite][testCaseNum].testCaseName);
             if(testSuite in beforeTest)
                 await beforeTest[testSuite]();
+            let start,end;
             try {
+                start = performance.now();
                 await testCases[testSuite][testCaseNum].callback();
+                end = performance.now();
             } catch (ex) {
                 success = false;
                 console.error(ex);
@@ -154,7 +160,10 @@ async function submitNext(testSuite, testCaseNum) {
             }
             if(testSuite in afterTest)
                 await afterTest[testSuite]();
-            console.log("Test case: " + testCases[testSuite][testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
+            console.log("Test case: " + testCases[testSuite][testCaseNum].testCaseName 
+                + ", result: " + (success ? "PASS" : "FAILED")
+                + ", time: " + Math.round(end - start) + " ms"
+            );
             totalTestCases++;
             passedTestCases += success ? 1 : 0;
             if (success || !stopOnError)
@@ -264,6 +273,7 @@ window.setLogArea = setLogArea;
 
 // source the test suites so the test can be populated
 const {} = await import('./salmon-core/salmon_core.test.js');
+const {} = await import('./salmon-core/salmon_core_perf.test.js');
 const {} = await import('./salmon-fs/salmon_fs_http.test.js');
 const {} = await import('./salmon-fs/salmon_fs.test.js');
 
@@ -274,3 +284,4 @@ testCaseList.value = sessionStorage.getItem(testCaseList.id) || testCaseList.val
 testThreadList.value = sessionStorage.getItem(testThreadList.id) || testThreadList.value;
 testProviderTypeList.value = sessionStorage.getItem(testProviderTypeList.id) || testProviderTypeList.value;
 testModeList.value = sessionStorage.getItem(testModeList.id) || testModeList.value;
+testEnableGPU.value = sessionStorage.getItem(testEnableGPU.id) || testEnableGPU.value;
