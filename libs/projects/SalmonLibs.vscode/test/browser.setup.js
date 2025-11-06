@@ -52,7 +52,7 @@ function updateTestCaseList() {
     for(let testCase of testCases[testSuiteList.value]) {
         addTestCaseToList(testCase["testCaseName"]);
     }
-    testCaseList.value = localStorage.getItem(testCaseList.id) || testCaseList.value;
+    testCaseList.value = sessionStorage.getItem(testCaseList.id) || testCaseList.value;
     if (testCaseList.value === "")
         testCaseList.value = "All";
 }
@@ -64,12 +64,12 @@ let testThreadList = document.getElementById("test-threads");
 let testModeList = document.getElementById("test-mode");
 testSuiteList.onchange = (event) => { 
     updateTestCaseList();
-    localStorage.setItem(testSuiteList.id, testSuiteList.value);
+    sessionStorage.setItem(testSuiteList.id, testSuiteList.value);
 }
-testCaseList.onchange = (event) => localStorage.setItem(testCaseList.id, testCaseList.value);
-testThreadList.onchange = (event) => localStorage.setItem(testThreadList.id, testThreadList.value);
-testProviderTypeList.onchange = (event) => localStorage.setItem(testProviderTypeList.id, testProviderTypeList.value);
-testModeList.onchange = (event) => localStorage.setItem(testModeList.id, testModeList.value);
+testCaseList.onchange = (event) => sessionStorage.setItem(testCaseList.id, testCaseList.value);
+testThreadList.onchange = (event) => sessionStorage.setItem(testThreadList.id, testThreadList.value);
+testProviderTypeList.onchange = (event) => sessionStorage.setItem(testProviderTypeList.id, testProviderTypeList.value);
+testModeList.onchange = (event) => sessionStorage.setItem(testModeList.id, testModeList.value);
 
 window.execute = async function () {
     testSuite = document.getElementById("testSuite").value;
@@ -269,8 +269,8 @@ const {} = await import('./salmon-fs/salmon_fs.test.js');
 
 updateTestCaseList();
 
-testSuiteList.value = localStorage.getItem(testSuiteList.id) || testSuiteList.value;
-testCaseList.value = localStorage.getItem(testCaseList.id) || testCaseList.value;
-testThreadList.value = localStorage.getItem(testThreadList.id) || testThreadList.value;
-testProviderTypeList.value = localStorage.getItem(testProviderTypeList.id) || testProviderTypeList.value;
-testModeList.value = localStorage.getItem(testModeList.id) || testModeList.value;
+testSuiteList.value = sessionStorage.getItem(testSuiteList.id) || testSuiteList.value;
+testCaseList.value = sessionStorage.getItem(testCaseList.id) || testCaseList.value;
+testThreadList.value = sessionStorage.getItem(testThreadList.id) || testThreadList.value;
+testProviderTypeList.value = sessionStorage.getItem(testProviderTypeList.id) || testProviderTypeList.value;
+testModeList.value = sessionStorage.getItem(testModeList.id) || testModeList.value;
