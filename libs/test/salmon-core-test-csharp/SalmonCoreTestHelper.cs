@@ -656,4 +656,20 @@ public class SalmonCoreTestHelper
     {
         return Integrity.Integrity.CalculateHash(hashProvider, bytes, offset, length, hashKey, includeData);
     }
+	
+    public static string GetChecksumStream(Stream stream)
+    {
+        try
+        {
+            MD5 md5 = MD5.Create();
+            byte[] hash = md5.ComputeHash(stream);
+            string hashstring = BitConverter.ToHex(hash);
+            return hashstring;
+        }
+        finally
+        {
+            if (stream != null)
+                stream.Close();
+        }
+    }
 }

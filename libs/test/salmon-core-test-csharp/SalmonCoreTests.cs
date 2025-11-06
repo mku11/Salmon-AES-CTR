@@ -641,10 +641,10 @@ public class SalmonCoreTests
         byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024);
         long t1 = Time.Time.CurrentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t2 = Time.Time.CurrentTimeMillis();
         byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t3 = Time.Time.CurrentTimeMillis();
 
         CollectionAssert.AreEqual(data, decData);
@@ -706,7 +706,7 @@ public class SalmonCoreTests
         long t1 = Time.Time.CurrentTimeMillis();
         byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         long t2 = Time.Time.CurrentTimeMillis();
         byte[] decData = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,

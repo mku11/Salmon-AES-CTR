@@ -320,23 +320,7 @@ public class SalmonFSTestHelper
     public static string GetChecksum(IFile realFile)
     {
         Stream stream = realFile.GetInputStream().AsReadStream();
-        return GetChecksumStream(stream);
-    }
-
-    public static string GetChecksumStream(Stream stream)
-    {
-        try
-        {
-            MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(stream);
-            string hashstring = BitConverter.ToHex(hash);
-            return hashstring;
-        }
-        finally
-        {
-            if (stream != null)
-                stream.Close();
-        }
+        return SalmonCoreTestHelper.GetChecksumStream(stream);
     }
 
     public static void ImportAndExport(IFile vaultDir, string pass, IFile importFile,
@@ -367,7 +351,7 @@ public class SalmonFSTestHelper
             salmonFile.SetVerifyIntegrity(false);
 
         Assert.IsTrue(salmonFile.Exists);
-        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(salmonFile.GetInputStream().AsReadStream());
+        string hashPostImport = SalmonCoreTestHelper.GetChecksumStream(salmonFile.GetInputStream().AsReadStream());
         if (shouldBeEqual)
             Assert.AreEqual(hashPreImport, hashPostImport);
 
@@ -907,7 +891,7 @@ public class SalmonFSTestHelper
         Assert.IsTrue(file.Exists);
 
         RandomAccessStream stream = file.GetInputStream();
-        string digest = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
+        string digest = SalmonCoreTestHelper.GetChecksumStream(stream.AsReadStream());
         stream.Close();
         Assert.AreEqual(digest, localChkSum);
     }
@@ -984,7 +968,7 @@ public class SalmonFSTestHelper
 
         List<string> hashPreExport = new List<string>();
         foreach (AesFile file in files)
-            hashPreExport.Add(SalmonFSTestHelper.GetChecksumStream(file.GetInputStream().AsReadStream()));
+            hashPreExport.Add(SalmonCoreTestHelper.GetChecksumStream(file.GetInputStream().AsReadStream()));
 
         // export files
         FileCommander.BatchExportOptions exportOptions = new FileCommander.BatchExportOptions();
@@ -1018,7 +1002,7 @@ public class SalmonFSTestHelper
         for (int i = 0; i < files.Length; i++)
         {
             RandomAccessStream stream = filesExported[i].GetInputStream();
-            string hashPostImport = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
+            string hashPostImport = SalmonCoreTestHelper.GetChecksumStream(stream.AsReadStream());
             stream.Close();
             Assert.AreEqual(hashPostImport, hashPreExport[i]);
         }
