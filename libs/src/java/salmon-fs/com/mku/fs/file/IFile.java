@@ -483,6 +483,8 @@ public interface IFile {
 		int index = newFilename.lastIndexOf(" (");
 		if (index >= 0)
 			newFilename = newFilename.substring(0,index);
+		//FIXME: Workaround: There can be other files created at the same millisecond so we wait
+		try { Thread.sleep(1); } catch (Exception ex) {}
 		newFilename += " (" + new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) + ")";
         if (ext.length() > 0)
             newFilename += "." + ext;
