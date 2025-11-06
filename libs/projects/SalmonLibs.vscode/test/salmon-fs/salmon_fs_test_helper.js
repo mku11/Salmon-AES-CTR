@@ -320,25 +320,9 @@ export class SalmonFSTestHelper {
 
     static async getChecksum(file) {
 		let stream = await file.getInputStream()
-        return SalmonFSTestHelper.getChecksumStream(stream)
+        return SalmonCoreTestHelper.getChecksumStream(stream)
 	}
 	
-	static async getChecksumStream(stream) {
-        let ms = new MemoryStream();
-        try {
-            await stream.copyTo(ms);
-            let data = ms.toArray();
-            let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", data)));
-            return digest;
-        } finally {
-            if (ms)
-                await ms.close();
-            if (stream) {
-                await stream.close();
-            }
-        }
-    }
-
     static async importAndExport(vaultDir, pass, importFile,
         bitflip, flipPosition, shouldBeEqual,
         applyFileIntegrity, verifyFileIntegrity) {
@@ -373,7 +357,7 @@ export class SalmonFSTestHelper {
 			await aesFile.setVerifyIntegrity(true);
 		
         expect(await aesFile.exists()).toBeTruthy();
-        let hashPostImport = await SalmonFSTestHelper.getChecksumStream(await aesFile.getInputStream());
+        let hashPostImport = await SalmonCoreTestHelper.getChecksumStream(await aesFile.getInputStream());
         if (shouldBeEqual)
             expect(hashPreImport).toBe(hashPostImport);
 		
@@ -541,7 +525,7 @@ export class SalmonFSTestHelper {
         await inStream.read(textBytes, 0, textBytes.length);
         await inStream.close();
         if (checkData)
-            SalmonCoreTestHelper.assertArrayEquals(testBytes, textBytes);
+            await SalmonCoreTestHelper.assertLargeArrayEquals(testBytes, textBytes);
         return readFile;
     }
 
@@ -744,7 +728,7 @@ export class SalmonFSTestHelper {
         await encInputStream.close();
         await outStream.close();
 
-        SalmonCoreTestHelper.assertArrayEquals(data, decData);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(data, decData);
     }
 
     static async getRealFileContents(filePath) {
@@ -778,7 +762,7 @@ export class SalmonFSTestHelper {
         let tdata = new Uint8Array(buffer.length);
         for (let i = 0; i < shouldReadLength; i++)
             tdata[readOffset + i] = data[start + i];
-        SalmonCoreTestHelper.assertArrayEquals(tdata, buffer);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(tdata, buffer);
         reader.releaseLock();
     }
 
@@ -866,7 +850,7 @@ export class SalmonFSTestHelper {
         await stream.close();
         // console.log("Text: ")
         // console.log(new TextDecoder().decode(ms.toArray()));
-        let digest = await SalmonFSTestHelper.getChecksumStream(ms);
+        let digest = await SalmonCoreTestHelper.getChecksumStream(ms);
         expect(digest).toBe(localChkSum);
     }
 
@@ -927,7 +911,7 @@ export class SalmonFSTestHelper {
         console.log(buffer);
         reader.releaseLock();
         await stream.cancel();
-        SalmonCoreTestHelper.assertArrayEquals(tdata, buffer);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(tdata, buffer);
     }
 
     static async exportFiles(files, dir, threads = 1) {
@@ -968,7 +952,7 @@ export class SalmonFSTestHelper {
 
         for(let i = 0; i < files.length; i++) {
             let stream = await filesExported[i].getInputStream();
-            let hashPostImport = await SalmonFSTestHelper.getChecksumStream(stream);
+            let hashPostImport = await SalmonCoreTestHelper.getChecksumStream(stream);
             await stream.close();
             expect(hashPostImport).toBe(hashPreExport[i]);
         }

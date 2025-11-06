@@ -20,6 +20,7 @@ var testRunnerMode = TestRunnerMode.NodeJS;
 var testDir = "d:\\tmp\\salmon\\test";
 var threads = 1;
 var providerType = ProviderType.Default;
+var enableGPU = true;
 
 for(let arg of process.argv) {
     let opt = arg.split("=");
@@ -35,8 +36,10 @@ for(let arg of process.argv) {
 		threads = opt[1];
 	if(opt[0] == "AES_PROVIDER_TYPE" && opt[1])
 		providerType = ProviderType[opt[1]];
+    if(opt[0] == "ENABLE_GPU" && opt[1])
+		enableGPU = opt[1] ? true : false;
 }
-SalmonCoreTestHelper.setTestParams(threads, providerType);
+SalmonCoreTestHelper.setTestParams(threads, providerType, enableGPU);
 await SalmonFSTestHelper.setTestParams(testDir, testMode, testRunnerMode, threads);
 console.log("testDir: ", testDir);
 console.log("testMode: ", testMode);

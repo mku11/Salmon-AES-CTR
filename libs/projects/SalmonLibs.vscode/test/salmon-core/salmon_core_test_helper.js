@@ -79,15 +79,16 @@ export class SalmonCoreTestHelper {
     static macPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib";
     static linuxPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so";
 	
-    static ENABLE_WEBGPU = true;
+    static ENABLE_GPU = true;
     static ENABLE_WEBGPU_LOG = false;
 
-	static setTestParams(threads=1, providerType=ProviderType.Default) {
+	static setTestParams(threads=1, providerType=ProviderType.Default, enableGPU=false) {
 		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+        SalmonCoreTestHelper.ENABLE_GPU = enableGPU;
         AesStream.setAesProviderType(providerType);
-        if(providerType == ProviderType.AesGPU) {
-            WebGPU.enable(SalmonCoreTestHelper.ENABLE_WEBGPU);
+        if(providerType == ProviderType.AesGPU) {    
+            WebGPU.enable(enableGPU);
             WebGPU.enableLog(SalmonCoreTestHelper.ENABLE_WEBGPU_LOG);
         }
 	}
@@ -125,6 +126,10 @@ export class SalmonCoreTestHelper {
     static getDecryptor() {
         return SalmonCoreTestHelper.decryptor;
     }
+
+    static isGPUEnabled() {
+		return SalmonCoreTestHelper.ENABLE_GPU;
+	}
 
     static async seekAndGetSubstringByRead(reader, seek, readCount, seekOrigin) {
         await reader.seek(seek, seekOrigin);
@@ -490,9 +495,17 @@ export class SalmonCoreTestHelper {
     }
 
     static getRandArray(size) {
+        // for simple random data Math.random is very slow 
+        // so we use the crypto, note: there is a limit of 2^16 bytes
         let data = new Uint8Array(size);
-        for (let i = 0; i < size; i++) {
-            data[i] = Math.floor(Math.random() * 255);
+        let buffer = new Uint8Array(1 << 16);
+        let count = 0;
+        while(count < size) {
+            crypto.getRandomValues(buffer);
+            for (let i = 0; i < buffer.length && i + count < size; i++) {
+                data[i + count] = buffer[i];
+            }
+            count += buffer.length;
         }
         return data;
     }
@@ -506,19 +519,19 @@ export class SalmonCoreTestHelper {
         return data;
     }
 
-    static encryptAndDecryptByteArray(size, enableLog) {
+    static async encryptAndDecryptByteArray(size, enableLog) {
         let data = SalmonCoreTestHelper.getRandArray(size);
-        SalmonCoreTestHelper.encryptAndDecryptByteArray2(data, enableLog);
+        await SalmonCoreTestHelper.encryptAndDecryptByteArray2(data, enableLog);
     }
 
-    static encryptAndDecryptByteArray2(data, enableLog) {
+    static async encryptAndDecryptByteArray2(data, enableLog) {
         let t1 = Date.now();
-        let encData = SalmonCoreTestHelper.getEncryptor().encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        let encData = await SalmonCoreTestHelper.getEncryptor().encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         let t2 = Date.now();
-        let decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
+        let decData = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         let t3 = Date.now();
 
-        expect(decData).toBe(data);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(decData, data);
         if (enableLog) {
             console.log("enc time: " + (t2 - t1));
             console.log("dec time: " + (t3 - t2));
@@ -526,21 +539,21 @@ export class SalmonCoreTestHelper {
         }
     }
 
-    static encryptAndDecryptByteArrayNative(size, enableLog) {
+    static async encryptAndDecryptByteArrayNative(size, enableLog) {
         let data = SalmonCoreTestHelper.getRandArray(size);
-        SalmonCoreTestHelper.encryptAndDecryptByteArrayNative2(data, enableLog);
+        await SalmonCoreTestHelper.encryptAndDecryptByteArrayNative2(data, enableLog);
     }
 
-    static encryptAndDecryptByteArrayNative2(data, enableLog) {
+    static async encryptAndDecryptByteArrayNative2(data, enableLog) {
         let t1 = Date.now();
-        let encData = SalmonCoreTestHelper.nativeCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
+        let encData = await SalmonCoreTestHelper.nativeCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
             AesStream.getAesProviderType());
         let t2 = Date.now();
-        let decData = SalmonCoreTestHelper.nativeCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        let decData = await SalmonCoreTestHelper.nativeCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
             AesStream.getAesProviderType());
         let t3 = Date.now();
 
-        expect(decData).toBe(data);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(decData, data);
         if (enableLog) {
             console.log("enc time: " + (t2 - t1));
             console.log("dec time: " + (t3 - t2));
@@ -548,19 +561,19 @@ export class SalmonCoreTestHelper {
         }
     }
 
-    static encryptAndDecryptByteArrayDef(size, enableLog) {
+    static async encryptAndDecryptByteArrayDef(size, enableLog) {
         let data = SalmonCoreTestHelper.getRandArray(size);
-        SalmonCoreTestHelper.encryptAndDecryptByteArrayDef2(data, enableLog);
+        await SalmonCoreTestHelper.encryptAndDecryptByteArrayDef2(data, enableLog);
     }
 
-    static encryptAndDecryptByteArrayDef2(data, enableLog) {
+    static async encryptAndDecryptByteArrayDef2(data, enableLog) {
         let t1 = Date.now();
-        let encData = SalmonCoreTestHelper.defaultAESCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+        let encData = await SalmonCoreTestHelper.defaultAESCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         let t2 = Date.now();
-        let decData = SalmonCoreTestHelper.defaultAESCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        let decData = await SalmonCoreTestHelper.defaultAESCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         let t3 = Date.now();
 
-        SalmonCoreTestHelper.assertArrayEquals(decData, data);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(decData, data);
         if (enableLog) {
             console.log("enc: " + (t2 - t1));
             console.log("dec: " + (t3 - t2));
@@ -589,7 +602,7 @@ export class SalmonCoreTestHelper {
 
     static async copyFromMemStream(size, bufferSize) {
         let testData = SalmonCoreTestHelper.getRandArray(size);
-        let digest = await crypto.subtle.digest("SHA-256", testData);
+        let digest = await SalmonCoreTestHelper.getChecksumArray(testData);
 
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
@@ -600,12 +613,11 @@ export class SalmonCoreTestHelper {
 
         expect(data2.length).toBe(testData.length);
 
-        let digest2 = await crypto.subtle.digest("SHA-256", data2);
+        let digest2 = await SalmonCoreTestHelper.getChecksumArray(data2);
         await ms1.close();
         await ms2.close();
 
-        SalmonCoreTestHelper.assertArrayEquals(digest2, digest);
-
+        expect(digest2).toBe(digest);
     }
 
     static async copyFromMemStreamToSalmonStream(size, key, nonce,
@@ -613,7 +625,7 @@ export class SalmonCoreTestHelper {
         bufferSize) {
 
         let testData = SalmonCoreTestHelper.getRandArray(size);
-        let digest = await crypto.subtle.digest("SHA-256", testData);
+        let digest = await SalmonCoreTestHelper.getChecksumArray(testData);
 
         // copy to a mem byte stream
         let ms1 = new MemoryStream(testData);
@@ -645,7 +657,9 @@ export class SalmonCoreTestHelper {
         await aesStream2.close();
         await ms3.close();
         await ms4.setPosition(0);
-        let digest2 = await crypto.subtle.digest("SHA-256", ms4.toArray());
+        let digest2 = await SalmonCoreTestHelper.getChecksumArray(ms4.toArray());
+
+        expect(digest2).toBe(digest);
         await ms4.close();
     }
 
@@ -653,13 +667,47 @@ export class SalmonCoreTestHelper {
         return Integrity.calculateHash(SalmonCoreTestHelper.hashProvider, bytes, offset, length, hashKey, includeData);
     }
 
-
-    // jest's toEqual assertion is very slow
     static assertArrayEquals(arr1, arr2) {
-        expect(arr1.length).toBe(arr2.length);
         for (let i = 0; i < arr1.length; i++) {
             if (arr1[i] != arr2[i])
                 expect(false).toBe(true);
         }
     }
+
+    static async assertLargeArrayEquals(arr1, arr2) {
+        // jest's toEqual assertion and simple != operator 
+        // are both very slow for large arrays
+        // so we validate the checksum first
+        // and only if there is a mismatch we get the details
+        expect(arr1.length).toBe(arr2.length);
+        let hash1 = await SalmonCoreTestHelper.getChecksumArray(arr1);
+        let hash2 = await SalmonCoreTestHelper.getChecksumArray(arr2);
+        if(hash1 !== hash2) {
+            assertArrayEquals(arr1, arr2);
+        }
+    }
+
+    static async getChecksumArray(data) {
+        let buffer = await crypto.subtle.digest("SHA-256", data);
+        let arr = new Uint8Array(buffer);
+        let digest = BitConverter.toHex(arr);
+        return digest;
+    }
+
+    static async getChecksumStream(stream) {
+        let ms = new MemoryStream();
+        try {
+            await stream.copyTo(ms);
+            let data = ms.toArray();
+            let digest = SalmonCoreTestHelper.getChecksumArray(data);
+            return digest;
+        } finally {
+            if (ms)
+                await ms.close();
+            if (stream) {
+                await stream.close();
+            }
+        }
+    }
+    
 }

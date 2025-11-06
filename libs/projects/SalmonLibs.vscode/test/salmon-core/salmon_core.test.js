@@ -32,7 +32,6 @@ import { TextEncryptor } from '../../lib/salmon-core/salmon/text/text_encryptor.
 import { TextDecryptor } from '../../lib/salmon-core/salmon/text/text_decryptor.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from './salmon_core_test_helper.js';
 import { SecurityException } from '../../lib/salmon-core/salmon/security_exception.js';
 import { RangeExceededException } from '../../lib/salmon-core/salmon/range_exceeded_exception.js';
@@ -519,14 +518,14 @@ describe('salmon-core', () => {
         const t1 = Date.now();
         const encData = await SalmonCoreTestHelper.getEncryptor().encrypt(data, 
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-            EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+            EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         const t2 = Date.now();
         const decData = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, 
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-            EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+            EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         const t3 = Date.now();
 
-        SalmonCoreTestHelper.assertArrayEquals(data, decData);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(data, decData);
         console.log("enc time: " + (t2 - t1));
         console.log("dec time: " + (t3 - t2));
     });
@@ -576,14 +575,14 @@ describe('salmon-core', () => {
         const t1 = Date.now();
         let encData = await SalmonCoreTestHelper.getEncryptor().encrypt(data,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 8 * 1024);
         const t2 = Date.now();
         let decData = await SalmonCoreTestHelper.getDecryptor().decrypt(encData,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
         const t3 = Date.now();
 
-        SalmonCoreTestHelper.assertArrayEquals(data, decData);
+        await SalmonCoreTestHelper.assertLargeArrayEquals(data, decData);
         console.log("enc time: " + (t2 - t1));
         console.log("dec time: " + (t3 - t2));
     });

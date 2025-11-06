@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
-import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
@@ -62,7 +61,7 @@ describe('salmon-fs', () => {
 
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
-        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = true;
+        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = false;
 
         // only default provider is supported
         AesStream.setAesProviderType(ProviderType.Default);
@@ -540,7 +539,7 @@ describe('salmon-fs', () => {
 
         let stream = await file.getInputStream();
         await stream.seek(pos, SeekOrigin.Current);
-        let h1 = await SalmonFSTestHelper.getChecksumStream(stream);
+        let h1 = await SalmonCoreTestHelper.getChecksumStream(stream);
         await stream.close();
 
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
@@ -562,7 +561,7 @@ describe('salmon-fs', () => {
         await ms.flush();
         await ms.close();
         ms.setPosition(0);
-        let h2 = await SalmonFSTestHelper.getChecksumStream(ms);
+        let h2 = await SalmonCoreTestHelper.getChecksumStream(ms);
         await fileInputStream1.cancel();
         ms.close();
         expect(h2).toBe(h1);
@@ -576,7 +575,7 @@ describe('salmon-fs', () => {
         await ms2.flush();
         await ms2.close();
         ms2.setPosition(0);
-        let h3 = await SalmonFSTestHelper.getChecksumStream(ms2);
+        let h3 = await SalmonCoreTestHelper.getChecksumStream(ms2);
         await fileInputStream2.cancel();
         ms2.close();
         expect(h3).toBe(h1);

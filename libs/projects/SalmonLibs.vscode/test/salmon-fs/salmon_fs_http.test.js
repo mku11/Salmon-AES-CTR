@@ -162,7 +162,7 @@ describe('salmon-httpfs', () => {
             SalmonFSTestHelper.httpCredentials);
         let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let stream = await httpFile.getInputStream();
-        let digest = await SalmonFSTestHelper.getChecksumStream(stream);
+        let digest = await SalmonCoreTestHelper.getChecksumStream(stream);
         await stream.close();
         console.log(digest + " vs " + localChkSum);
         expect(digest).toBe(localChkSum);
