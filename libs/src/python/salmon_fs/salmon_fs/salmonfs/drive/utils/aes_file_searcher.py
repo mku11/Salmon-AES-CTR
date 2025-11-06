@@ -90,7 +90,7 @@ class AesFileSearcher:
             options = AesFileSearcher.SearchOptions()
         self.__running = True
         self.__quit = False
-        search_results: OrderedDict[str, AesFile] = {}
+        search_results: OrderedDict[str, AesFile] = OrderedDict()
         if options.on_search_event:
             options.on_search_event(AesFileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, options.any_term, options.on_result_found, search_results)
