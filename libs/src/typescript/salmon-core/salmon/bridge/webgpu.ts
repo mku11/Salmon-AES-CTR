@@ -57,13 +57,13 @@ export class WebGPU {
     static enable(value: boolean) {
         WebGPU.#enable = value;
         if(value)
-            console.log("WebGPU logger enable: DO NOT USE IN PRODUCTION!");
+            console.log("WebGPU enabled: DO NOT USE IN PRODUCTION!");
     }
 
     static enableLog(value: boolean) {
         WebGPU.#debug = value;
         if(value)
-            console.log("WebGPU logger enable: DO NOT USE IN PRODUCTION!");
+            console.log("WebGPU logger enabled: DO NOT USE IN PRODUCTION!");
     }
 
     /**
@@ -94,7 +94,7 @@ export class WebGPU {
     static async init_webgpu() {
         if(!WebGPU.#enable)
             throw new Error("WebGPU is experimental and might not be"
-        + " safe to use with encryption. Use WebGPU.setEnable(true) to proceed at your own risk!");
+        + " safe to use with encryption. Use WebGPU.enable(true) to proceed at your own risk!");
         let device = await WebGPU.#getDevice();
         
         let bindGroupLayoutEntries = [
