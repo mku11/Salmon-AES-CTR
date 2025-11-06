@@ -687,7 +687,7 @@ public class SalmonFSTests
 
         Stream stream = file.GetInputStream().AsReadStream();
         stream.Seek(pos, SeekOrigin.Current);
-        String h1 = SalmonFSTestHelper.GetChecksumStream(stream);
+        String h1 = SalmonCoreTestHelper.GetChecksumStream(stream);
         stream.Close();
 
         FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();

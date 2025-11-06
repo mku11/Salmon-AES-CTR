@@ -218,7 +218,7 @@ public class SalmonFSHttpTests
             + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME, SalmonFSTestHelper.httpCredentials);
         IFile httpFile = httpRoot.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
         RandomAccessStream stream = httpFile.GetInputStream();
-        string digest = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
+        string digest = SalmonCoreTestHelper.GetChecksumStream(stream.AsReadStream());
         stream.Close();
 
         Console.WriteLine(digest + " vs " + localChkSum);
