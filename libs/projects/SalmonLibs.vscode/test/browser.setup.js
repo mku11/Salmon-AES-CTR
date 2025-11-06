@@ -65,6 +65,9 @@ let testModeList = document.getElementById("test-mode");
 let testEnableGPU = document.getElementById("test-enable-gpu");
 testSuiteList.onchange = (event) => { 
     updateTestCaseList();
+    testCaseList.value = sessionStorage.getItem(testCaseList.id) || testCaseList.value;
+    if(!testCaseList.value)
+        testCaseList.value = "All";
     sessionStorage.setItem(testSuiteList.id, testSuiteList.value);
 }
 testCaseList.onchange = (event) => sessionStorage.setItem(testCaseList.id, testCaseList.value);
@@ -277,11 +280,10 @@ const {} = await import('./salmon-core/salmon_core_perf.test.js');
 const {} = await import('./salmon-fs/salmon_fs_http.test.js');
 const {} = await import('./salmon-fs/salmon_fs.test.js');
 
-updateTestCaseList();
-
 testSuiteList.value = sessionStorage.getItem(testSuiteList.id) || testSuiteList.value;
-testCaseList.value = sessionStorage.getItem(testCaseList.id) || testCaseList.value;
 testThreadList.value = sessionStorage.getItem(testThreadList.id) || testThreadList.value;
 testProviderTypeList.value = sessionStorage.getItem(testProviderTypeList.id) || testProviderTypeList.value;
 testModeList.value = sessionStorage.getItem(testModeList.id) || testModeList.value;
 testEnableGPU.value = sessionStorage.getItem(testEnableGPU.id) || testEnableGPU.value;
+
+updateTestCaseList();
