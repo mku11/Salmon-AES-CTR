@@ -31,6 +31,7 @@ export class Platform {
      * @returns {PlatformType} The current version
      */
     public static getPlatform(): PlatformType {
+        // @ts-ignore
         if(typeof process === 'object')
             return PlatformType.NodeJs;
         else
@@ -42,7 +43,9 @@ export class Platform {
      * @returns {OSType} The operating system
      */
     public static getOS(): OSType {
+        // @ts-ignore
         if(typeof process === 'object') {
+            // @ts-ignore
 			switch(process.platform) {
 				case "win32":
 					return OSType.Windows;
@@ -102,6 +105,7 @@ export enum OSType {
 
 let requireModule: any | null;
 if(Platform.getPlatform() == PlatformType.NodeJs) {
+    // @ts-ignore
 	const { createRequire } = await import('module');
 	requireModule = createRequire(import.meta.url);
 }
