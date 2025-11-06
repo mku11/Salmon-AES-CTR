@@ -420,7 +420,7 @@ class IFile(ABC):
         if " (" in new_filename:
             index = new_filename.index(" (")
             new_filename = new_filename[0:index]
-        new_filename += " (" + datetime.today().strftime("%H%m%S%f")[:-3] + ")"
+        new_filename += " (" + datetime.today().strftime("%H%m%S%f")[:-2] + ")"
         if len(ext) > 0:
             new_filename += "." + ext
         return new_filename
