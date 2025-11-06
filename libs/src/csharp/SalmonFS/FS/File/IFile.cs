@@ -436,7 +436,7 @@ public interface IFile
 		int index = newFilename.LastIndexOf(" (");
 		if (index >= 0)
 			newFilename = newFilename.Substring(0,index);
-        newFilename += " (" + DateTime.Now.ToString("HHmmssfff") + ")";
+        newFilename += " (" + DateTime.Now.ToString("HHmmssffff") + ")";
         if (ext.Length > 0)
             newFilename += "." + ext;
         return newFilename;
