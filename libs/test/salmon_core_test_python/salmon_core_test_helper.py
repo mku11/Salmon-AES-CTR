@@ -638,3 +638,16 @@ class SalmonCoreTestHelper:
     def calculate_hmac(v_bytes, offset, length, hash_key, include_data):
         return Integrity.calculate_hash(SalmonCoreTestHelper.hashProvider, v_bytes, offset, length, hash_key,
                                         include_data)
+
+    @staticmethod
+    def get_checksum_stream(stream: RandomAccessStream | None = None) -> str:
+        try:
+            hash_md5 = hashlib.md5()
+            buffer: bytearray = bytearray(256 * 1024)
+            while (bytes_read := stream.read(buffer, 0, len(buffer))) > 0:
+                hash_md5.update(buffer[0:bytes_read])
+            return hash_md5.hexdigest()
+
+        finally:
+            if stream:
+                stream.close()

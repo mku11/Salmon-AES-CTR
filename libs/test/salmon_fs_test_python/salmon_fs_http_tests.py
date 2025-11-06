@@ -196,5 +196,5 @@ class SalmonFSHttpTests(TestCase):
         ms.set_position(0)
         ms.close()
         stream.close()
-        digest = SalmonFSTestHelper.get_checksum_stream(ms)
+        digest = SalmonCoreTestHelper.get_checksum_stream(ms)
         SalmonFSTestHelper.testCase.assertEqual(digest, local_chk_sum)

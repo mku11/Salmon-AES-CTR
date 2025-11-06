@@ -341,20 +341,7 @@ class SalmonFSTestHelper:
     @staticmethod
     def get_checksum(file: IFile | AesFile) -> str:
         stream: RandomAccessStream | None = file.get_input_stream()
-        return SalmonFSTestHelper.get_checksum_stream(stream)
-
-    @staticmethod
-    def get_checksum_stream(stream: RandomAccessStream | None = None) -> str:
-        try:
-            hash_md5 = hashlib.md5()
-            buffer: bytearray = bytearray(256 * 1024)
-            while (bytes_read := stream.read(buffer, 0, len(buffer))) > 0:
-                hash_md5.update(buffer[0:bytes_read])
-            return hash_md5.hexdigest()
-
-        finally:
-            if stream:
-                stream.close()
+        return SalmonCoreTestHelper.get_checksum_stream(stream)
 
     @staticmethod
     def import_and_export(vault_dir: IFile, password: str, import_file: IFile,
@@ -883,7 +870,7 @@ class SalmonFSTestHelper:
         stream.copy_to(ms)
         ms.flush()
         ms.set_position(0)
-        digest = SalmonFSTestHelper.get_checksum_stream(ms)
+        digest = SalmonCoreTestHelper.get_checksum_stream(ms)
         ms.close()
         stream.close()
         # print("Text: ")
@@ -986,7 +973,7 @@ class SalmonFSTestHelper:
 
         for i in range(len(files)):
             stream = files_exported[i].get_input_stream()
-            hash_post_import = SalmonFSTestHelper.get_checksum_stream(stream)
+            hash_post_import = SalmonCoreTestHelper.get_checksum_stream(stream)
             stream.close()
             SalmonFSTestHelper.testCase.assertEqual(hash_post_import, hash_pre_export[i])
 

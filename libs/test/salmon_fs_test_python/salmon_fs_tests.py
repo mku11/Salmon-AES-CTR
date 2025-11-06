@@ -544,12 +544,12 @@ class SalmonFSTests(TestCase):
     def test_shouldReadFromFileMultithreaded(self):
         caught: bool = False
         vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        file: IFile = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
+        file: IFile = SalmonFSTestHelper.TEST_IMPORT_FILE
         pos: int = 3 * Integrity.DEFAULT_CHUNK_SIZE + 3
 
         stream: RandomAccessStream = file.get_input_stream()
         stream.seek(pos, RandomAccessStream.SeekOrigin.Begin)
-        h1 = SalmonFSTestHelper.get_checksum_stream(stream)
+        h1 = SalmonCoreTestHelper.get_checksum_stream(stream)
         stream.close()
 
         sequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
