@@ -586,7 +586,7 @@ public class SalmonFSTests {
 
         InputStream stream = file.getInputStream().asReadStream();
         stream.skip(pos);
-        String h1 = SalmonFSTestHelper.getChecksumStream(stream);
+        String h1 = SalmonCoreTestHelper.getChecksumStream(stream);
         stream.close();
 
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();

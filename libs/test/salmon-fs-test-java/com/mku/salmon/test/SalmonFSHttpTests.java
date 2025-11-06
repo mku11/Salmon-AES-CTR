@@ -218,7 +218,7 @@ public class SalmonFSHttpTests {
                 + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME, SalmonFSTestHelper.httpCredentials);
         IFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         RandomAccessStream stream = httpFile.getInputStream();
-        String digest = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
+        String digest = SalmonCoreTestHelper.getChecksumStream(stream.asReadStream());
         stream.close();
         assertEquals(digest, localChkSum);
     }
@@ -234,12 +234,12 @@ public class SalmonFSHttpTests {
         URLConnection conn = HttpSyncClient.createConnection(url);
         conn.connect();
         InputStream stream = conn.getInputStream();
-        String chksum = SalmonFSTestHelper.getChecksumStream(stream);
+        String chksum = SalmonCoreTestHelper.getChecksumStream(stream);
         stream.close();
 
         RandomAccessStream encStream = file.getInputStream();
         InputStreamWrapper streamWrapper = new InputStreamWrapper(encStream);
-        String chksum2 = SalmonFSTestHelper.getChecksumStream(streamWrapper);
+        String chksum2 = SalmonCoreTestHelper.getChecksumStream(streamWrapper);
         assertEquals(chksum2, chksum);
         encStream.close();
 
