@@ -1,0 +1,11 @@
+set CURRDIR=%CD%
+
+set NODE_OPTIONS=--experimental-vm-modules
+set ENC_THREADS=2
+
+cd ..\..\..\..\libs\projects\SalmonLibs.vscode
+
+call npm run test -- salmon-native -t="salmon-native" AES_PROVIDER_TYPE=AesGPU ENC_THREADS=%ENC_THREADS%
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+cd %CURRDIR%
