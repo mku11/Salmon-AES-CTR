@@ -448,7 +448,7 @@ public abstract class AesDrive : VirtualDrive
         AesStream stream = null;
         try
         {
-            if (password == null)
+            if (password == null || password.Trim().Length == 0)
             {
                 throw new SecurityException("Password is missing");
             }

@@ -252,7 +252,7 @@ class AesDrive(VirtualDrive, ABC):
         """
         stream: AesStream | None = None
         try:
-            if password is None:
+            if password is None or len(password.strip()) == 0:
                 raise SecurityException("Password is missing")
 
             salmon_config: DriveConfig = self.__get_drive_config()

@@ -192,8 +192,8 @@ export abstract class AesDrive extends VirtualDrive {
     async #unlock(password: string): Promise<void> {
         let stream: AesStream | null = null;
         try {
-            if (password == null) {
-                throw new SecurityException("Password is missing");
+            if (password == null || password.trim().length == 0) {
+                throw new SecurityException("Password is missing or empty");
             }
             let salmonConfig: DriveConfig | null = await this.getDriveConfig();
             if (salmonConfig == null)

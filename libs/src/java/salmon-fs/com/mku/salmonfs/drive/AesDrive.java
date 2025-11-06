@@ -540,7 +540,7 @@ public abstract class AesDrive extends VirtualDrive {
     private void unlock(String password) throws IOException {
         AesStream stream = null;
         try {
-            if (password == null) {
+            if (password == null || password.trim().length() == 0) {
                 throw new SecurityException("Password is missing");
             }
             DriveConfig salmonConfig = getDriveConfig();
