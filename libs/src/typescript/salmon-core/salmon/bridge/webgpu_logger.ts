@@ -78,7 +78,7 @@ export class WebGPULogger {
   createDebugShader(shader: string, bindGroupLayoutEntries: any[]): string {
     if (this.#shader)
       throw new Error("Debug shader already added");
-    let dgbShader = shader + "\n" + `
+    let dgbShader = shader + "\n\n" + `
     // DEBUGGING
     @group(0) @binding(${bindGroupLayoutEntries.length - 1})
     var<storage, read_write> dbgLog: array<u32>;
