@@ -4,7 +4,7 @@ set CURRDIR=%CD%
 
 cd ..\..\..\..\libs\projects\SalmonLibs.VS2022
 
-call vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:SalmonNativeTest /Logger:Console;verbosity=detailed
+call vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 
 cd %CURRDIR%

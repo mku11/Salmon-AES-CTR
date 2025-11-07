@@ -190,22 +190,20 @@ namespace SalmonNativeTest
 			char* key = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP";
 			char* nonce = "ABCDEFGH\0\0\0\0\0\0\0\0";
 			string text = "This is a plaintext that will be used for testing";
-			// string text = "This is a plaintext that will be";
-			//string text = "This is a plaintext that will be used for testing but we can do";
 			for (int i = 0; i < 3; i++) 
 				text += text;
 			const char* bytes = (const char*)text.c_str();
 			int length = text.size();
-			printf("Data Size: %d\n", length);
+			printf("Example data Size: %d\n", length);
 			// Logger::WriteMessage(bytes);
 			// Logger::WriteMessage("\n");
 
 			printf("aes:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES);
-			printf("aes intr:\r\n");
+			printf("example aes intr:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
 #ifdef USE_GPU
-			printf("aes gpu:\r\n");
+			printf("example aes gpu:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU);
 #endif
 		}
