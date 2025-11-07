@@ -9,9 +9,9 @@ name: Java Gradle Linux
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "wip-3.0.2" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "wip-3.0.2" ]
 
 jobs:
   build:
