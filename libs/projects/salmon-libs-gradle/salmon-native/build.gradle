@@ -109,7 +109,7 @@ model {
                 cCompiler.args '-O2'
                 cCompiler.args '-maes'
 				
-				// ___constant is needed only for OpenCL kernel compiler for macos
+				// ___constant is needed only for OpenCL kernel compiler for macos 
 				// for gcc and clang we use an empty macro to suppress the warnings
 				cCompiler.args '-D__constant='
 				cCompiler.args '-D__global='
