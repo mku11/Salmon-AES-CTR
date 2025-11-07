@@ -10,6 +10,10 @@ name: Java Gradle Windows
 on:
   push:
     branches: [ "wip-3.0.2" ]
+    paths:
+      - libs/src/java/**
+      - libs/test/*java*/**
+      - libs/projects/salmon-libs-gradle/**
   pull_request:
     branches: [ "wip-3.0.2" ]
 
