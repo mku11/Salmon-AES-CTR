@@ -66,12 +66,12 @@ jobs:
       
     # native
     - name: Salmon.Native Aes Test
-      run: .\gradlew.bat :salmon-native:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=1 -i
+      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=1 -i
     - name: Salmon.Native Aes Multithreaded Test
-      run: .\gradlew.bat :salmon-native:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=2 -i
+      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=2 -i
       
     - name: Salmon.Native AesIntrinsics Test
-      run: .\gradlew.bat :salmon-native:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=1 -i
+      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=1 -i
     - name: Salmon.Native AesIntrinsics Multithreaded Test
-      run: .\gradlew.bat :salmon-native:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=2 -i
+      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=2 -i
   
