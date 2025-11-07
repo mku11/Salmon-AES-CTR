@@ -38,6 +38,8 @@ describe('salmon-perf', () => {
             WebGPU.enable(true);
         //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+
+        console.log("Data size: " + TEST_PERF_SIZE);
     });
     
     afterAll(() => {

@@ -62,7 +62,7 @@ const Rcon = array<u32,8>( 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40 );
 fn add_round_key(
     round: u32,
     state: ptr<function,array<u32,16>>,
-    roundKey: ptr<function,array<u32,240>>
+    roundKey: ptr<storage,array<u32>>
 ) {
 	var subKey: u32;
 	for (var i: u32 = 0; i < 4; i++)
@@ -186,7 +186,7 @@ fn aes_key_expand(
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#High-level_description_of_the_algorithm
 fn aes_transform(
-    expandedKey: ptr<function,array<u32,240>>,
+    expandedKey: ptr<storage,array<u32>>,
     data: ptr<function,array<u32,16>>
 ) {
 	for (var r: u32 = 0; r <= ROUNDS; r++)
@@ -232,11 +232,11 @@ fn increment_counter(
 
 // https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
 fn aes_transform_ctr (
-    expandedKey: ptr<function,array<u32,240>>,
+    expandedKey: ptr<storage,array<u32>>,
     counter: ptr<function,array<u32,16>>,
-	srcBuffer: ptr<function,array<u32,16>>,
+	srcBuffer: ptr<storage,array<u32>>,
     srcOffset: u32,
-	destBuffer: ptr<function,array<u32,16>>,
+	destBuffer: ptr<storage,array<u32>,read_write>,
     destOffset: u32, 
     count: u32
 ) -> i32 {
@@ -248,10 +248,11 @@ fn aes_transform_ctr (
 			encCounter[j] = counter[j];
 		}
 		aes_transform(expandedKey, &encCounter);
-		for (var k: u32 = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
+		let len = select(count - i, AES_BLOCK_SIZE, AES_BLOCK_SIZE < count - i);
+		for (var k: u32 = 0; k < len; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
-			totalBytes++;
 		}
+		totalBytes += i32(len);
 		if (increment_counter(1, counter) < 0) {
 			return -1;
         }
@@ -299,15 +300,9 @@ fn main(
 	// console.log("srcBuffer:", srcBuffer[0:16]);
 	// console.log("count:", count);
 
-    var k = array<u32, 240>();
 	var ctr = array<u32, 16>();
-    var src = array<u32, 16>();
-    var dest = array<u32, 16>();
 	let cnt = select(CHUNK_SIZE, count - idx, CHUNK_SIZE > count - idx);
 
-    for(var i=0; i<240; i++) {
-		k[i]=key[i];
-    }
     for(var i=0; i<16; i++) {
 		ctr[i]=counter[i];
     }
@@ -316,13 +311,8 @@ fn main(
 
 	for(var j: u32 = 0; j < cnt; j+=16) {
 		let cn = select(16, cnt - j, 16 > cnt - j);
-		for(var i: u32 = 0; i < cn; i++) {
-			src[i]=srcBuffer[srcOffset + idx + j + i];
-        }
-		aes_transform_ctr(&k, &ctr, &src, 0, &dest, 0, cn);
-		for(var i: u32 = 0; i < cn; i++) {
-			destBuffer[destOffset + idx + j + i] = dest[i];
-        }
+		aes_transform_ctr(&key, &ctr, &srcBuffer, srcOffset + idx + j, 
+			&destBuffer, destOffset + idx + j, cn);
 	}
 }
 `;

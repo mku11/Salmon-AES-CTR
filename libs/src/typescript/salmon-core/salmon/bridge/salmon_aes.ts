@@ -229,10 +229,11 @@ export function aes_transform_ctr(expandedKey: Uint8Array, counter: Uint8Array,
 		}
 
 		aes_transform(expandedKey, encCounter);
-		for (let k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
+		let len = AES_BLOCK_SIZE < count - i ? AES_BLOCK_SIZE : count - i;
+		for (let k = 0; k < len; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
-			totalBytes++;
 		}
+		totalBytes+=len;
 		if (increment_counter(1, counter) < 0)
 			return -1;
 	}
