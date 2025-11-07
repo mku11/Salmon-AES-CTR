@@ -23,33 +23,27 @@ jobs:
       run:
         working-directory: libs/projects/salmon-libs-gradle
 
+    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     steps:
-    - uses: actions/checkout@v4
-    - name: Cache Gradle packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: gradle-${{ runner.os }}
-        restore-keys: |
-          gradle-${{ runner.os }}
-          gradle-
-    - name: Set up JDK 11
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
       uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 11
       with:
         java-version: '11'
         distribution: 'temurin'
-      
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      uses: gradle/actions/setup-gradle@v5
 
     # build
     - name: Build Salmon native with Gradle Wrapper
       run: .\gradlew.bat build -x test -i  
 
+    # test
     - name: Salmon.Core Test
       run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -i
     - name: Salmon.FS Test
