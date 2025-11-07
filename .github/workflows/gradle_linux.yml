@@ -1,0 +1,44 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java Gradle Linux
+
+on:
+  push:
+    branches: [ "wip-3.0.2" ]
+  pull_request:
+    branches: [ "wip-3.0.2" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: libs/projects/salmon-libs-gradle
+
+    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 11
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v5
+        
+    - name: set exec permissions
+      run: chmod +x ./gradlew
+      
+    # exclude windows deps      
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build -x :salmon-win:build -x test -i
