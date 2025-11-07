@@ -39,6 +39,42 @@ jobs:
     - name: set exec permissions
       run: chmod +x ./gradlew
       
-    # exclude windows deps      
+    # build without salmon-win
     - name: Build with Gradle Wrapper
       run: ./gradlew build -x :salmon-win:build -x test -i
+
+
+    # tests
+    # core
+    - name: Salmon.Core Default Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=Default -DENC_THREADS=1 -i
+    - name: Salmon.Core Default Multithreaded Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=Default -DENC_THREADS=2 -i
+      
+    - name: Salmon.Core Aes Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=1 -i
+    - name: Salmon.Core Aes Multithreaded Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=2 -i
+
+    - name: Salmon.Core AesIntrinsics Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=1 -i
+    - name: Salmon.Core AesIntrinsics Multithreaded Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=2 -i
+
+
+    # fs     
+    - name: Salmon.FS Test
+      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=1 -i -DtestDir="C:/tmp/salmon/test"
+    - name: Salmon.FS Multithreaded Test
+      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=2 -i -DtestDir="C:/tmp/salmon/test"
+      
+    # native
+    - name: Salmon.Native Aes Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=1 -i
+    - name: Salmon.Native Aes Multithreaded Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=Aes -DENC_THREADS=2 -i
+      
+    - name: Salmon.Native AesIntrinsics Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=1 -i
+    - name: Salmon.Native AesIntrinsics Multithreaded Test
+      run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=AesIntrinsics -DENC_THREADS=2 -i
