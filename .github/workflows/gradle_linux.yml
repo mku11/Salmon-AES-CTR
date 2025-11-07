@@ -64,9 +64,9 @@ jobs:
 
     # fs     
     - name: Salmon.FS Test
-      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=1 -i -DtestDir="C:/tmp/salmon/test"
+      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=1 -i -DtestDir="/tmp/salmon/test"
     - name: Salmon.FS Multithreaded Test
-      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=2 -i -DtestDir="C:/tmp/salmon/test"
+      run: ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DENC_THREADS=2 -i -DtestDir="/tmp/salmon/test"
       
     # native
     - name: Salmon.Native Aes Test
