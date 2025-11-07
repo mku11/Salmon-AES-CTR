@@ -3,7 +3,7 @@
 Salmon is an AES-256 CTR encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, byte streams, and a virtual drive API for encrypted local and remote files. Optimized for Intel x86_64, ARM64, and GPU cards.
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0.1-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
+[![Version](https://img.shields.io/badge/version-3.0.2-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features  
@@ -119,12 +119,12 @@ For a showcase of the Salmon API for multiple platforms (JavaFx, WPF, Android, W
 
 #### Salmon API Reference Documentation ####
 The API ref documentation is now almost complete:  
-[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/java/html/)
- | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/csharp/html/namespaces.html)
- | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/javascript/html)
- | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/typescript/html)
- | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.1/python/html/namespaces.html)
+[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/java/html/)
+ | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/csharp/html/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/c/html/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/javascript/html)
+ | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/typescript/html)
+ | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.2/python/html/namespaces.html)
 
 
 ### Why another encryption library?  
