@@ -26,8 +26,9 @@ SOFTWARE.
 #define AES_BLOCK_SIZE 16
 #define WORD_LEN 8
 
-// NOTE: __constant is only used by OpenCL for other compilers 
-// you can set this to empty via a macro
+// NOTE: __constant and __global is only used by OpenCL 
+// for other compilers you can set this to an empty value 
+// via a macro def, ie: -D__constant= -D__global=
 
 // https://en.wikipedia.org/wiki/Rijndael_S-box
 __constant const unsigned char sbox[256] = {
@@ -53,7 +54,7 @@ __constant const unsigned char sbox[256] = {
 __constant static const unsigned char Rcon[8] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40 };
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#The_AddRoundKey
-static inline void add_round_key(unsigned char round, unsigned char* state, const unsigned char* roundKey)
+static inline void add_round_key(unsigned char round, unsigned char* state, const __global unsigned char* roundKey)
 {
 	int subKey;
 	for (int i = 0; i < 4; i++)
@@ -161,7 +162,7 @@ void aes_key_expand(const unsigned char* key, unsigned char* expandedKey)
 }
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#High-level_description_of_the_algorithm
-void aes_transform(const unsigned char* expandedKey, unsigned char* data)
+void aes_transform(const __global unsigned char* expandedKey, unsigned char* data)
 {
 	for (int r = 0; r <= ROUNDS; r++)
 	{
@@ -195,9 +196,10 @@ static inline long increment_counter(long value, unsigned char* counter) {
 }
 
 // https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
-int aes_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
-	const unsigned char* srcBuffer, int srcOffset,
-	unsigned char* destBuffer, int destOffset, int count) {
+int aes_transform_ctr(const __global unsigned char* expandedKey, unsigned char* counter,
+	const __global unsigned char* srcBuffer, int srcOffset,
+	__global unsigned char* destBuffer, 
+	int destOffset, int count) {
 	unsigned char encCounter[AES_BLOCK_SIZE];
 
 	int totalBytes = 0;
@@ -207,14 +209,15 @@ int aes_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
 		}
 
 		aes_transform(expandedKey, encCounter);
-		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
+		int len = AES_BLOCK_SIZE < count - i ? AES_BLOCK_SIZE : count - i;
+		for (int k = 0; k < len; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
-			totalBytes++;
 		}
+		totalBytes += len;
 		if (increment_counter(1, counter) < 0)
 			return -1;
 	}
 
 	return totalBytes;
 }
- 
+

@@ -103,7 +103,7 @@ int init_opencl() {
 		printf("Could not get device name, code: %d\n", err);
 		goto error;
 	}
-	// printf("using device: %d:%s\n", currentDevice, device_name);
+	printf("Using GPU device: %d:%s\n", currentDevice, device_name);
 
 	// Create a context 
 	context = clCreateContext(0, 1, &device_id, NULL, NULL, &err);
