@@ -547,7 +547,7 @@ public class SalmonFSTestHelper {
             fileImporter.importFile(fileToImport, rootDir);
             success = true;
         } catch (Exception ex) {
-            ex.printStackTrace();
+			System.out.println("Caught: " + ex.getMessage());
         }
 
         assertFalse(success);
@@ -615,7 +615,10 @@ public class SalmonFSTestHelper {
         } catch (Exception ex) {
             if (ex instanceof RangeExceededException)
                 importSuccess = false;
-            ex.printStackTrace();
+			if(shouldImport == importSuccess)
+				System.out.println("Caught: " + ex.getMessage());
+			else
+				ex.printStackTrace();
         }
 
         assertEquals(shouldImport, importSuccess);

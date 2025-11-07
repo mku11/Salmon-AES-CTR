@@ -355,7 +355,7 @@ public class Decryptor {
             }
             outputStream.flush();
         } catch (IOException | SecurityException | IntegrityException ex) {
-            ex.printStackTrace();
+            System.out.println("Decryptor error: " + ex.getMessage());
             throw new SecurityException("Could not decrypt data", ex);
         } finally {
             if (inputStream != null)

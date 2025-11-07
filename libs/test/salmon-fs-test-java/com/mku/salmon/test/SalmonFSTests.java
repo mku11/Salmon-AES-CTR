@@ -68,7 +68,8 @@ public class SalmonFSTests {
         System.out.println("testDir: " + testDir);
         System.out.println("testMode: " + testMode);
         System.out.println("threads: " + threads);
-        System.out.println("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
+		if(testMode == TestMode.WebService)
+			System.out.println("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 

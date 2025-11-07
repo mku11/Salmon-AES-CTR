@@ -198,7 +198,6 @@ public abstract class FileExporter {
             if (lastException != null)
                 throw lastException;
         } catch (Exception ex) {
-            ex.printStackTrace();
             failed = true;
             stopped = true;
             throw ex;
@@ -280,7 +279,6 @@ public abstract class FileExporter {
                     onProgress.accept(totalBytesWritten[0], fileToExport.getLength());
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             failed = true;
             lastException = ex;
             stop();

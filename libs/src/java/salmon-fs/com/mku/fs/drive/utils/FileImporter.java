@@ -198,7 +198,6 @@ public abstract class FileImporter {
             if (lastException != null)
                 throw lastException;
         } catch (Exception ex) {
-            ex.printStackTrace();
             failed = true;
             stopped = true;
             throw ex;
@@ -279,7 +278,6 @@ public abstract class FileImporter {
                     onProgress.accept(totalBytesRead[0], fileToImport.getLength());
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             failed = true;
             lastException = ex;
             stop();

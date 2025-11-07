@@ -493,7 +493,7 @@ public class SalmonCoreTests {
             SalmonCoreTestHelper.testCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES,
                     SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.MAX_ENC_COUNTER);
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
+            System.out.println("Caught: " + throwable.getMessage());
             if (throwable instanceof RangeExceededException || throwable instanceof IllegalArgumentException)
                 caught = true;
         }
@@ -621,6 +621,7 @@ public class SalmonCoreTests {
             byte[] decData4 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
             assertArrayEquals(data, decData4);
         } catch (Exception ex) {
+			System.out.println("Caught: " + ex.getMessage());
             caught = true;
         }
         assertTrue(caught);
@@ -630,6 +631,7 @@ public class SalmonCoreTests {
         try {
             byte[] decData5 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, false);
         } catch (Exception ex) {
+			System.out.println("Caught: " + ex.getMessage());
             caught2 = true;
         }
         assertFalse(caught2);
