@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { Decryptor } from "../decryptor.js";
-import { Base64Utils } from "../encode/base64_utils.js";
+import { Base64Utils } from "../../../simple-io/encode/base64_utils.js";
 import { EncryptionFormat } from "../streams/encryption_format.js";
 
 /**

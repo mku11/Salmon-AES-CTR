@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../convert/bit_converter.js";
-import { RandomAccessStream } from "../streams/random_access_stream.js";
-import { MemoryStream } from "../streams/memory_stream.js";
+import { BitConverter } from "../../simple-io/convert/bit_converter.js";
+import { RandomAccessStream } from "../../simple-io/streams/random_access_stream.js";
+import { MemoryStream } from "../../simple-io/streams/memory_stream.js";
 import { Generator } from "./generator.js";
 
 /**

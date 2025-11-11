@@ -28,16 +28,16 @@
 	<ItemGroup>
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Time\Time.cs" Link="Time\Time.cs" />
 
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Convert\Base64.cs" Link="Convert\Base64.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Convert\BitConverter.cs" Link="Convert\BitConverter.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Convert\IBase64.cs" Link="Convert\IBase64.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\MemoryStream.cs" Link="Streams\MemoryStream.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\Buffer.cs" Link="Streams\Buffer.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\RandomAccessStream.cs" Link="Streams\RandomAccessStream.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\InputStreamWrapper.cs" Link="Streams\InputStreamWrapper.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\BlockingInputOutputAdapterStream.cs" Link="Streams\BlockingInputOutputAdapterStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Convert\Base64.cs" Link="Convert\Base64.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Convert\BitConverter.cs" Link="Convert\BitConverter.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Convert\IBase64.cs" Link="Convert\IBase64.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Streams\MemoryStream.cs" Link="Streams\MemoryStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Streams\Buffer.cs" Link="Streams\Buffer.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Streams\RandomAccessStream.cs" Link="Streams\RandomAccessStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Streams\InputStreamWrapper.cs" Link="Streams\InputStreamWrapper.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Streams\BlockingInputOutputAdapterStream.cs" Link="Streams\BlockingInputOutputAdapterStream.cs" />
 
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Encode\Base64Utils.cs" Link="Salmon\Encode\Base64Utils.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleIO\Encode\Base64Utils.cs" Link="Encode\Base64Utils.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Integrity\HmacSHA256Provider.cs" Link="Salmon\Integrity\HmacSHA256Provider.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Integrity\IHashProvider.cs" Link="Salmon\Integrity\IHashProvider.cs" />

@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
+import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
 import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
-import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
+import { HttpFile } from '../../lib/salmon-fs/../simple-fs/fs/file/http_file.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';

@@ -33,7 +33,7 @@ from xml.dom import minidom
 import sys
 from typeguard import typechecked
 
-from salmon_core.salmon.encode.base64_utils import Base64Utils
+from simple_io.encode.base64_utils import Base64Utils
 from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon.sequence.nonce_sequence import NonceSequence
 from salmon.sequence.sequence_exception import SequenceException

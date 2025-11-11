@@ -23,20 +23,20 @@ SOFTWARE.
 */
 
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
+import { MemoryStream } from "../../../simple-io/streams/memory_stream.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
 import { DriveGenerator } from "../drive/drive_generator.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { AuthException } from "./auth_exception.js";
 import { AesDrive } from "../drive/aes_drive.js";
 import { AesFile } from "../file/aes_file.js";
-import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { RandomAccessStream } from "../../../simple-io/streams/random_access_stream.js";
 import { NonceSequence, Status } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
 import { SequenceException } from "../../../salmon-core/salmon/sequence/sequence_exception.js";
 import { SecurityException } from "../../../salmon-core/salmon/security_exception.js";
 import { Nonce } from "../../../salmon-core/salmon/nonce.js";
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 
 /**

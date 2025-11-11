@@ -19,7 +19,7 @@ endif ()
 
 # ___constant is needed only for OpenCL kernel compiler for macos
 # for gcc and clang we use an empty macro to suppress the warnings
-set(SALMON_DEFS "${SALMON_DEFS} -D__constant=")
+set(SALMON_DEFS "${SALMON_DEFS} -D__constant= -D__global=")
 
 # some older devices do not like optimization you can disable here
 # set(SALMON_OPT_FLAGS " -O0")

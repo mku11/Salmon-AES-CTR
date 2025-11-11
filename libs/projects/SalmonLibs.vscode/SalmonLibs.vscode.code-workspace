@@ -4,6 +4,12 @@
 			"path": "."
 		},
 		{
+			"path": "../../src/typescript/simple-io"
+		},
+		{
+			"path": "../../src/typescript/simple-fs"
+		},
+		{
 			"path": "../../src/typescript/salmon-core"
 		},
 		{

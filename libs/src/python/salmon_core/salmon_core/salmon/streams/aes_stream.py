@@ -30,7 +30,7 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException

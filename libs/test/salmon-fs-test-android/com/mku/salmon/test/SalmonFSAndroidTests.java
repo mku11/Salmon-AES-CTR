@@ -236,7 +236,7 @@ public class SalmonFSAndroidTests {
 
     @Test
     public void ShouldEncryptAndReadFileInputStream() throws Exception {
-        salmonFSTests.ShouldEncryptAndReadFileInputStream();
+        salmonFSTests.shouldEncryptAndReadFileInputStream();
     }
 
     @Test
@@ -251,12 +251,12 @@ public class SalmonFSAndroidTests {
 
     @Test
     public void ShouldPerformOperationsRealFiles() throws IOException {
-        salmonFSTests.ShouldPerformOperationsRealFiles();
+        salmonFSTests.shouldPerformOperationsRealFiles();
     }
 
     @Test
     public void ShouldReadFromFileMultithreaded() throws Exception {
-        salmonFSTests.ShouldReadFromFileMultithreaded();
+        salmonFSTests.shouldReadFromFileMultithreaded();
     }
 
     @Test

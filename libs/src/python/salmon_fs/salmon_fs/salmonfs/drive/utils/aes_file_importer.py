@@ -38,9 +38,9 @@ from multiprocessing.shared_memory import SharedMemory
 from typing import Any, Callable
 from typeguard import typechecked
 
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.fs.file.ifile import IFile
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_fs.fs.file.ifile import IFile
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_fs.salmonfs.file.aes_file import AesFile
 

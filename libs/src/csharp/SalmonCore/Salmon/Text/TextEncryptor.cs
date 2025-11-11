@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.Encode;
+using Mku.Encode;
 using Mku.Salmon.Integrity;
 using Mku.Salmon.Streams;
 using System.IO;

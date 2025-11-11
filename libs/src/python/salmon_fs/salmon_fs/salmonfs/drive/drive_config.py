@@ -28,10 +28,10 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.fs.file.ifile import IFile
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_fs.fs.file.ifile import IFile
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.generator import Generator
 from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../convert/bit_converter.js";
+import { BitConverter } from "../../simple-io/convert/bit_converter.js";
 import { Generator } from "./generator.js";
 import { RangeExceededException } from "./range_exceeded_exception.js";
 import { SecurityException } from "./security_exception.js";

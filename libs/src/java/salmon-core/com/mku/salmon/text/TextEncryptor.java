@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.Encryptor;
 import com.mku.salmon.SecurityException;
-import com.mku.salmon.encode.Base64Utils;
+import com.mku.encode.Base64Utils;
 import com.mku.salmon.streams.EncryptionFormat;
 
 import java.io.IOException;

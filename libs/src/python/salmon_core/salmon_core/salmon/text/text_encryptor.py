@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from salmon_core.salmon.encode.base64_utils import Base64Utils
+from simple_io.encode.base64_utils import Base64Utils
 from salmon_core.salmon.encryptor import Encryptor
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from typeguard import typechecked

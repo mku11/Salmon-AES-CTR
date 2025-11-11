@@ -31,9 +31,10 @@ from unittest import TestCase
 import os
 import sys
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_core.streams.memory_stream import MemoryStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_io.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.provider_type import ProviderType

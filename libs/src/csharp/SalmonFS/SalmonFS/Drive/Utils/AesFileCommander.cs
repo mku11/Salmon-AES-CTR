@@ -27,6 +27,7 @@ using System.Linq;
 using Mku.SalmonFS.File;
 using Mku.FS.File;
 using Mku.FS.Drive.Utils;
+using Mku.Salmon.Sequence;
 
 namespace Mku.SalmonFS.Drive.Utils;
 
@@ -62,5 +63,16 @@ public class AesFileCommander : FileCommander
     {
         IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, options);
         return files.Cast<AesFile>().ToArray();
+    }
+	
+	/// <summary>
+    /// Handle the error
+	/// </summary>
+	override
+    protected bool OnError(Exception ex) {
+		if (ex.GetType() == typeof(SequenceException))
+            throw ex;
+		else
+			return false;
     }
 }

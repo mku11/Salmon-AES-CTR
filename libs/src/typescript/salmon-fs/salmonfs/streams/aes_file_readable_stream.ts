@@ -22,17 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IOException } from "../../../salmon-core/streams/io_exception.js";
+import { IOException } from "../../../simple-io/streams/io_exception.js";
 import { AesFile } from "../file/aes_file.js";
-import { ReadableStreamWrapper, fillBufferPart } from "../../../salmon-core/streams/readable_stream_wrapper.js";
-import { Buffer } from "../../../salmon-core/streams/buffer.js";
+import { ReadableStreamWrapper, fillBufferPart } from "../../../simple-io/streams/readable_stream_wrapper.js";
+import { Buffer } from "../../../simple-io/streams/buffer.js";
 import { IntegrityException } from "../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { AuthException } from "../auth/auth_exception.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
-import { Credentials } from "../../fs/file/credentials.js";
-import { IFile } from "../../fs/file/ifile.js";
-import { FileUtils } from "../../fs/drive/utils/file_utils.js";
+import { HttpSyncClient } from "../../../simple-fs/fs/file/http_sync_client.js";
+import { Credentials } from "../../../simple-fs/fs/file/credentials.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
+import { FileUtils } from "../../../simple-fs/fs/drive/utils/file_utils.js";
 import { Platform, PlatformType } from "../../../salmon-core/platform/platform.js";
 
 /**

@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
-import { RandomAccessStream } from '../../lib/salmon-core/streams/random_access_stream.js';
+import { BitConverter } from '../../lib/simple-io/convert/bit_converter.js';
+import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
+import { RandomAccessStream } from '../../lib/simple-io/streams/random_access_stream.js';
 import { Generator } from '../../lib/salmon-core/salmon/generator.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { RangeExceededException } from '../../lib/salmon-core/salmon/range_exceeded_exception.js';
-import { ReadableStreamWrapper } from '../../lib/salmon-core/streams/readable_stream_wrapper.js';
+import { ReadableStreamWrapper } from '../../lib/simple-io/streams/readable_stream_wrapper.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { AesFile } from '../../lib/salmon-fs/salmonfs/file/aes_file.js';
 import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
@@ -38,19 +38,19 @@ import { FileSequencer } from '../../lib/salmon-fs/salmonfs/sequence/file_sequen
 import { AesFileImporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_importer.js';
 import { AesFileExporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
-import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/fs/file/ifile.js';
-import { FileSearcher, SearchOptions} from '../../lib/salmon-fs/fs/drive/utils/file_searcher.js';
+import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/../simple-fs/fs/file/ifile.js';
+import { FileSearcher, SearchOptions} from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_searcher.js';
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AuthConfig } from '../../lib/salmon-fs/salmonfs/auth/auth_config.js';
 import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
-import { WSFile } from '../../lib/salmon-fs/fs/file/ws_file.js';
-import { Credentials } from '../../lib/salmon-fs/fs/file/credentials.js';
+import { WSFile } from '../../lib/salmon-fs/../simple-fs/fs/file/ws_file.js';
+import { Credentials } from '../../lib/salmon-fs/../simple-fs/fs/file/credentials.js';
 import { WSDrive } from '../../lib/salmon-fs/salmonfs/drive/ws_drive.js';
-import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
-import { HttpSyncClient } from '../../lib/salmon-fs/fs/file/http_sync_client.js';
-import { FileImportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_importer.js';
-import { FileExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_exporter.js';
-import { BatchExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
+import { HttpFile } from '../../lib/salmon-fs/../simple-fs/fs/file/http_file.js';
+import { HttpSyncClient } from '../../lib/salmon-fs/../simple-fs/fs/file/http_sync_client.js';
+import { FileImportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_importer.js';
+import { FileExportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_exporter.js';
+import { BatchExportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_commander.js';
 
 export const TestMode = {
     Local: { name: 'Local', ordinal: 0 },
@@ -173,10 +173,10 @@ export class SalmonFSTestHelper {
         }
 
         if(currTestRunnerMode == TestRunnerMode.Browser) {
-            const { File } = await import('../../lib/salmon-fs/fs/file/file.js');
+            const { File } = await import('../../lib/salmon-fs/../simple-fs/fs/file/file.js');
             SalmonFSTestHelper.TEST_ROOT_DIR = new File(testDir);
         } else if(currTestRunnerMode == TestRunnerMode.NodeJS) {
-            const { NodeFile } = await import('../../lib/salmon-fs/fs/file/node_file.js');
+            const { NodeFile } = await import('../../lib/salmon-fs/../simple-fs/fs/file/node_file.js');
             SalmonFSTestHelper.TEST_ROOT_DIR = new NodeFile(testDir);
             if(!await SalmonFSTestHelper.TEST_ROOT_DIR.exists())
                 await SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();

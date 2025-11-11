@@ -44,7 +44,9 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += '../../../src/android/src/salmon-android-fs/'
+        main.java.srcDirs += '../../../src/android/salmon-android-fs/'
+        main.java.srcDirs += '../../../src/android/simple-io/'
+        main.java.srcDirs += '../../../src/android/simple-fs/'
     }
 }
 

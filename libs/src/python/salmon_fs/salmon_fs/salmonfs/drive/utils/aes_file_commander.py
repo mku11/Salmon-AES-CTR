@@ -32,10 +32,10 @@ from concurrent.futures import CancelledError
 from typing import Callable, Any
 from typeguard import typechecked
 
-from salmon_fs.fs.file.ifile import IFile
+from simple_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.file.aes_file import IVirtualFile
 from salmon_fs.salmonfs.file.aes_file import AesFile
-from salmon.sequence.sequence_exception import SequenceException
+from salmon_core.salmon.sequence.sequence_exception import SequenceException
 from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
 from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
 from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher

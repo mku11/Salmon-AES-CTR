@@ -31,9 +31,9 @@ SOFTWARE.
 from typeguard import typechecked
 import sys
 
-from salmon_fs.fs.file.ifile import IFile
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_fs.fs.file.ifile import IFile
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
@@ -42,7 +42,7 @@ from salmon_core.salmon.security_exception import SecurityException
 from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
-from salmon_core.convert.bit_converter import BitConverter
+from simple_io.convert.bit_converter import BitConverter
 from salmon.sequence.nonce_sequence import NonceSequence
 from salmon_core.salmon.nonce import Nonce
 from salmon.sequence.sequence_exception import SequenceException

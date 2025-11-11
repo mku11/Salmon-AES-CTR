@@ -35,10 +35,10 @@ from concurrent.futures import ThreadPoolExecutor
 from typeguard import typechecked
 from wrapt import synchronized
 
-from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.streams.buffer import Buffer
+from simple_io.streams.random_access_stream import RandomAccessStream
+from simple_io.streams.buffer import Buffer
 from salmon_core.salmon.generator import Generator
-from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
+from simple_io.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.security_exception import SecurityException

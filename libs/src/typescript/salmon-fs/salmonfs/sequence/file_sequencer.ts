@@ -22,16 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { INonceSequenceSerializer } from "../../../salmon-core/salmon/sequence/inonce_sequence_serializer.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 import { Status, NonceSequence } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
 import { Nonce } from "../../../salmon-core/salmon/nonce.js";
 import { SequenceException } from "../../../salmon-core/salmon/sequence/sequence_exception.js";
-import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
-import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { MemoryStream } from "../../../simple-io/streams/memory_stream.js";
+import { RandomAccessStream } from "../../../simple-io/streams/random_access_stream.js";
 
 /**
  * Generates nonces based on a sequencer backed by a file.

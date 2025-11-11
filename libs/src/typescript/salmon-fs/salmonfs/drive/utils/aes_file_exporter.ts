@@ -23,14 +23,14 @@ SOFTWARE.
 */
 
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
-import { IFile } from "../../../fs/file/ifile.js";
-import { HttpSyncClient } from "../../../fs/file/http_sync_client.js";
-import { Credentials } from "../../../fs/file/credentials.js";
-import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
-import { FileExporter } from "../../../fs/drive/utils/file_exporter.js";
+import { IFile } from "../../../../simple-fs/fs/file/ifile.js";
+import { HttpSyncClient } from "../../../../simple-fs/fs/file/http_sync_client.js";
+import { Credentials } from "../../../../simple-fs/fs/file/credentials.js";
+import { IVirtualFile } from "../../../../simple-fs/fs/file/ivirtual_file.js";
+import { FileExporter } from "../../../../simple-fs/fs/drive/utils/file_exporter.js";
 import { AuthException } from "../../auth/auth_exception.js";
 import { AesFile } from "../../file/aes_file.js";
-import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
+import { FileUtils } from "../../../../simple-fs/fs/drive/utils/file_utils.js";
 import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 
 /**

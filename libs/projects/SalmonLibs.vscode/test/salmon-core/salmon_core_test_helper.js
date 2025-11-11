@@ -22,15 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
+import { BitConverter } from '../../lib/simple-io/convert/bit_converter.js';
+import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
 import { Generator } from '../../lib/salmon-core/salmon/generator.js';
 import { Encryptor } from '../../lib/salmon-core/salmon/encryptor.js';
 import { Decryptor } from '../../lib/salmon-core/salmon/decryptor.js';
 import { TransformerFactory } from '../../lib/salmon-core/salmon/transform/transformer_factory.js';
 import { HmacSHA256Provider } from '../../lib/salmon-core/salmon/integrity/hmac_sha256_provider.js';
 import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
-import { SeekOrigin } from '../../lib/salmon-core/streams/random_access_stream.js';
+import { SeekOrigin } from '../../lib/simple-io/streams/random_access_stream.js';
 import { AESCTRTransformer } from '../../lib/salmon-core/salmon/transform/aes_ctr_transformer.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';

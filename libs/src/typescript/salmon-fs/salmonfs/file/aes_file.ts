@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
-import { IOException } from "../../../salmon-core/streams/io_exception.js";
-import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
+import { IOException } from "../../../simple-io/streams/io_exception.js";
+import { RandomAccessStream, SeekOrigin } from "../../../simple-io/streams/random_access_stream.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
 import { Header } from "../../../salmon-core/salmon/header.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
@@ -38,7 +38,7 @@ import {
     MoveOptions,
     RecursiveMoveOptions,
     RecursiveDeleteOptions
-} from "../../fs/file/ifile.js";
+} from "../../../simple-fs/fs/file/ifile.js";
 import { AesDrive } from "../drive/aes_drive.js";
 import { EncryptionMode } from "../../../salmon-core/salmon/streams/encryption_mode.js";
 import { EncryptionFormat } from "../../../salmon-core/salmon/streams/encryption_format.js";
@@ -48,7 +48,7 @@ import { TextDecryptor } from "../../../salmon-core/salmon/text/text_decryptor.j
 import { TextEncryptor } from "../../../salmon-core/salmon/text/text_encryptor.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
 import { DriveKey } from "../drive/drive_key.js";
-import { IVirtualFile, VirtualRecursiveCopyOptions, VirtualRecursiveMoveOptions, VirtualRecursiveDeleteOptions } from "../../fs/file/ivirtual_file.js";
+import { IVirtualFile, VirtualRecursiveCopyOptions, VirtualRecursiveMoveOptions, VirtualRecursiveDeleteOptions } from "../../../simple-fs/fs/file/ivirtual_file.js";
 
 /**
  * A virtual file backed by an encrypted {@link IFile} on the real filesystem.

@@ -31,11 +31,11 @@ from typeguard import typechecked
 from wrapt import synchronized
 import sys
 
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.fs.file.ifile import IFile
-from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_fs.fs.file.ifile import IFile
+from simple_io.streams.buffered_io_wrapper import BufferedIOWrapper
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.nonce import Nonce
 from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer

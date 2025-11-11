@@ -10,26 +10,45 @@ Python 3.11+
 * typeguard
 * pycryptodome
 * wrapt
-  
+* simple_io
+* simple_fs
+
 install dependencies:  
+```
 python -m pip install typeguard pycryptodome wrapt  
-  
+```
+
+install local dependencies:  
+```
+python -m pip install packages/salmon_core.tar.gz  
+python -m pip install packages/simple_io.tar.gz  
+python -m pip install packages/simple_fs.tar.gz  
+```
+
 to run tests from command line:
+```
 cd libs\test\salmon_fs_test_python\
 python -m unittest -v salmon_fs_tests.SalmonFSTests.test_AuthorizedPositive
-  
-to package:  
-dos2unix package_salmon_fs.sh  
-./package_salmon_fs.sh  
-  
+```
+
+To package:
+```
+dos2unix package.sh  
+./package.sh  
+```
+
 To install:  
+```
 pip install packages/salmon_fs.tar.gz  
-  
+```
+
 To disable the type checks run with -O optimization  
   
-If you use intellij IDEA and the package names are not resolved make sure you add  
-the salmon_fs path to the interpreter paths under File/Settings/Interpreters/Show All/Interpreter Paths  
+If you use intellij IDEA and the package names are not resolved make sure you add    
+Add simple_io, simple_fs, salmon_core, and salmon_fs folder paths to the interpreter paths under: File/Settings/Interpreters/Show All/Interpreter Paths    
   
-To run with AES intrinsics set the path to the salmon native dll:  
-NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")  
-AesStream.set_aes_provider_type(ProviderType.AesIntrinsics)  
+To run with AES intrinsics set the path to the salmon native dll:
+```
+NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")    
+AesStream.set_aes_provider_type(ProviderType.AesIntrinsics)
+```  

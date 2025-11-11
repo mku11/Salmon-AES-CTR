@@ -26,18 +26,24 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\File.cs" Link="FS\File\File.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\WSFile.cs" Link="FS\File\WSFile.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\HttpFile.cs" Link="FS\File\HttpFile.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\HttpSyncClient.cs" Link="FS\File\HttpSyncClient.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\Credentials.cs" Link="FS\File\Credentials.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\IFile.cs" Link="FS\File\IFile.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\File\IVirtualFile.cs" Link="FS\File\IVirtualFile.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\VirtualDrive.cs" Link="FS\Drive\VirtualDrive.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\File.cs" Link="FS\File\File.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\WSFile.cs" Link="FS\File\WSFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\HttpFile.cs" Link="FS\File\HttpFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\HttpSyncClient.cs" Link="FS\File\HttpSyncClient.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\Credentials.cs" Link="FS\File\Credentials.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\IFile.cs" Link="FS\File\IFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\File\IVirtualFile.cs" Link="FS\File\IVirtualFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\VirtualDrive.cs" Link="FS\Drive\VirtualDrive.cs" />
 
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Streams\FileStream.cs" Link="FS\Streams\FileStream.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Streams\HttpFileStream.cs" Link="FS\Streams\HttpFileStream.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Streams\WSFileStream.cs" Link="FS\Streams\WSFileStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Streams\FileStream.cs" Link="FS\Streams\FileStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Streams\HttpFileStream.cs" Link="FS\Streams\HttpFileStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Streams\WSFileStream.cs" Link="FS\Streams\WSFileStream.cs" />
+		
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\Utils\FileCommander.cs" Link="FS\Drive\Utils\FileCommander.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\Utils\FileExporter.cs" Link="FS\Drive\Utils\FileExporter.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\Utils\FileImporter.cs" Link="FS\Drive\Utils\FileImporter.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\Utils\FileSearcher.cs" Link="FS\Drive\Utils\FileSearcher.cs" />
+		<Compile Include="..\..\..\src\csharp\SimpleFS\FS\Drive\Utils\FileUtils.cs" Link="FS\Drive\Utils\FileUtils.cs" />
 		
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Drive.cs" Link="SalmonFS\Drive\Drive.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\WSDrive.cs" Link="SalmonFS\Drive\WSDrive.cs" />
@@ -61,12 +67,6 @@
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileExporter.cs" Link="SalmonFS\Drive\Utils\AesFileExporter.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileImporter.cs" Link="SalmonFS\Drive\Utils\AesFileImporter.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileComparators.cs" Link="SalmonFS\Drive\Utils\AesFileComparators.cs" />
-
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileCommander.cs" Link="FS\Drive\Utils\FileCommander.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileExporter.cs" Link="FS\Drive\Utils\FileExporter.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileImporter.cs" Link="FS\Drive\Utils\FileImporter.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileSearcher.cs" Link="FS\Drive\Utils\FileSearcher.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileUtils.cs" Link="FS\Drive\Utils\FileUtils.cs" />
 
 	</ItemGroup>
 

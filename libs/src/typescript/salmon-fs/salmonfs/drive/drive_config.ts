@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
-import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
-import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
+import { MemoryStream } from "../../../simple-io/streams/memory_stream.js";
+import { RandomAccessStream } from "../../../simple-io/streams/random_access_stream.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { DriveGenerator } from "./drive_generator.js";
 
 /**

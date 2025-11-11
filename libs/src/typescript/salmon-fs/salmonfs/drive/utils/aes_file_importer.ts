@@ -22,15 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IFile } from "../../../fs/file/ifile.js";
-import { HttpSyncClient } from "../../../fs/file/http_sync_client.js";
-import { Credentials } from "../../../fs/file/credentials.js";
-import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
+import { IFile } from "../../../../simple-fs/fs/file/ifile.js";
+import { HttpSyncClient } from "../../../../simple-fs/fs/file/http_sync_client.js";
+import { Credentials } from "../../../../simple-fs/fs/file/credentials.js";
+import { IVirtualFile } from "../../../../simple-fs/fs/file/ivirtual_file.js";
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { AuthException } from "../../auth/auth_exception.js";
-import { FileImporter } from "../../../fs/drive/utils/file_importer.js";
+import { FileImporter } from "../../../../simple-fs/fs/drive/utils/file_importer.js";
 import { AesFile } from "../../file/aes_file.js";
-import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
+import { FileUtils } from "../../../../simple-fs/fs/drive/utils/file_utils.js";
 import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
 
 /**

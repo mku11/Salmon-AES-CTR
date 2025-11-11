@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
-import { IFile } from "../../../fs/file/ifile.js";
-import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
-import { FileExporterWorker } from "../../../fs/drive/utils/file_exporter_worker.js";
-import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
+import { IFile } from "../../../../simple-fs/fs/file/ifile.js";
+import { IVirtualFile } from "../../../../simple-fs/fs/file/ivirtual_file.js";
+import { FileExporterWorker } from "../../../../simple-fs/fs/drive/utils/file_exporter_worker.js";
+import { FileUtils } from "../../../../simple-fs/fs/drive/utils/file_utils.js";
 import { AesFile } from "../../file/aes_file.js";
 
 /**

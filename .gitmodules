@@ -2,3 +2,9 @@
 [submodule "libs/src/c/tiny-AES-c"]
 	path = libs/src/c/tiny-AES-c
 	url = https://github.com/kokke/tiny-AES-c
+[submodule "libs/deps/SimpleIO"]
+	path = libs/deps/SimpleIO
+	url = https://github.com/mku11/SimpleIO.git
+[submodule "libs/deps/SimpleFS"]
+	path = libs/deps/SimpleFS
+	url = https://github.com/mku11/SimpleFS.git

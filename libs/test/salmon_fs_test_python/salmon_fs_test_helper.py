@@ -36,13 +36,15 @@ from io import BufferedIOBase
 
 from typeguard import typechecked
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_fs')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
+from simple_io.convert.bit_converter import BitConverter
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
+from simple_io.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
@@ -51,12 +53,12 @@ from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 from salmon_fs.salmonfs.drive.ws_drive import WSDrive
 from salmon_fs.salmonfs.drive.http_drive import HttpDrive
 from salmon_fs.salmonfs.drive.drive import Drive
-from salmon_fs.fs.file.http_sync_client import HttpSyncClient
-from salmon_fs.fs.file.http_file import HttpFile
-from salmon_fs.fs.file.credentials import Credentials
-from salmon_fs.fs.file.ws_file import WSFile
-from salmon_fs.fs.file.file import File
-from salmon_fs.fs.file.ifile import IFile
+from simple_fs.fs.file.http_sync_client import HttpSyncClient
+from simple_fs.fs.file.http_file import HttpFile
+from simple_fs.fs.file.credentials import Credentials
+from simple_fs.fs.file.ws_file import WSFile
+from simple_fs.fs.file.file import File
+from simple_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon_fs.salmonfs.streams.aes_file_input_stream import AesFileInputStream

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../streams/memory_stream.js";
+import { MemoryStream } from "../../simple-io/streams/memory_stream.js";
 import { Integrity } from "./integrity/integrity.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";

@@ -33,12 +33,12 @@ import sys
 from typeguard import typechecked
 from typing import Type
 
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.fs.file.ifile import IFile
-from salmon_fs.fs.drive.virtual_drive import VirtualDrive
-from salmon_fs.fs.file.ivirtual_file import IVirtualFile
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_fs.fs.file.ifile import IFile
+from simple_fs.fs.drive.virtual_drive import VirtualDrive
+from simple_fs.fs.file.ivirtual_file import IVirtualFile
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity import Integrity

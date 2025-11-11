@@ -31,16 +31,18 @@ from typeguard import typechecked
 import os
 import sys
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_fs')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.integrity.integrity import Integrity
-from salmon_fs.fs.file.ivirtual_file import IVirtualFile
+from simple_fs.fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmonfs.auth.auth_exception import AuthException
 from salmon_fs.salmonfs.file.aes_file import AesFile, IFile
 from salmon_fs.salmonfs.streams.aes_file_input_stream import AesFileInputStream

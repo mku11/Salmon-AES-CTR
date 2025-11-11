@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-import { ReadableStreamWrapper } from "../../../salmon-core/streams/readable_stream_wrapper.js";
+import { ReadableStreamWrapper } from "../../../simple-io/streams/readable_stream_wrapper.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
-import { IFile } from "../../fs/file/ifile.js";
-import { HttpSyncClient } from "../../fs/file/http_sync_client.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
+import { HttpSyncClient } from "../../../simple-fs/fs/file/http_sync_client.js";
 import { AesFile } from "../file/aes_file.js";
 import { AesFileReadableStream } from "../streams/aes_file_readable_stream.js";
-import { FileUtils } from "../../fs/drive/utils/file_utils.js";
+import { FileUtils } from "../../../simple-fs/fs/drive/utils/file_utils.js";
 
 
 export class AesServiceWorker {

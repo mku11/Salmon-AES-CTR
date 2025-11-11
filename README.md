@@ -16,10 +16,11 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
 - File system API for encrypted virtual drives  
 - Protected nonce sequencers (limited)  
 - Support for network drives HTTP (readonly) and Web Service (experimental)  
+- GPU AES acceleration with WebGPU (*Experimental)
  
-## Live Web Demo
+## Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
-Access to live web demo: [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
+Access to the demo: [**Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
 Demo Vault files are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 
 \* Access to the demo vault is remote and read-only so you won't be able to import new files.  
@@ -30,8 +31,8 @@ Demo Vault files are licensed under [Content License](https://mku11.github.io/Sa
 - Java 11+  
 - C# .NET 8+  
 - Python 3.11+  
-- Typescript ESM/ES2020  
-- Javascript ESM/ES2020  
+- Typescript ESM/ES2022  
+- Javascript ESM/ES2022  
 - C/C++ (data encryption API only, no streams)  
   
 **Platforms:**  
@@ -112,7 +113,10 @@ For complete samples for Java, C#, C, C++, Python, and JS:
 [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
   
 Documentation:  
-[Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
+[Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples_Documentation.md)  
+[Technical Specs](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Salmon_Technical_Specifications.md)  
+[Development Guide](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Development_Guide.md)  
+[Package Management](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Package_Management.md)  
   
 For a showcase of the Salmon API for multiple platforms (JavaFx, WPF, Android, Web) visit:  
 [**Salmon Vault App**](https://github.com/mku11/Salmon-Vault)  
@@ -223,7 +227,7 @@ To integrate Salmon into your project with Maven, Gradle, VS Studio, or VS Code:
 [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
 
 ### Contributions ###
-Unfortunately I cannot accept any code contributions.  
+Unfortunately I cannot accept any code contributions for this project.  
 Though, bugs and security reports are more than welcome!  
 If you have a request for a new features open an issue.  
 

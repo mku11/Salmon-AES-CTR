@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { FileSearcher } from "../../../fs/drive/utils/file_searcher.js";
-import { FileCommander } from "../../../fs/drive/utils/file_commander.js";
+import { FileSearcher } from "../../../../simple-fs/fs/drive/utils/file_searcher.js";
+import { FileCommander } from "../../../../simple-fs/fs/drive/utils/file_commander.js";
 import { AesFileExporter } from "./aes_file_exporter.js";
 import { AesFileImporter } from "./aes_file_importer.js";
 import { SequenceException } from "../../../../salmon-core/salmon/sequence/sequence_exception.js";

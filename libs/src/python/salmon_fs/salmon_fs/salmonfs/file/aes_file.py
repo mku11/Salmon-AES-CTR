@@ -33,10 +33,10 @@ import sys
 from typeguard import typechecked
 from wrapt import synchronized
 
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.fs.file.ifile import IFile
-from salmon_fs.fs.file.ivirtual_file import IVirtualFile
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.convert.bit_converter import BitConverter
+from simple_fs.fs.file.ifile import IFile
+from simple_fs.fs.file.ivirtual_file import IVirtualFile
+from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode

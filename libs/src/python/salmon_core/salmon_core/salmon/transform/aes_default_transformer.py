@@ -29,7 +29,7 @@ SOFTWARE.
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
 
-from salmon_core.convert.bit_converter import BitConverter
+from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_core.salmon.transform.aes_ctr_transformer import AESCTRTransformer
 

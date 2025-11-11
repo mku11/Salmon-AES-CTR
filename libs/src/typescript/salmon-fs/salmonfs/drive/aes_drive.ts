@@ -25,24 +25,24 @@ SOFTWARE.
 import { HmacSHA256Provider } from "../../../salmon-core/salmon/integrity/hmac_sha256_provider.js";
 import { IHashProvider } from "../../../salmon-core/salmon/integrity/ihash_provider.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { DriveKey } from "./drive_key.js";
 import { DriveGenerator } from "./drive_generator.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
 import { DriveConfig } from "./drive_config.js";
-import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
+import { MemoryStream } from "../../../simple-io/streams/memory_stream.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { EncryptionMode } from "../../../salmon-core/salmon/streams/encryption_mode.js";
 import { EncryptionFormat } from "../../../salmon-core/salmon/streams/encryption_format.js";
 import { SecurityException } from "../../../salmon-core/salmon/security_exception.js";
-import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
+import { RandomAccessStream } from "../../../simple-io/streams/random_access_stream.js";
 import { AuthException } from "../auth/auth_exception.js";
 import { Password } from "../../../salmon-core/salmon/password/password.js";
-import { VirtualDrive } from "../../fs/drive/virtual_drive.js";
+import { VirtualDrive } from "../../../simple-fs/fs/drive/virtual_drive.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
 import { NonceSequence } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
-import { IVirtualFile } from "../../fs/file/ivirtual_file.js";
+import { IVirtualFile } from "../../../simple-fs/fs/file/ivirtual_file.js";
 
 /**
  * Class provides an abstract virtual drive that can be extended for use with

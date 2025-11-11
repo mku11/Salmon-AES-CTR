@@ -28,7 +28,7 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-from salmon_core.convert.bit_converter import BitConverter
+from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.security_exception import SecurityException

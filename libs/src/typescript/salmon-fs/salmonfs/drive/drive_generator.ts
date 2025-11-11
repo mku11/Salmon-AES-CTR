@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
 
 /**
  * Utility class generates internal secure properties for the drive.

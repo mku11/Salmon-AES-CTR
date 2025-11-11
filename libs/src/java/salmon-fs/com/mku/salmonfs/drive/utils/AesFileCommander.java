@@ -93,4 +93,16 @@ public class AesFileCommander extends FileCommander {
             throws Exception {
         return super.exportFiles(filesToExport, exportDir, options);
     }
+	
+    /**
+     * Handle the error
+     * @param ex The exception
+     * @return True if recoverable
+     */
+    protected boolean onError(Exception ex) {
+		if (ex instanceof SequenceException)
+            throw ex;
+		else
+			return false;
+    }
 }

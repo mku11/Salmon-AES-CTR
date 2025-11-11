@@ -22,20 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
+import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
 import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
-import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/fs/file/ifile.js'
+import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/../simple-fs/fs/file/ifile.js'
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
-import { BatchImportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
+import { BatchImportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_commander.js';
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
-import { SeekOrigin } from "../../lib/salmon-core/streams/random_access_stream.js";
+import { SeekOrigin } from "../../lib/simple-io/streams/random_access_stream.js";
 
 function checkParams() {
     if(getTestMode() == TestMode.Http) {

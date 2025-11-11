@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { AesDrive } from "./aes_drive.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 import { AesFile } from "../file/aes_file.js";
 

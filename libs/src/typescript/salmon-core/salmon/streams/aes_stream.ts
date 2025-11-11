@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IOException } from "../../streams/io_exception.js";
-import { RandomAccessStream, SeekOrigin } from "../../streams/random_access_stream.js";
-import { ReadableStreamWrapper } from "../../streams/readable_stream_wrapper.js";
+import { IOException } from "../../../simple-io/streams/io_exception.js";
+import { RandomAccessStream, SeekOrigin } from "../../../simple-io/streams/random_access_stream.js";
+import { ReadableStreamWrapper } from "../../../simple-io/streams/readable_stream_wrapper.js";
 import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
 import { Integrity } from "../integrity/integrity.js";
 import { IntegrityException } from "../integrity/integrity_exception.js";

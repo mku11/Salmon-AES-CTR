@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { AesDrive } from "./aes_drive.js";
-import { IFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { AesFile } from "../file/aes_file.js";
 
 /**

@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
-    <content url="file://$MODULE_DIR$/../../src/python/salmon_core/salmon_core">
+    <content url="file://$MODULE_DIR$/../../src/python/salmon_core">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon_core" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon_core/salmon_core" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../src/python/salmon_fs/salmon_fs">
+    <content url="file://$MODULE_DIR$/../../src/python/salmon_fs">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon_fs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon_fs/salmon_fs" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/python/simple_fs">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/simple_fs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/simple_fs/simple_fs" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/python/simple_io/simple_io">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/simple_io/simple_io" isTestSource="false" />
     </content>
     <content url="file://$MODULE_DIR$/../../test/salmon_core_test_python">
       <sourceFolder url="file://$MODULE_DIR$/../../test/salmon_core_test_python" isTestSource="true" />
@@ -17,7 +25,7 @@
     <content url="file://$MODULE_DIR$/../../test/salmon_native_test_python">
       <sourceFolder url="file://$MODULE_DIR$/../../test/salmon_native_test_python" isTestSource="true" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (salmon_env)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (salmon_env) (3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../streams/memory_stream.js";
+import { MemoryStream } from "../../simple-io/streams/memory_stream.js";
 import { AesStream } from "./streams/aes_stream.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 import { SecurityException } from "./security_exception.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";
-import { RandomAccessStream } from "../streams/random_access_stream.js";
+import { RandomAccessStream } from "../../simple-io/streams/random_access_stream.js";
 
 /**
  * Decrypt the data.
