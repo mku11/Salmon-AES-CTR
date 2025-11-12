@@ -1,0 +1,5 @@
+SalmonIO
+version: 1.0.2
+project: https://github.com/mku11/SimpleIO
+license: MIT License https://github.com/mku11/SimpleIO/blob/main/LICENSE  
+  
