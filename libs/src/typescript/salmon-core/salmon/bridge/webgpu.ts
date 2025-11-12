@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { Platform, PlatformType } from "../../platform/platform.js";
 import { getSalmonAESShader } from "./salmon_aes_shader.js";
-import { WebGPULogger } from "./webgpu_logger.js";
+import { WebGPULogger } from "../../../webgpu-logger/webgpu_logger.js";
 
 // AES Blocks to process per GPU thread
 const BLOCKS_PER_WORKITEM = 1;
@@ -111,16 +111,16 @@ export class WebGPU {
         ];
         if (WebGPU.#debug) {
             WebGPU.#logger = new WebGPULogger(device);
-            WebGPU.#logger.addDebugBindLayoutEntry(bindGroupLayoutEntries);
+            WebGPU.#logger.setBindGroupLayoutEntries(bindGroupLayoutEntries);
         }
         WebGPU.#bindGroupLayout = device.createBindGroupLayout({
             label: 'tranformBindGroupLayout',
             entries: bindGroupLayoutEntries,
         });
 
-        let salmonShader = getSalmonAESShader(16 * BLOCKS_PER_WORKITEM, WORKITEMS_PER_WORKGROUP);
+        let salmonShader: any = getSalmonAESShader(16 * BLOCKS_PER_WORKITEM, WORKITEMS_PER_WORKGROUP);
         if (WebGPU.#logger) {
-            salmonShader = WebGPU.#logger.createDebugShader(salmonShader, bindGroupLayoutEntries);
+            salmonShader = WebGPU.#logger.createLogShader(salmonShader, bindGroupLayoutEntries);
         }
         
         const shaderModule = device.createShaderModule({
@@ -229,7 +229,7 @@ export class WebGPU {
             this.#createBindEntry(4, bufferParams)
         ];
         if (WebGPU.#logger) {
-            WebGPU.#logger.addDebugBindEntry(bindGroupEntries);
+            WebGPU.#logger.setBindGroupEntries(bindGroupEntries);
         }
         const bindGroup = device.createBindGroup({
             label: 'transformBindGroup',
@@ -258,11 +258,13 @@ export class WebGPU {
 
         device.queue.submit([commandEncoder.finish()]);
         if(WebGPU.#logger) {
-            console.log("webgpu dbg:");
             let log: string = await WebGPU.#logger.getLog();
-            let lines = log.split("\n");
-            for(let line of lines)
-                console.log(line);
+            if(log) {
+                console.log("webgpu dbg:");
+                let lines = log.split("\n");
+                for(let line of lines)
+                    console.log(line);
+            }
         }
         
         await stagingBufferDest.mapAsync(

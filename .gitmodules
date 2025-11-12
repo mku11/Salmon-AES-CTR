@@ -8,3 +8,6 @@
 [submodule "libs/deps/SimpleFS"]
 	path = libs/deps/SimpleFS
 	url = https://github.com/mku11/SimpleFS.git
+[submodule "libs/deps/WebGPULogger"]
+	path = libs/deps/WebGPULogger
+	url = https://github.com/mku11/WebGPULogger.git

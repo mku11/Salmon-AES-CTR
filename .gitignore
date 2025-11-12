@@ -77,10 +77,10 @@ htmlReport
 
 gradle-wrapper*
 
-libs/deps
 simple-io
 simple_io
 SimpleIO
 simple-fs
 simple_fs
 SimpleFS
+webgpu-logger

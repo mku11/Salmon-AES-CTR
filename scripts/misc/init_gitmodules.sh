@@ -20,4 +20,8 @@ cp -rf src/typescript/simple-fs ../../src/typescript/
 cp -rf src/android/simple-fs ../../src/android/
 cp -rf src/dotnetandroid/simple-fs ../../src/dotnetandroid/
 
+cd $CURRDIR/../../libs/deps/WebGPULogger
+mkdir -p ../../src/typescript/webgpu-logger
+cp -rf *.js ../../src/typescript//webgpu-logger/
+
 cd $CURRDIR
