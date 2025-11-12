@@ -30,7 +30,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.mku.android.convert.Base64;
 import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmon.sequence.AndroidSequenceSerializer;
-import com.mku.salmon.encode.Base64Utils;
+import com.mku.encode.Base64Utils;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.ProviderType;
 
