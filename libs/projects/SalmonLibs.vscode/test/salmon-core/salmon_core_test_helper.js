@@ -36,7 +36,7 @@ import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
-import { Platform, OSType } from '../../lib/salmon-core/platform/platform.js';
+import { Platform, OSType } from '../../lib/simple-io/platform/platform.js';
 import { NativeProxy } from '../../lib/salmon-core/salmon/bridge/native_proxy.js';
 import { WebGPU } from '../../lib/salmon-core/salmon/bridge/webgpu.js';
 

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Platform, PlatformType } from "../../platform/platform.js";
+import { Platform, PlatformType } from "../../../simple-io/platform/platform.js";
 import { INativeProxy } from "./inative_proxy";
 import { salmon_init, salmon_expandKey, salmon_transform } from "./salmon.js";
 

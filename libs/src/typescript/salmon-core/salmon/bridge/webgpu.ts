@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Platform, PlatformType } from "../../platform/platform.js";
+import { Platform, PlatformType } from "../../../simple-io/platform/platform.js";
 import { getSalmonAESShader } from "./salmon_aes_shader.js";
 import { WebGPULogger } from "../../../webgpu-logger/webgpu_logger.js";
 

@@ -29,7 +29,7 @@ import { SecurityException } from "./security_exception.js";
 import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
 import { encryptData } from "./encryptor_helper.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";
-import { Platform, PlatformType } from "../platform/platform.js";
+import { Platform, PlatformType } from "../../simple-io/platform/platform.js";
 
 /**
  * Encrypts byte arrays.

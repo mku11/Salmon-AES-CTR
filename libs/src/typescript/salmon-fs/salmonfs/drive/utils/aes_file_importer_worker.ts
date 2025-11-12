@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
+import { Platform, PlatformType } from "../../../../simple-io/platform/platform.js";
 import { IFile } from "../../../../simple-fs/fs/file/ifile.js";
 import { IVirtualFile } from "../../../../simple-fs/fs/file/ivirtual_file.js";
 import { FileImporterWorker } from "../../../../simple-fs/fs/drive/utils/file_importer_worker.js";

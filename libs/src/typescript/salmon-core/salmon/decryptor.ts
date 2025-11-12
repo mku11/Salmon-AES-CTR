@@ -31,7 +31,7 @@ import { AesStream } from "./streams/aes_stream.js";
 import { SecurityException } from "./security_exception.js";
 import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
 import { decryptData } from "./decryptor_helper.js";
-import { Platform, PlatformType } from "../platform/platform.js";
+import { Platform, PlatformType } from "../../simple-io/platform/platform.js";
 
 /**
  * Utility class that decrypts byte arrays.

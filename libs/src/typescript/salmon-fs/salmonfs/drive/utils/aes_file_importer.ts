@@ -31,7 +31,7 @@ import { AuthException } from "../../auth/auth_exception.js";
 import { FileImporter } from "../../../../simple-fs/fs/drive/utils/file_importer.js";
 import { AesFile } from "../../file/aes_file.js";
 import { FileUtils } from "../../../../simple-fs/fs/drive/utils/file_utils.js";
-import { Platform, PlatformType } from "../../../../salmon-core/platform/platform.js";
+import { Platform, PlatformType } from "../../../../simple-io/platform/platform.js";
 
 /**
  * Imports files to a drive.

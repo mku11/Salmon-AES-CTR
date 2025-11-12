@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Platform, PlatformType } from '../../lib/salmon-core/platform/platform.js';
+import { Platform, PlatformType } from '../../lib/simple-io/platform/platform.js';
 import { WebGPU } from '../../lib/salmon-core/salmon/bridge/webgpu.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';

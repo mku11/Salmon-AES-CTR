@@ -33,7 +33,7 @@ import { HttpSyncClient } from "../../../simple-fs/fs/file/http_sync_client.js";
 import { Credentials } from "../../../simple-fs/fs/file/credentials.js";
 import { IFile } from "../../../simple-fs/fs/file/ifile.js";
 import { FileUtils } from "../../../simple-fs/fs/drive/utils/file_utils.js";
-import { Platform, PlatformType } from "../../../salmon-core/platform/platform.js";
+import { Platform, PlatformType } from "../../../simple-io/platform/platform.js";
 
 /**
  * ReadableStream wrapper for seeking and reading an encrypted AesFile.
