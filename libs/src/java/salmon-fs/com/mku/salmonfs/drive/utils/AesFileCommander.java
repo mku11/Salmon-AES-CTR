@@ -27,6 +27,7 @@ import com.mku.fs.drive.utils.FileCommander;
 import com.mku.fs.drive.utils.FileSearcher;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
+import com.mku.salmon.sequence.SequenceException;
 import com.mku.salmonfs.file.AesFile;
 
 import java.util.ArrayList;
