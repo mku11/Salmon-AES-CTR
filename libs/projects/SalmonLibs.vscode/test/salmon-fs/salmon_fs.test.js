@@ -34,7 +34,7 @@ import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
 import { BatchImportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_commander.js';
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
-import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
+import { TestMode } from "./salmon_fs_test_helper.js";
 import { SeekOrigin } from "../../lib/simple-io/streams/random_access_stream.js";
 import { Platform, PlatformType } from '../../lib/simple-io/platform/platform.js';
 

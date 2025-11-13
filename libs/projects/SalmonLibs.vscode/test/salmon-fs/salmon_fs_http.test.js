@@ -29,7 +29,7 @@ import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { getTestMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
+import { SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
 describe('salmon-httpfs', () => {
     let oldTestMode = null;

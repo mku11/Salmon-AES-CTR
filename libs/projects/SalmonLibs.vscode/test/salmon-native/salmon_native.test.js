@@ -24,8 +24,6 @@ SOFTWARE.
 
 import { Decryptor } from '../../lib/salmon-core/salmon/decryptor.js';
 import { Encryptor } from '../../lib/salmon-core/salmon/encryptor.js';
-import { Password } from '../../lib/salmon-core/salmon/password/password.js';
-import { PbkdfType } from '../../lib/salmon-core/salmon/password/pbkdf_type.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
