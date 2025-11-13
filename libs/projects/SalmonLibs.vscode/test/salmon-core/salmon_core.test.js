@@ -25,6 +25,7 @@ SOFTWARE.
 import { BitConverter } from '../../lib/simple-io/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
 import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { Generator } from '../../lib/salmon-core/salmon/generator.js';
@@ -37,12 +38,29 @@ import { SecurityException } from '../../lib/salmon-core/salmon/security_excepti
 import { RangeExceededException } from '../../lib/salmon-core/salmon/range_exceeded_exception.js';
 
 describe('salmon-core', () => {
-    beforeAll(() => {
-        // see jest.setup.js and browser.setup.js for setting params
+    beforeAll(async () => {
+        // see jest.setup.js and browser.setup.js for setting PARAMS
+        let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
+                parseInt(PARAMS["ENC_THREADS"]) : 1;
+
+        console.log("threads: " + threads);
+        //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+        //SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+
         SalmonCoreTestHelper.initialize();
+
+        let providerType = ProviderType.Default;
+        let aesProviderType = PARAMS["AES_PROVIDER_TYPE"];
+        if (aesProviderType != undefined && aesProviderType !== "")
+            providerType = ProviderType[aesProviderType];
+        console.log("ProviderType: " + ProviderType[providerType]);
+
+        AesStream.setAesProviderType(providerType);
     });
 
-    afterAll(() => {
+    afterAll(async () => {
         console.log("closing");
         SalmonCoreTestHelper.close();
     });

@@ -26,7 +26,7 @@ import { MemoryStream } from '../../lib/simple-io/streams/memory_stream.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
+import { SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
 import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/../simple-fs/fs/file/ifile.js'
@@ -36,41 +36,55 @@ import { BatchImportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/ut
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
 import { SeekOrigin } from "../../lib/simple-io/streams/random_access_stream.js";
-
-function checkParams() {
-    if(getTestMode() == TestMode.Http) {
-        throw Error("TestMode Http not supported, please specify 'Node', 'Local', or 'WebService'");
-    }
-    if(getTestMode() != TestMode.Node && getTestMode() != TestMode.Local && getTestMode() != TestMode.WebService) {
-        throw Error("TestMode not found, please specify 'Node', 'Local', or 'WebService'");
-    }
-    if(!getTestRunnerMode()) {
-        throw Error("TestRunnerMode not found, please specify 'Browser' or 'NodeJS'");
-    }
-}
+import { Platform, PlatformType } from '../../lib/simple-io/platform/platform.js';
 
 describe('salmon-fs', () => {
-	beforeAll(() => {
-        checkParams();
+	beforeAll(async () => {
+        // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
+        // for WS drives make sure you start the WebFS Service
+        let testDir = PARAMS["TEST_DIR"] != undefined && PARAMS["TEST_DIR"] !== "" ?
+                PARAMS["TEST_DIR"] : "d:\\tmp\\salmon\\test";
+        let testMode = PARAMS["TEST_MODE"] != undefined && PARAMS["TEST_MODE"] !== "" ?
+                TestMode[PARAMS["TEST_MODE"]] : TestMode.Local;
+        let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
+                parseInt(PARAMS["ENC_THREADS"]) : 1;
+
+        await SalmonFSTestHelper.setTestParams(testDir, testMode);
+        let testDirDisplay = Platform.getPlatform() == PlatformType.Browser ? testDir.name : testDir;
+        console.log("testDir: " + testDirDisplay);
+        console.log("testMode: " + testMode.name);
+        console.log("threads: " + threads);
+		if(testMode == TestMode.WebService)
+			console.log("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
+
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
-        // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
+        SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
 
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
-        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = false;
-
-        // only default provider is supported
-        AesStream.setAesProviderType(ProviderType.Default);
-        
         SalmonCoreTestHelper.initialize();
-        SalmonFSTestHelper.initialize();
+        SalmonFSTestHelper.initialize();     
+        
+        let providerType = ProviderType.Default;
+        let aesProviderType = PARAMS["AES_PROVIDER_TYPE"];
+        if (aesProviderType != undefined && aesProviderType !== "")
+            providerType = ProviderType[aesProviderType];
+        console.log("ProviderType: " + ProviderType[providerType]);
+
+        AesStream.setAesProviderType(providerType);
     });
 
-    afterAll(() => {
+    afterAll(async () => {
         SalmonFSTestHelper.close();
         SalmonCoreTestHelper.close();
     });

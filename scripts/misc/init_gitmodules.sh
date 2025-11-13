@@ -24,4 +24,8 @@ cd $CURRDIR/../../libs/deps/WebGPULogger
 mkdir -p ../../src/typescript/webgpu-logger
 cp -rf *.js ../../src/typescript//webgpu-logger/
 
+cd $CURRDIR/../../libs/deps/Best
+mkdir -p ../../../libs/projects/SalmonLibs.vscode/best
+cp -rf src/* ../../../libs/projects/SalmonLibs.vscode/best
+
 cd $CURRDIR

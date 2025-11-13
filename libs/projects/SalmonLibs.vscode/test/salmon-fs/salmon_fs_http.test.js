@@ -29,34 +29,52 @@ import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { getTestMode, getTestRunnerMode, getTestThreads, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
+import { getTestMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
 describe('salmon-httpfs', () => {
     let oldTestMode = null;
     beforeAll(async () => {
-		oldTestMode = getTestMode();
-		await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), TestMode.Http, getTestRunnerMode(), getTestThreads());
-		
-		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-        // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
-		
+        // make sure you run an HTTP server
+		oldTestMode = SalmonFSTestHelper.currTestMode;
+        let testDir = PARAMS["TEST_DIR"];
+        // use TestMode: Http only
+        let testMode = TestMode.Http;
+        let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
+                parseInt(PARAMS["ENC_THREADS"]) : 1;
+
+        await SalmonFSTestHelper.setTestParams(testDir, testMode);
+
+        console.log("testDir: " + testDir);
+        console.log("testMode: " + testMode.name);
+        console.log("threads: " + threads);
+        console.log("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
+        console.log("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE;
+
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
-        // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
+        SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
 
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
-
-        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = true;
-        
-        // only default provider is supported
-        AesStream.setAesProviderType(ProviderType.Default);
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
+
+        let providerType = ProviderType.Default;
+        let aesProviderType = PARAMS["AES_PROVIDER_TYPE"];
+        if (aesProviderType != undefined && aesProviderType !== "")
+            providerType = ProviderType[aesProviderType];
+        console.log("ProviderType: " + ProviderType[providerType]);
+
+        AesStream.setAesProviderType(providerType);
     });
 
     afterAll(async () => {
@@ -64,7 +82,7 @@ describe('salmon-httpfs', () => {
         SalmonCoreTestHelper.close();
 		
 		if (oldTestMode)
-			await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), oldTestMode, getTestRunnerMode());
+			await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), oldTestMode);
     });
 
     it('shouldCatchNotAuthorizeNegative', async () => {

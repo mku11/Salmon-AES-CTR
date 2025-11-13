@@ -51,6 +51,7 @@ import { HttpSyncClient } from '../../lib/salmon-fs/../simple-fs/fs/file/http_sy
 import { FileImportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_importer.js';
 import { FileExportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_exporter.js';
 import { BatchExportOptions } from '../../lib/salmon-fs/../simple-fs/fs/drive/utils/file_commander.js';
+import { Platform, PlatformType } from '../../lib/simple-io/platform/platform.js';
 
 export const TestMode = {
     Local: { name: 'Local', ordinal: 0 },
@@ -59,22 +60,9 @@ export const TestMode = {
     WebService: { name: 'WebService', ordinal: 3 },
 }
 
-export const TestRunnerMode = {
-    Browser: { name: 'Browser', ordinal: 0 },
-    NodeJS: { name: 'NodeJS', ordinal: 1 }
-}
-
 let currTestMode = null;
-let currTestRunnerMode = null;
-let currTestThreads = 1;
 export function getTestMode() {
 	return currTestMode;
-}
-export function getTestRunnerMode() {
-	return currTestRunnerMode;
-}
-export function getTestThreads() {
-	return currTestThreads;
 }
 
 export class SalmonFSTestHelper {
@@ -151,14 +139,8 @@ export class SalmonFSTestHelper {
     static sequenceSerializer = new SequenceSerializer();
     
     // testDir can be a path or a fileHandle
-	static async setTestParams(testDir,testMode,testRunnerMode,threads=1) {
+	static async setTestParams(testDir, testMode) {
         currTestMode = testMode;
-        currTestRunnerMode = testRunnerMode;
-        currTestThreads = threads;
-
-		SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
-		SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
-		SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
 
         if (testMode == TestMode.Local) {
             const { Drive } = await import('../../lib/salmon-fs/salmonfs/drive/drive.js');
@@ -172,10 +154,12 @@ export class SalmonFSTestHelper {
             SalmonFSTestHelper.driveClassType = WSDrive;
         }
 
-        if(currTestRunnerMode == TestRunnerMode.Browser) {
+        if(Platform.getPlatform() == PlatformType.Browser) {
+            if(!(testDir instanceof FileSystemDirectoryHandle))
+                throw new Error("Select a valid test directory");
             const { File } = await import('../../lib/salmon-fs/../simple-fs/fs/file/file.js');
             SalmonFSTestHelper.TEST_ROOT_DIR = new File(testDir);
-        } else if(currTestRunnerMode == TestRunnerMode.NodeJS) {
+        } else if(Platform.getPlatform() == PlatformType.NodeJs) {
             const { NodeFile } = await import('../../lib/salmon-fs/../simple-fs/fs/file/node_file.js');
             SalmonFSTestHelper.TEST_ROOT_DIR = new NodeFile(testDir);
             if(!await SalmonFSTestHelper.TEST_ROOT_DIR.exists())

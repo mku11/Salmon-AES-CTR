@@ -23,4 +23,7 @@ xcopy /E /Y /I src\dotnetandroid\simple-fs ..\..\src\dotnetandroid\simple-fs
 cd %CURRDIR%\..\..\libs\deps\WebGPULogger
 xcopy /E /Y /I src\javascript\webgpu-logger ..\..\src\javascript\webgpu-logger
 
+cd %CURRDIR%\..\..\libs\deps\Best
+xcopy /E /Y /I src ..\..\..\libs\projects\SalmonLibs.vscode\best
+
 cd %CURRDIR%

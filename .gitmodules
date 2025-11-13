@@ -11,3 +11,6 @@
 [submodule "libs/deps/WebGPULogger"]
 	path = libs/deps/WebGPULogger
 	url = https://github.com/mku11/WebGPULogger.git
+[submodule "libs/deps/Best"]
+	path = libs/deps/Best
+	url = https://github.com/mku11/Best.git
