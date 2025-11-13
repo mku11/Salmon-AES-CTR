@@ -54,3 +54,12 @@ To refresh a branch from the remote repo:
 ```
 git pull origin wip-3.0.2
 ```
+
+To upgrade the git submodule go under submodule under project libs/deps  
+and pull the latest changes following with a commit and initialize the module again to copy the changes:
+```
+git pull origin main
+git commit
+$ cd ../../../scripts/misc/
+./init_gitmodules.sh
+```
