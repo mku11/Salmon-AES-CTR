@@ -57,13 +57,13 @@ export class WebGPU {
     static enable(value: boolean) {
         WebGPU.#enable = value;
         if(value)
-            console.log("WebGPU enabled: DO NOT USE IN PRODUCTION!");
+            console.log("WebGPU is experimental and susceptible to side-channel attacks, DO NOT USE IN PRODUCTION!");
     }
 
     static enableLog(value: boolean) {
         WebGPU.#debug = value;
         if(value)
-            console.log("WebGPU logger enabled: DO NOT USE IN PRODUCTION!");
+            console.log("WebGPU logger enabled");
     }
 
     /**
