@@ -24,7 +24,6 @@ SOFTWARE.
 
 import { Platform, PlatformType } from "../../../simple-io/platform/platform.js";
 import { getSalmonAESShader } from "./salmon_aes_shader.js";
-import { WebGPULogger } from "../../../webgpu-logger/webgpu_logger.js";
 
 // AES Blocks to process per GPU thread
 const BLOCKS_PER_WORKITEM = 1;
@@ -42,7 +41,7 @@ export class WebGPU {
     static #device: any | null = null;
     static #bindGroupLayout: any | null = null;
     static #computePipeline: any | null = null;
-    static #logger: WebGPULogger | null = null;
+    static #logger: any | null = null;
     static #debug: boolean = false;
    
     /**
@@ -110,6 +109,7 @@ export class WebGPU {
             this.#createBindLayoutEntry(4, "uniform")
         ];
         if (WebGPU.#debug) {
+			const { WebGPULogger } = await import("../../../webgpu-logger/webgpu_logger.js");
             WebGPU.#logger = new WebGPULogger(device);
             WebGPU.#logger.setBindGroupLayoutEntries(bindGroupLayoutEntries);
         }
