@@ -27,7 +27,8 @@ SOFTWARE.
  *
  * @see #Default
  * @see #AesIntrinsics
- * @see #TinyAES
+ * @see #Aes
+ * @see #AesGPU
  */
 export enum ProviderType {
     /**
