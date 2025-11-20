@@ -36,7 +36,8 @@ describe('salmon-httpfs', () => {
     beforeAll(async () => {
         // make sure you run an HTTP server
 		oldTestMode = SalmonFSTestHelper.currTestMode;
-        let testDir = PARAMS["TEST_DIR"];
+        let testDir = PARAMS["TEST_DIR"] != undefined && PARAMS["TEST_DIR"] !== "" ?
+                PARAMS["TEST_DIR"] : "d:\\tmp\\salmon\\test";
         // use TestMode: Http only
         let testMode = TestMode.Http;
         let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
