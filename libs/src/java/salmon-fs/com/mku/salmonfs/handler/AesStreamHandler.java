@@ -44,10 +44,10 @@ import java.lang.reflect.Field;
  * This works with 3rd party libraries and apps that can read file via HTTP URLs.
  */
 public class AesStreamHandler extends URLStreamHandler {
-    private static final int BUFFERS = 4;
-    private static final int BUFFER_SIZE = 4 * 1024 * 1024;
-    private static final int THREADS = 1;
-    private static final int BACKOFFSET = 256 * 1024;
+    private static int buffers = 4;
+    private static int bufferSize = 4 * 1024 * 1024;
+    private static int threads = 1;
+    private static int backOffset = 256 * 1024;
     private static AesStreamHandler instance;
     private static URLStreamHandler defaultStreamHandler;
     private static final String protocol = "https";
@@ -55,6 +55,25 @@ public class AesStreamHandler extends URLStreamHandler {
 
     private final HashMap<String, AesFile> requests = new HashMap<>();
 
+	/**
+     * Set this stream handler with optional properties, use zero to keep the default
+     *
+     * @param buffers Number of buffers to use.
+     * @param bufferSize   The length of each buffer.
+     * @param threads      The number of threads/streams to source the file in parallel.
+     * @param backOffset   The back offset.
+     */
+    public void setProperties(int buffers, int bufferSize, int threads, int backOffset) {
+		if(buffers > 0)
+			AesStreamHandler.buffers = buffers;
+		if(bufferSize > 0)
+			AesStreamHandler.bufferSize = bufferSize;
+		if(threads > 0)
+			AesStreamHandler.threads = threads;
+		if(backOffset >= 0)
+			AesStreamHandler.backOffset = backOffset;
+    }
+	
     private AesStreamHandler() {
         if (defaultStreamHandler == null)
             defaultStreamHandler = getURLStreamHandler();
@@ -235,7 +254,7 @@ public class AesStreamHandler extends URLStreamHandler {
         public InputStream getInputStream() throws IOException {
             AesFile file = getFile();
             stream = new AesFileInputStream(file,
-                    BUFFERS, BUFFER_SIZE, THREADS, BACKOFFSET);
+                    buffers, bufferSize, threads, backOffset);
             if (pendingSeek > 0) {
                 pendingSeek = stream.skip(pendingSeek);
             }
