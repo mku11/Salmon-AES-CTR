@@ -65,7 +65,7 @@ export class NativeProxy implements INativeProxy {
             return;
         try {
             if (Platform.getPlatform() == PlatformType.NodeJs) {
-                const koffi = Platform.require('koffi');
+                const koffi = await Platform.require('koffi');
 				NativeProxy.#lib = koffi.load(NativeProxy.#libraryPath);
 				NativeProxy.#init = NativeProxy.#lib.func('void salmon_init(int aesImplType)');
                 NativeProxy.#expandKey = NativeProxy.#lib.func('void salmon_expandKey(const unsigned char* key, unsigned char* expandedKey)');
