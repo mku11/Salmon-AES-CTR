@@ -1,0 +1,145 @@
+body {
+  color: black;
+  font-family: monospace;
+  margin: 0px;
+}
+
+a {
+  font-weight: bold;
+}
+
+p {
+  margin: 1.5em 0 1.5em 0;
+}
+
+#header {
+  background-color: #41485d;
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  overflow-y: auto;
+}
+
+.header-title {
+  margin: 0;
+  padding: 0.5em 4mm 0.5em 4mm;
+}
+
+.header-title img {
+  width: 48px;
+  height: 48px;
+  vertical-align: middle;
+}
+
+.header-title-text-container {
+  vertical-align: middle;
+}
+
+.header-title-text-container span {
+  color: #D17DAC;
+  text-decoration: none;
+  font-weight: bold;
+  display: table-cell;
+  font-size: 28px;
+}
+
+.menu-bar {
+  width: 14em;
+  float: left;
+}
+
+.menu-bar-header {
+  color: aliceblue;
+  background-color: #485167bb;
+  font-weight: bold;
+  margin: 0;
+  padding: 1em 1em;
+  border-radius: 4px;
+}
+
+.menu-bar-header-sections {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.menu-bar div {
+  color: #cacdd6bb;
+  margin: 0.5em;
+  padding: 0 0 0.5em 0.5em;
+}
+
+.menu-bar a {
+  color: #cacdd6bb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.menu-bar a:hover {
+  color: #D17DAC;
+  text-decoration: none;
+}
+
+.menu-bar .menu-bar-text {
+  color: #485167bb;
+  padding: 0;
+}
+
+.menu-bar .menu-bar-text a {
+  text-decoration: underline;
+}
+
+.menu-bar .menu-bar-text a:hover {
+  color: #D17DAC;
+  text-decoration: none;
+}
+
+#home-container {
+  line-height: 1.5em;
+  margin: 0 0 0 15em;
+  padding: 0 5em 1em 1em;
+}
+
+#home-container h1 {
+  color: #485167bb;
+  font-size: 200%;
+  font-weight: bold;
+  margin: 1em 0 0 0;
+  border-top: 1px solid #485167bb;
+  padding: 16px 0 0 0;
+}
+
+#home-container h3 {
+  color: #485167bb;
+  font-size: 150%;
+  font-weight: bold;
+  margin: 1em 0 0 0;
+}
+
+#home-container a:hover {
+  color: #D17DAC;
+}
+
+#home {
+  border-style: none !important;
+  padding: 0px !important;
+}
+
+#footer-container {
+  color: aliceblue;
+  background-color: #41485d;
+  text-align: center;
+  padding: 8px 0 8px 0;
+  clear: both;
+}
+
+.sample-code {
+  color: aliceblue;
+  background-color: #41485d;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.screenshot-image {
+  max-width: 600px;
+  max-height: 400px;
+}
