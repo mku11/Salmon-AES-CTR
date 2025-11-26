@@ -1,121 +1,215 @@
-<!DOCTYPE html>
-<html>
+<html lang="en-US">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="assets/images/favicon.ico">
-    <title>Salmon</title>
-	<meta name="description" content="Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files in Java and C#. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.">
-    <meta name="keywords" content="Salmon,AES,CTR">
-    <link rel="stylesheet" type="text/css" href="assets/css/dark.css">
+  <meta http-equiv="content-type" />
+  <link rel="stylesheet" type="text/css" href="./assets/css/main.css" />
+  <title>Salmon</title>
 </head>
 
 <body>
-    <div id="site-container" class="site-container">
-		<div class="app-icon-container">
-			<a href="index.html">
-				<img src="assets/images/logo.png" class="app-icon"/>
-			</a>
-			<div>
-				Salmon-AES-CTR
-			</div>
+  <div id="header">
+    <div class="header-title">
+			<img class="logo-image" src="assets/images/logo.png"/>
+			<b class="header-title-text-container">
+				<span class="header-title-text">Salmon</span>
+			</b>
 		</div>
-		<br>
-		<div class="app-descr">
-			<div>
-				Salmon is an AES-256 CTR encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, byte streams, and a virtual drive API for encrypted local and remote files. Optimized for Intel x86_64, ARM64, and GPU cards.
-			</div>
-		</div>
-		<br>
-		<div class="link-container">
-			<a href="https://mku11.github.io/Salmon-Vault/demo.html" class="demo-link">Live Web Demo</a>
-			<a href="https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE" target="_blank" class="license-link">MIT License</a>
-			<a href="https://github.com/mku11/Salmon-AES-CTR" target="_blank" class="project-link">Source Code</a>
-			<a href="docs" class="project-link">Documentation</a>
-			<a href="https://github.com/mku11/Salmon-AES-CTR/tree/main/samples" target="_blank" class="project-link">Samples</a>
-			<a href="https://mku11.github.io/Salmon-Vault/" class="salmon-vault-link">Applications</a>
-			<a href="downloads.html" class="downloads-link">Downloads</a>
-		</div>
-		<div class="features-container">
-			<H3>Library Features</H3>
-			<pre>
-- AES-256 encryption in CTR Mode  
-- HMAC SHA-256 authentication  
-- SHA-256 PBKDF2 key derivation  
-- CPU AES-NI acceleration for Intel x86 and ARM64  
-- GPU AES acceleration with OpenCL  
-- Data and seekable stream encryption API  
-- File system API for encrypted virtual drives  
-- Protected nonce sequencers (limited)  
-- Support for network drives HTTP (readonly) and Web Service (experimental)  
- 
-Live Web Demo
-<img style="max-width: 800px; max-height: 600px;" src="https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png?raw=true">  
+    <div class="menu-bar">
+      <p class="menu-bar-header menu-bar-header-sections">Sections</p>
+        <div><a href="#home">Home</a></div>
+        <div><a href="#download" title="Download">Download</a></div>
+        <div><a href="#samples" title="Samples">Samples</a></div>
+        <div><a href="#Live-demo" title="divve Demo">Live Demo</a></div>
+        <div><a href="#benchmarks" title="Benchmarks">Benchmarks</a></div>
+        <div><a href="#tech-specs" title="Techl Specs">Tech Specs</a></div>
+        <div><a href="#source-code" title="Source Code">Source Code</a></div>
+        <div><a href="#License" title="License">License</a></div>
 
-Access to live web demo: <a href="https://mku11.github.io/Salmon-Vault/demo.html">Live Web Demo</a> 
-Demo Vault files are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
+      <p class="menu-bar-header">API Reference</p>
+        <div><a href="docs/3.0.1/java/html" target="_blank" title="Java">Java 11</a></div>
+        <div><a href="docs/3.0.1/java/html" target="_blank" title="Java">Android 23</a></div>
+        <div><a href="docs/3.0.1/csharp/html/namespaces.html" target="_blank" title="C# .NET">C# .NET 8</a></div>
+        <div><a href="docs/3.0.1/csharp/html/namespaces.html" target="_blank" title="Android .NET">C# Android 23 .NET 8</a></div>
+        <div><a href="docs/3.0.1/javascript/html/global.html" target="_blank" title="JavaScript ESM">JavaScript</a></div>
+        <div><a href="docs/3.0.1/typescript/html" target="_blank" title="TypeScript ESM">TypeScript</a></div>
+        <div><a href="docs/3.0.1/python/html/namespaces.html" target="_blank" title="Python 11">Python</a></div>
+        <div><a href="docs/3.0.1/c/html/files.html" target="_blank" title="C/C++">C/C++</a></div>
 
-* Access to the demo vault is remote and read-only so you won't be able to import new files.  
-* Local drives are only available using Chrome.  
+      <p class="menu-bar-header">Subprojects</p>
+        <div><a href="https://github.com/mku11/Salmon-Vault" target="_blank" title="Salmon Vault">Salmon Vault</a></div>
+        <div><a href="https://github.com/mku11/SalmonTunnel" target="_blank" title="Salmon Tunnel">Salmon Tunnel</a></div>
+        <div><a href="https://github.com/mku11/SimpleIO" target="_blank" title="SimpleIO">SimpleIO</a></div>
+        <div><a href="https://github.com/mku11/SimpleFS" target="_blank" title="SimpleFS">SimpleFS</a></div>
+        <div><a href="https://github.com/mku11/WebFS" target="_blank" title="WebFS">WebFS</a></div>
 
-Salmon API Support  
-Languages:  
-- Java 11+  
-- C# .NET 8+  
-- Python 3.11+  
-- Typescript ESM/ES2020  
-- Javascript ESM/ES2020  
-- C/C++ (data encryption API only, no streams)  
-  
-Platforms:  
-- JavaFX 17+  
-- .NET WPF  
-- .NET Xamarin and MAUI  
-- Android 23+ (No GPU-accel)  
-- .NET Android 23+ (No GPU-accel)  
-- Chrome (default JS crypto only)  
-- Firefox, Safari (No Local drives / default JS crypto only)  
-- Node.js (ESM modules / default JS crypto only)  
-  
-Operating Systems:  
-- Windows 10+ x86_64  
-- MacOS 10.11+ x86_64  
-- Linux/Debian/Ubuntu x86_64, aarch64  
-- Android 23+ ARM  
+      <p class="menu-bar-header">News</p>
+      <span class="menu-bar-text">
+        <div>
+        <strong>Nov 11 2005</strong>
+        <br>
+        Version 3.0.2 is coming soon
+        </div>
+      </span>
 
-Acceleration:
-- Intel AES-NI SIMD x86_64  
-- ARM64 SIMD aarch64
-- GPU OpenCL 1.2+
-			</pre>
-		</div>
-		<div class="why-salmon-container">
-			<H3>So why another encryption library?</H3>
-			<pre>
-- Blazing fast CPU and GPU acceleration.  
-- Parallel baked-in encryption and decryption of data arrays, streams, and files.  
-- Low ceremony API for read/write/seek operations.  
-- Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.
-- Use of sequential nonces with strict ranges so no birthday problem.
-- Nonce sequences reside outside of encrypted drives so you can have multiple fully operational clones and backups.  
-- Import new files in virtual drives using multiple authorized devices.  
-- Sequence ranges are stored in app protected space (Android only).  
-- Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
-- Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
-- API for several popular programming languages, platforms, and operating systems.  
-- Implementation is based on abstract components which can easily be extended.  
+    </div>
+  </div>
 
-Comparison:
-- Salmon uses AES-CTR which supports random access unlike GCM.  
-- Salmon uses HMAC-SHA256 which supports authentication unlike XTS.  
-- Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.  
-  
-Benchmarks  
-How fast is Salmon?  
-  
-jmh benchmark shows that salmon is almost 2x faster than OpenJDK 11 javax.crypto and 3x faster than Bouncy castle:  
-<code>
+  <div id="home-container">
+    <h1 id="home">Salmon</h1>
+    <pre>Welcome to Salmon official web page</pre>
+    <p>
+      Salmon is an AES-256 CTR encryption library with built-in integrity, parallel operations, and seekable stream
+      support.
+      <br>
+      The library provides a high level API for encrypting data, byte streams, and a virtual drive API for encrypted
+      local and remote files.
+      <br>
+      Native libraries are optimized for Intel x86_64, ARM64, and GPU cards.
+    </p>
+
+    <h3>Features</h3>
+    <ul>
+      <li>AES-256 encryption in CTR Mode</li>
+      <li>HMAC SHA-256 authentication</li>
+      <li>SHA-256 PBKDF2 key derivation</li>
+      <li>CPU AES-NI acceleration for Intel x86 and ARM64</li>
+      <li>GPU AES acceleration with OpenCL</li>
+      <li>Data and seekable stream encryption API</li>
+      <li>File system API for encrypted virtual drives</li>
+      <li>Protected nonce sequencers (limited)</li>
+      <li>Support for network drives HTTP (readonly) and Web Service (experimental)</li>
+    </ul>
+
+    <h3>Platforms</h3>
+    <ul>
+      <li>JavaFX 17+</li>
+      <li>.NET WPF</li>
+      <li>.NET Xamarin and MAUI</li>
+      <li>Android 23+ (No GPU-accel)</li>
+      <li>.NET Android 23+ (No GPU-accel)</li>
+      <li>Chrome (default JS crypto only)</li>
+      <li>Firefox, Safari (No Local drives / default JS crypto only)</li>
+      <li>Node.js (ESM modules / default JS crypto only)</li>
+    </ul>
+
+    <h3>Operating Systems</h3>
+    <ul>
+      <li>Windows 10+ x86_64</li>
+      <li>MacOS 10.11+ x86_64</li>
+      <li>Linux/Debian/Ubuntu x86_64, aarch64</li>
+      <li>Android 23+ ARM</li>
+    </ul>
+
+    <h3>Acceleration</h3>
+    <ul>
+      <li>Intel AES-NI SIMD x86_64</li>
+      <li>ARM64 SIMD aarch64</li>
+      <li>GPU OpenCL 1.2+</li>
+    </ul>
+
+    <H3>Why use Salmon?</H3>
+    <ul>
+      <li>Blazing fast CPU and GPU acceleration.</li>
+      <li>Parallel baked-in encryption and decryption of data arrays, streams, and files.</li>
+      <li>Low ceremony API for read/write/seek operations.</li>
+      <li>Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.</li>
+      <li>Use of sequential nonces with strict ranges so no birthday problem.</li>
+      <li>Nonce sequences reside outside of encrypted drives so you can have multiple fully operational clones and
+        backups.</li>
+      <li>Import new files in virtual drives using multiple authorized devices.</li>
+      <li>Sequence ranges are stored in app protected space (Android only).</li>
+      <li>Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).</li>
+      <li>Additional protection from non-admin users (Salmon Windows Service Win10/11 only).</li>
+      <li>API for several popular programming languages, platforms, and operating systems.</li>
+      <li>Implementation is based on abstract components which can easily be extended.</li>
+    </ul>
+
+    <h3>Comparison</h3>
+    <ul>
+      <li>Salmon uses AES-CTR which supports random access unlike GCM.</li>
+      <li>Salmon uses HMAC-SHA256 which supports authentication unlike XTS.</li>
+      <li>Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.</li>
+    </ul>
+
+    <h1 id="downloads">Downloads</h1>
+    
+
+    <h1 id="samples">Samples</h1>
+    <h3>Salmon Core API:</h3>
+    <pre class="sample-code">
+// Simple encryption and decryption of byte array
+byte[] key = Generator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
+byte[] nonce = Generator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
+byte[] bytes = ..; // data you want to encrypt
+
+// use 2 threads for encryption
+Encryptor encryptor = new Encryptor(2);
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce);
+encryptor.close();
+
+// use 2 threads for decryption
+// the nonce is already embedded
+Decryptor decryptor = new Decryptor(2); 
+byte[] decBytes = decryptor.decrypt(encBytes, key);
+decryptor.close();
+
+// Or encrypt a text string
+nonce = Generator.getSecureRandomBytes(8); // always get a fresh nonce!
+String encText = TextEncryptor.encryptString(text, key, nonce);
+
+// Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
+String decText = TextDecryptor.decryptString(encText, key);
+</code></pre>
+
+    <h3>SalmonFS API:</h3>
+    <pre class="sample-code">
+// Create a file-based nonce sequencer. 
+// Make sure this path is secure and excluded from your backups.
+String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
+FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
+
+// create/open a virtual drive provided with a location and a text password
+// Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
+AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+
+// get root directory and list files
+AesFile root = drive.getRoot();
+AesFile[] files = root.listFiles();
+
+// import files:
+AesFileCommander commander = new AesFileCommander();
+File[] newFiles = new File[]{new File("myfile.txt")};
+commander.importFiles(newFiles, root);
+
+// read a file:
+AesFile file = root.getChild("myfile.txt");
+RandomAccessStream stream = root.getInputStream();
+stream.close();
+</pre>
+
+    For complete samples: <a href="https://github.com/mku11/Salmon-AES-CTR/tree/main/samples">Samples Code</a>
+    <br>
+    For samples documentation: <a
+      href="https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Samples_Documentation.md">Samples Documentation</a>
+
+
+    <h1 id="live-demo">Live Demo</h1>
+    <p>
+      There is a live web demo you can try here: <a href="https://mku11.github.io/Salmon-Vault/demo.html">Live Web
+        Demo</a>
+    </p>
+    <a href="https://mku11.github.io/Salmon-Vault/demo.html">
+      <img class="screenshot-image"
+        src="https://github.com/mku11/Salmon-Vault/blob/wip-3.0.1/screenshots/Screenshot.png?raw=true">
+    </a>
+
+
+    <h1 id="benchmarks">Benchmarks</h1>
+    <h3>JMH benchmarks</h3>
+    <p>
+      Salmon is almost 2x faster than OpenJDK 11 javax.crypto and 3x faster than Bouncy castle:
+    </p>
+    <pre>
 CPU: Intel i7 @2.00GHz
 Data size: 32MB  
 Threads: 1
@@ -124,11 +218,12 @@ Benchmark                                              Mode  Cnt   Score   Error
 SalmonBenchmark.EncryptAndDecryptSalmonNativeAesIntr  thrpt       22.008          ops/s  
 SalmonBenchmark.EncryptAndDecryptSysBouncyCastle      thrpt        6.457          ops/s  
 SalmonBenchmark.EncryptAndDecryptSysDefault           thrpt       12.371          ops/s  
-</code>
-  
-C# benchmark shows that salmon is 2x faster than .NET 7 System.Security.Cryptography:  
+    </pre>
 
-<code>
+
+    <H3>C# Benchmarks</H3>
+    Salmon is 2x faster than .NET 7 System.Security.Cryptography:
+    <pre>
 CPU: Intel i7 @2.00GHz
 Data size: 32MB  
 Threads: 1
@@ -143,48 +238,103 @@ EncryptAndDecryptPerfSalmonNativeAesIntrinsics
 Time ms:  
  enc time: 253  
  dec time: 253  
- Total: 506  
-</code>
-			</pre>
-		</div>
+ Total: 506
+ </pre>
 
-		<div class="security-limitations-container">
-			<H3>Sequence Files</H3>
-			<pre>
-User sequencer files keep information about the sequence ranges so they need to be kept in a protected space. Someone who has write access to a sequencer file and repeated read access to your encrypted files can leak encrypted information about your files. Also make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is exluded from your backups, this will prevent nonce reuse!  
+    <h1 id="tech-specs">Technical Specifications</h1>
+    <h3>Documentation</h3>
+    <p>
+      Salmon tech specs, development, and deployment guides:
+      <a href="https://github.com/mku11/Salmon-AES-CTR/tree/main/docs">Documentation</a>
+      <br>
+      There are plenty of README files under project folder with build instructions.
+      <br>
+      And to make things easier there are batch scripts provided to test, deploy, and generate docs:
+      <a href="https://github.com/mku11/Salmon-AES-CTR/tree/main/scripts">Scripts</a>
+    </p>
 
-More specifically:  
-- Android: You must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments so the sequence files are protected from other apps. Though for rooted devices there is no such guarantee since any app can run as a superuser.  
-- Windows: You should create a sequencer file under %LOCALAPPDATA% folder. Salmon for Windows will detect if a file is tampered with though it is recommended for additional security that you use the Salmon Windows Service. The Salmon Service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
-- Linux/Mac: You can create a sequencer file under your $HOME folder. Keep in mind that Salmon has no anti-tampering support for these operating systems. Therefore, if you want to prevent other apps having access to the sequencer file you can do is implement a protected service like the equivalent of Salmon Windows Service or create your own tampering detection. You can do the latter by extending SalmonFileSequencer class, see WinFileSequencer implementation as an example.  
-			</pre>
-		</div>
+    <h3>Sequence Files</h3>
+    User sequencer files keep information about the sequence ranges so they need to be kept in a protected space.
+    Someone who has write access to a sequencer file and repeated read access to your encrypted files can leak encrypted
+    information about your files. Also make sure that you never backup and restore the nonce sequencer files! You should
+    always create them under a directory that is exluded from your backups, this will prevent nonce reuse! More
+    specifically:
+    <ul>
+      <li>Android: You must create sequencer files in protected app space and not on external storage! Android apps work
+        on sandbox environments so the sequence files are protected from other apps. Though for rooted devices there is
+        no such guarantee since any app can run as a superuser.</li>
+      <li>Windows: You should create a sequencer file under %LOCALAPPDATA% folder. Salmon for Windows will detect if a
+        file is tampered with though it is recommended for additional security that you use the Salmon Windows Service.
+        The Salmon Service is a better solution because it protects the sequencer files under a system administrator
+        (LocalSystem) account.</li>
+      <li>Linux/Mac: You can create a sequencer file under your $HOME folder. Keep in mind that Salmon has no
+        anti-tampering support for these operating systems. Therefore, if you want to prevent other apps having access
+        to the sequencer file you can do is implement a protected service like the equivalent of Salmon Windows Service
+        or create your own tampering detection. You can do the latter by extending SalmonFileSequencer class, see
+        WinFileSequencer implementation as an example.</li>
+    </ul>
 
-		<div class="functional-limitations-container">
-			<H3>Functional Limitations</H3>
-			<pre>
-- Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).  
-- Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.  
-- Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).  
-- Maximum drive file size: 2^64 bytes  
-- Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.  
-- Python parallel processing (multiple cpus) in Windows is slow due to python being single-threaded.  
-- Javascript implementation uses only the default platform crypto and not the salmon native implementation.
-- Javascript service worker handler does not support parallel processing.  
-- Javascript implementation is ESM so in order to work in Node.js you need to use --experimental-vm-modules  
-- Data integrity works with file contents but not filenames.  
-			</pre>
-		</div>
-		
-		<div class="functional-limitations-container">
-			<H3>Functional Limitations</H3>
-			<pre>
-Salmon is released under MIT Licence, see <a href="https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE">LICENSE</a>
-Make sure you read the LICENSE file and display proper attribution if you decide to use this software.  
-Dependencies are covered by their own license see <a href="https://github.com/mku11/Salmon-AES-CTR/blob/main/NOTICE">NOTICE</a>
-			</pre>
-		<div>
-	</div>
+    <h3>Device Authorization</h3>
+    <ul>
+      <li>Importing files to a salmon virtual drive using different devices requires authorization by an already
+        authorized
+        device for each virtual drive. The device that created the drive is by default authorized. The authorization
+        mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
+      </li>
+    </ul>
+    <h3>Data integrity</h3>
+    <ul>
+      <li>
+        Salmon can inform if an encrypted file is tampered with. The verification works with HMAC-SHA256 only for file
+        content ranges that are currently accessed so it allows fast random access without reading the whole file.
+      </li>
+    </ul>
+    <h3>Functional Limitations</h3>
+    <ul>
+      <li>Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).</li>
+      <li>Salmon API is not Thread Safe! If you want to use parallel processing you need to use</li>
+      SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.</li>
+      <li>Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).</li>
+      <li>Maximum drive file size: 2^64 bytes</li>
+      <li>Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents).</li>
+      <li>Python parallel processing (multiple cpus) in Windows is slow due to python being single-threaded.</li>
+      <li>Javascript implementation uses only the default platform crypto and not the salmon native implementation.</li>
+      <li>Javascript service worker handler does not support parallel processing.</li>
+      <li>Javascript implementation is ESM so in order to work in Node.js you need to use --experimental-vm-modules</li>
+      <li>Data integrity works with file contents but not filenames.</li>
+    </ul>
+
+
+    <h1 id="source-code">Source Code</h1>
+    <p>
+      The salmon project is hosted on GitHub: <a href="https://github.com/mku11/Salmon-AES-CTR">
+        Source Code</a>
+    </p>
+
+    <ul>
+      <li>Demo Vault files are licensed under <a
+          href="https://mku11.github.io/Salmon-Vault/vault/content_license.txt">MIT License</a></li>
+      <li>Access to the demo vault is remote and read-only so you won't be able to import new files.</li>
+      <li>Local drives are only available using Chrome for desktop.</li>
+    </ul>
+
+    <h1 id="license">License</h1>
+    <p>Salmon is released under MIT Licence, see <a
+        href="https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE">LICENSE</a>
+      <br>
+      Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
+      <br>
+      <span>
+        Dependencies are covered by their own license see <a
+          href="https://github.com/mku11/Salmon-AES-CTR/blob/main/NOTICE">NOTICE</a>
+    </p>
+  </div>
+
+  <div id="footer-container">
+    <div id="footer">
+      Copyright &copy; 2025, Salmon Project
+    </div>
+  </div>
 </body>
 
 </html>
