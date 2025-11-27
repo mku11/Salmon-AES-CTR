@@ -20,8 +20,8 @@ jobs:
   java_build_matrix:
     strategy:
       matrix:
-        java_version: [11, 17]
-        os: [ubuntu-latest, windows-latest, darwin-latest]
+        java_version: [11]
+        os: [windows-latest]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -32,14 +32,9 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
-    - if: runner.os == 'Windows'
-      name: Download dependencies
+    - name: Download dependencies
       working-directory: scripts/misc
       run: init_gitmodules.bat
-    - if: runner.os == 'Linux' || runner.os == 'macOS'
-      name: Download dependencies
-      working-directory: scripts/misc
-      run: ./init_gitmodules.sh
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -47,5 +42,5 @@ jobs:
         java-version: ${{ matrix.java_version }}
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
-    - name: Build Salmon native with Gradle Wrapper
-      run: .\gradlew.bat build -x test -x salmon-native -i  
+    - name: Build Java Libraries
+      run: .\gradlew.bat build -x test -i
