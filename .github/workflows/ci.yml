@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest]
+        os: [windows-latest,ubuntu-latest]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -31,9 +31,14 @@ jobs:
       uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
-    - name: Download dependencies
+    - if: runner.os == 'Windows'
+      name: Download dependencies
       shell: cmd
       run: cd ./scripts/misc && init_gitmodules.bat
+    - if: runner.os == 'Linux'
+      name: Download dependencies
+      shell: bash
+      run: cd ./scripts/misc && ./init_gitmodules.sh
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -41,6 +46,11 @@ jobs:
         java-version: ${{ matrix.java_version }}
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
-    - name: Build Java Libraries
+    - if: runner.os == 'Windows'
+      name: Build Java Libraries
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -i
+    - if: runner.os == 'Linux'
+      name: Build Java Libraries
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -i
