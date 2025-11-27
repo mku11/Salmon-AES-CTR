@@ -16,14 +16,14 @@ on:
 env:
   TEST_DIR: "C:/tmp/salmon/test"
   ENABLE_GPU: true
-  OPENCL_SDK_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
+  OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
 
 jobs:
   java_build_matrix:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest,ubuntu-latest,darwin-latest]
+        os: [windows-latest,ubuntu-latest,macos-15-intel]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -63,7 +63,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Build Java Libraries on Windows
       shell: cmd
-      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_VERSION\\include -DOPENCL_LIB=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_VERSION\\lib -i
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\include -DOPENCL_LIB=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\lib -i
     - if: runner.os == 'Linux' || runner.os == 'MacOS'
       name: Build Java Libraries on Linux/MacOS
       shell: bash
