@@ -14,3 +14,6 @@
 [submodule "libs/deps/Best"]
 	path = libs/deps/Best
 	url = https://github.com/mku11/Best.git
+[submodule "libs/deps/WebFS"]
+	path = libs/deps/WebFS
+	url = https://github.com/mku11/WebFS.git

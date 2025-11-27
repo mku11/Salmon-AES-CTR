@@ -85,4 +85,5 @@ simple_fs
 SimpleFS
 webgpu-logger
 best
-libs/deps
+
+libs/deps/OpenCL*
