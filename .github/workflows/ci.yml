@@ -30,9 +30,7 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v4
     - name: Download dependencies
-      run: |
-        cd scripts/misc
-        init_gitmodules.bat
+      run: cd scripts/misc && init_gitmodules.bat
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -41,6 +39,4 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
     - name: Build Java Libraries
-      run: |
-        cd libs/projects/salmon-libs-gradle
-        gradlew.bat build -x test -i
+      run: cd libs/projects/salmon-libs-gradle && gradlew.bat build -x test -i
