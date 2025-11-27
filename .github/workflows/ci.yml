@@ -25,17 +25,13 @@ jobs:
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: libs/projects/salmon-libs-gradle
+      contents: read 
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
     - name: Download dependencies
-      run: |
-        cd scripts/misc
-        init_gitmodules.bat
+      working-directory: scripts/misc
+      run: init_gitmodules.bat
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -44,4 +40,5 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
     - name: Build Java Libraries
+      working-directory: libs/projects/salmon-libs-gradle
       run: .\gradlew.bat build -x test -i
