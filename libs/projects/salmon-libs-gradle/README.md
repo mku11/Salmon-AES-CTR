@@ -26,13 +26,20 @@ gradlew.bat build -x test --rerun-tasks
 
 To enable GPU support for the native libary you need to set the following environment variable:
 ENABLE_GPU=true
-You also need to specify the paths using variables OPENCL_INCLUDE and OPENCL_LIB to the appropriate paths. These variables can be found in build.gradle where you can also edit them directly.
+And install OpenCL SDK
+for Windows:
+```
+cd scripts\misc
+get_opencl.bat
+```
 
-To build the java web service from the command line run:  
+For Linux:
 ```
-gradlew.bat bootWar -x test --rerun-tasks
+sudo apt install -y ocl-icd-opencl-dev
 ```
-Then build the artifacts from within IntelliJ IDEA
+
+
+You also need to specify the paths using variables OPENCL_INCLUDE and OPENCL_LIB to the appropriate paths. These variables can be found in build.gradle where you can also edit them directly or via the command line, see the scripts in scripts/deploy directory.
 
 To create the maven packages (see root folder output dir):  
 ```
@@ -62,8 +69,8 @@ see salmon-core/src/jmh folder for benchmarks. To run from the command line:
 gradlew.bat :salmon-core:jmh --rerun-tasks  
 ```
 
-To start the web service:
+To start the WebFS service:
 ```
-start-salmon-ws.bat
+start-webfs-service.bat
 ```
-for more info see salmon-ws/README.txt
+for more info see WebFS/README.md
