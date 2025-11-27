@@ -33,8 +33,9 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v4
     - name: Download dependencies
-      working-directory: scripts/misc
-      run: init_gitmodules.bat
+      run: |
+        cd scripts/misc
+        init_gitmodules.bat
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
