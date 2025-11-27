@@ -63,4 +63,4 @@ jobs:
     - if: runner.os == 'Linux'
       name: Build Java Libraries on Linux
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -i
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
