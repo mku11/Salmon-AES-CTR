@@ -32,11 +32,11 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - if: runner.os == 'Windows'
-      name: Download dependencies
+      name: Download dependencies on Windows
       shell: cmd
       run: cd ./scripts/misc && init_gitmodules.bat
     - if: runner.os == 'Linux'
-      name: Download dependencies
+      name: Download dependencies on Linux
       shell: bash
       run: cd ./scripts/misc && ./init_gitmodules.sh
     - name: Setup Java
@@ -47,10 +47,10 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
     - if: runner.os == 'Windows'
-      name: Build Java Libraries
+      name: Build Java Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -i
     - if: runner.os == 'Linux'
-      name: Build Java Libraries
+      name: Build Java Libraries on Linux
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -i
