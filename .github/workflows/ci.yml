@@ -14,7 +14,7 @@ on:
     branches: [ "wip-3.0.2" ]
 
 env:
-  TEST_DIR="C:/tmp/salmon/test"  
+  TEST_DIR: "C:/tmp/salmon/test"
 
 jobs:
   java_build_matrix:
