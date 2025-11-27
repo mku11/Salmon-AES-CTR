@@ -33,7 +33,7 @@ jobs:
         ref: ${{ github.ref }}
     - name: Download dependencies
       shell: cmd
-      run: cd ${GITHUB_WORKSPACE}/scripts/misc && init_gitmodules.bat
+      run: cd ./scripts/misc && init_gitmodules.bat
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
