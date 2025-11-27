@@ -13,6 +13,8 @@ on:
   pull_request:
     branches: [ "wip-3.0.2" ]
 
+# NOTE: we cannot run GPU or salmon-win tests on github
+    
 env:
   TEST_DIR: "C:/tmp/salmon/test"
   ENABLE_GPU: true
@@ -68,7 +70,6 @@ jobs:
       name: Build Java Libraries on Linux/MacOS
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
-    # NOTE: we cannot run GPU or salmon-win tests on github
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
@@ -83,9 +84,9 @@ jobs:
       name: Test Java Libraries on Linux/MacOS
       shell: bash
       run: |
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Default
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=Default
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Aes
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=Aes
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=AesIntrinsics
-        cd ./libs/projects/salmon-libs-gradle && ./gradlew.sh test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=AesIntrinsics
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Default
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=Default
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Aes
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=Aes
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=AesIntrinsics
+        cd ./libs/projects/salmon-libs-gradle && ./gradlew test -x :salmon-win:test -DENC_THREADS=2 -DAES_PROVIDER_TYPE=AesIntrinsics
