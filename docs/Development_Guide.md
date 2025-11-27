@@ -11,6 +11,11 @@ For Windows:
 init_gitmodules.bat
 ```
 
+If you're building the GPU native library you need to get the OpenCL:
+```
+get_opencl.bat
+```
+
 Now you should be able to build the libraries on Windows 10/11, Linux, and macOS.
 Make sure you read the README files in each folder as they are specific to the language, platform, and operating system you're building for.
 

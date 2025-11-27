@@ -1,7 +1,10 @@
+@echo ON
 set CURRDIR=%CD%
 set ENABLE_GPU=true
-set OPENCL_INCLUDE=D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\include
-set OPENCL_LIB=D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\lib
+REM set SDK_ROOT=D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64
+set SDK_ROOT=%CURRDIR%\\..\\..\\libs\\deps\\OpenCL\\OpenCL-SDK-v2025.07.23-Win-x64
+set OPENCL_INCLUDE=%SDK_ROOT%\\include
+set OPENCL_LIB=%SDK_ROOT%\\lib
 
 cd ..\..\libs\projects\salmon-libs-gradle
 gradlew.bat --refresh-dependencies & ^

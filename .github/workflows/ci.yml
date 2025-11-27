@@ -32,13 +32,17 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - if: runner.os == 'Windows'
-      name: Download dependencies on Windows
+      name: Get submodules on Windows
       shell: cmd
       run: cd ./scripts/misc && init_gitmodules.bat
     - if: runner.os == 'Linux'
-      name: Download dependencies on Linux
+      name: Get submodules on Linux
       shell: bash
       run: cd ./scripts/misc && ./init_gitmodules.sh
+    - if: runner.os == 'Windows'
+      name: Get OpenCL
+      shell: cmd
+      run: cd ./scripts/misc && get_opencl.bat
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
