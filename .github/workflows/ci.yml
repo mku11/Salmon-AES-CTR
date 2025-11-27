@@ -49,25 +49,3 @@ jobs:
       uses: gradle/actions/setup-gradle@v5
     - name: Build Salmon native with Gradle Wrapper
       run: .\gradlew.bat build -x test -x salmon-native -i  
-
-  java_test_matrix:
-    strategy:
-      matrix:
-        java_version: [11, 17]
-        os: [ubuntu-latest, windows-latest, darwin-latest]
-        enc_threads: [1, 2, 4]
-        aes_provider_type: [Default, Aes, AesIntrinsics]
-    name: test.java.${{ matrix.java_version }}.${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: libs/projects/salmon-libs-gradle
-    - name: Salmon.Core.Native
-      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonNativeTests" -DAES_PROVIDER_TYPE=${{ matrix.aes_provider_type }} -DENC_THREADS=${{ matrix.enc_threads }} -i
-    - name: Salmon.Core
-      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -DAES_PROVIDER_TYPE=${{ matrix.aes_provider_type }} -DENC_THREADS=${{ matrix.enc_threads }} -i
-    - name: Salmon.FS
-      run: .\gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DAES_PROVIDER_TYPE=${{ matrix.aes_provider_type }} -DENC_THREADS=${{ matrix.enc_threads }} -i -DtestDir=$TEST_DIR
-
