@@ -32,10 +32,16 @@ if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch
 }
 
 // set to true to enable opencl or set via env vars
+// make sure you have installed OpenCL in your system see README for instructions
 project.ext.set('ENABLE_GPU', System.getProperty('ENABLE_GPU', "false").equals("true"))
+project.ext.set('DEFAULT_OPENCL_ROOT', "${projectDir}\\..\\..\\..\\deps\\OpenCL\\OpenCL-SDK-v2025.07.23-Win-x64")
+
+println "DEFAULT_OPENCL_ROOT: " + project.DEFAULT_OPENCL_ROOT
+
 // windows
-project.ext.set('OPENCL_INCLUDE', System.getProperty('OPENCL_INCLUDE', "D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\include"))
-project.ext.set('OPENCL_LIB', System.getProperty('OPENCL_LIB', "D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\lib"))
+project.ext.set('OPENCL_INCLUDE', System.getProperty('OPENCL_INCLUDE', project.DEFAULT_OPENCL_ROOT + "\\include"))
+project.ext.set('OPENCL_LIB', System.getProperty('OPENCL_LIB', project.DEFAULT_OPENCL_ROOT + "\\lib"))
+
 // linux
 // project.ext.set('OPENCL_INCLUDE', System.getProperty('OPENCL_INCLUDE',"/usr/include")
 // project.ext.set('OPENCL_LIB', System.getProperty('OPENCL_LIB',"/usr/lib/x86_64-linux-gnu/")

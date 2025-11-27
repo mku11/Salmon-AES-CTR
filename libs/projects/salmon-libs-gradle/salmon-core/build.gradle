@@ -24,6 +24,9 @@ test {
 	systemProperty "ENABLE_GPU", System.getProperty('ENABLE_GPU')
 	systemProperty "AES_PROVIDER_TYPE", System.getProperty('AES_PROVIDER_TYPE')
 	systemProperty "ENC_THREADS", System.getProperty('ENC_THREADS', "1")
+	afterTest { desc, result -> 
+        logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
+    }
 }
 
 tasks.withType(Test) {
