@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest,ubuntu-latest]
+        os: [windows-latest,ubuntu-latest,darwin-latest]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -37,8 +37,8 @@ jobs:
       name: Get submodules on Windows
       shell: cmd
       run: cd ./scripts/misc && init_gitmodules.bat
-    - if: runner.os == 'Linux'
-      name: Get submodules on Linux
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Get submodules on Linux/MacOS
       shell: bash
       run: cd ./scripts/misc && ./init_gitmodules.sh
     - if: runner.os == 'Windows'
@@ -49,6 +49,10 @@ jobs:
       name: Get OpenCL for Linux
       shell: bash
       run: sudo apt install -y ocl-icd-opencl-dev
+    - if: runner.os == 'macOS'
+      name: Get OpenCL for MacOS
+      shell: bash
+      run: echo "opencl for macos"
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -60,7 +64,7 @@ jobs:
       name: Build Java Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_VERSION\\include -DOPENCL_LIB=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_VERSION\\lib -i
-    - if: runner.os == 'Linux'
-      name: Build Java Libraries on Linux
+    - if: runner.os == 'Linux' || runner.os == 'MacOS'
+      name: Build Java Libraries on Linux/MacOS
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
