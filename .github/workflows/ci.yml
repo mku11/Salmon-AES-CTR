@@ -96,4 +96,4 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Test Java Libraries on Linux/MacOS
       shell: bash
-      run: cd ./scripts/tests/java/linux && test_java_ci.sh
+      run: cd ./scripts/tests/java/linux_mac && test_java_ci.sh
