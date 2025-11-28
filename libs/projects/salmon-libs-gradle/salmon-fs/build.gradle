@@ -42,7 +42,7 @@ tasks.withType(Test) {
 
 sourceSets {
     main.java.srcDirs += '../../../src/java/salmon-fs/'
-    main.java.srcDirs += '../../../deps/SimpleFS/src/java/simple-fs/'
+    main.java.srcDirs += '../../../src/java/simple-fs/'
     test.java.srcDirs += '../../../test/salmon-fs-test-java/'
 }
 

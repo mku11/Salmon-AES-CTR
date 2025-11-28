@@ -36,7 +36,7 @@ tasks.withType(Test) {
 
 sourceSets {
     main.java.srcDirs += '../../../src/java/salmon-core/'
-	main.java.srcDirs += '../../../deps/SimpleIO/src/java/simple-io/'
+	main.java.srcDirs += '../../../src/java/simple-io/'
     test.java.srcDirs += '../../../test/salmon-core-test-java/'
     test.java.srcDirs += '../../../test/salmon-native-test-java/'
 }
