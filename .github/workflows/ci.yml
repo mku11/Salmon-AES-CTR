@@ -14,7 +14,8 @@ on:
     branches: [ "wip-3.0.2" ]
 
 env:
-  TEST_DIR: "C:/tmp/salmon/test"
+  HTDOCS: C:\tmp\salmon
+  TEST_DIR: C:\tmp\salmon\test
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
   WS_SERVER_URL: http://localhost:8080
@@ -78,8 +79,13 @@ jobs:
       shell: cmd
       run: npm install -g http-server
     - if: runner.os == 'Windows'
+      name: Setup directories
+      run: |
+        mkdir $HTDOCS
+        mkdir $TEST_DIR
+    - if: runner.os == 'Windows'
       name: Start Http Server
-      run: cd ./scripts/misc && start_http_server.bat &
+      run: npx http-server $HTDOCS -p 80 &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
