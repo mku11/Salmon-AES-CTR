@@ -72,19 +72,11 @@ jobs:
     - if: runner.os == 'Windows'
       name: Setup WebFS service
       shell: cmd
-      run: |
-        cd ./libs/deps/WebFS/project && 
-        ./gradlew bootWar &&
-        cd webfs-service &&
-        ./package.sh &&
-        cd ../../output/webfs-service/webfs-service-1.0.0/config &&
-        ren application.properties application.properties.bak &&
-        copy ../../../libs/test/config/application.properties.win.text application.properties
+      run: cd ./libs/deps/WebFS/project && ./gradlew bootWar && cd webfs-service && ./package.sh && cd ../../output/webfs-service/webfs-service-1.0.0/config && ren application.properties application.properties.bak && copy ../../../libs/test/config/application.properties.win.text application.properties
     - if: runner.os == 'Windows'
       name: Setup Http service
       shell: cmd
-      run: |
-        npm install -g http-server
+      run: npm install -g http-server
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
