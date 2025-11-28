@@ -85,7 +85,6 @@ jobs:
       run: mkdir $HTDOCS && mkdir $TEST_DIR
     - if: runner.os == 'Windows'
       name: Start Http Server
-      shell: cmd
       run: cd ./scripts/misc && start_http_server.bat &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
