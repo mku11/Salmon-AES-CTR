@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel]
+        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -65,6 +65,18 @@ jobs:
         java-version: ${{ matrix.java_version }}
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
+    - if: runner.os == 'Linux' && ${{ matrix.os }} == 'ubuntu-24.04-arm'
+      name: Build GCC Native Libraries on Linux aarch64
+      shell: cmd
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=aarch64 USE_OPENCL=1 ENABLE_JNI=1 package
+    - if: runner.os == 'macOS' && ${{ matrix.os }} == 'macos-15-intel'
+      name: Build GCC Native Libraries on MacOS x86_64
+      shell: cmd
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64 USE_OPENCL=1 ENABLE_JNI=1 package
+    - if: runner.os == 'macOS' && ${{ matrix.os }} == 'macos-latest'
+      name: Build GCC Native Libraries on MacOS aarch64
+      shell: cmd
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 USE_OPENCL=1 ENABLE_JNI=1 package
     - if: runner.os == 'Windows'
       name: Build Java Libraries on Windows
       shell: cmd
