@@ -28,8 +28,10 @@ ARCH?=x86_64
 CC?=gcc
 
 ifeq ($(ARCH),aarch64)
+ifeq ($(PLATFORM),linux)
   CC=aarch64-$(PLATFORM)-gnu-gcc
   CFLAGS+=-march=armv8-a+crypto
+endif
 else
   ARCH=x86_64
   CC=gcc
