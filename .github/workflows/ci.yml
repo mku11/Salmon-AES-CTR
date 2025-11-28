@@ -72,7 +72,7 @@ jobs:
     - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Build GCC Native Libraries on MacOS x86_64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64 USE_OPENCL=1 ENABLE_JNI=1 package
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64  ENABLE_JNI=1 package
     - if: ${{ matrix.os == 'macos-latest' }}
       name: Build GCC Native Libraries on MacOS aarch64
       shell: bash
