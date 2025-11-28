@@ -17,7 +17,8 @@ env:
   TEST_DIR: "C:/tmp/salmon/test"
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
-
+  WS_SERVER_URL=http://localhost:8080
+  
 jobs:
   java_build_matrix:
     strategy:
@@ -69,6 +70,27 @@ jobs:
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
     - if: runner.os == 'Windows'
+      name: Setup WebFS service
+      shell: cmd
+      run: |
+        cd ./libs/deps/WebFS/project && 
+        ./gradlew bootWar &&
+        cd webfs-service &&
+        ./package.sh &&
+        cd ../../output/webfs-service/webfs-service-1.0.0/config &&
+        ren application.properties application.properties.bak &&
+        copy ../../../libs/test/config/application.properties.win.text application.properties
+    - if: runner.os == 'Windows'
+      name: Setup Http service
+      shell: cmd
+      run: |
+        npm install -g http-server
+    - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
-      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Default -i
+      run: |
+        cd ./libs/deps/WebFS/output/webfs-service/webfs-service-1.0.0 &&
+        start-webfs-service.bat &
+        npx http-server -p 80 &
+        cd ../../../../../projects/salmon-libs-gradle &&
+        gradlew.bat test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Default  -i

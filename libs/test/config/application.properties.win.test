@@ -1,0 +1,16 @@
+spring.servlet.multipart.max-file-size = 4GB
+spring.servlet.multipart.max-request-size = 4GB
+spring.main.allow-bean-definition-overriding=true
+
+# Root path
+app.path=C:\\tmp\\salmon\\test\\ws
+
+# Primary user, you can add more users with AuthUsers.addUser()
+app.username=user
+app.password=password
+# permission: READ, WRITE, READ_WRITE
+app.role=READ_WRITE
+
+# CORS
+# allow browser to use the web service from specific site:
+app.cors.allowed-origins=http://localhost
