@@ -64,6 +64,7 @@ ifeq ($(ENABLE_JNI),1)
   endif
   ifeq ($(PLATFORM),macos)
 	CFLAGS+=-I"$(JAVA_HOME)/Headers"
+	CFLAGS+=-I"$(JAVA_HOME)/include/darwin"
   endif
 endif
 
