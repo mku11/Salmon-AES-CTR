@@ -3,6 +3,5 @@ set CURRDIR=%CD%
 set TEST_DIR=c:\tmp\salmon
 
 powershell mkdir -ErrorAction SilentlyContinue %TEST_DIR%\test &^
-cd %CURRDIR%\..\..\libs\deps\WebFS\output\webfs-service\webfs-service-1.0.0 &^
-start-webfs-service.bat &^
+npx http-server %TEST_DIR% -p 80 &^
 cd %CURRDIR%

@@ -80,10 +80,4 @@ jobs:
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
-      run: |
-        cd ./libs/deps/WebFS/output/webfs-service/webfs-service-1.0.0 &&
-        start-webfs-service.bat &
-        npx http-server -p 80 &
-        sleep 10 &&
-        cd ../../../../../projects/salmon-libs-gradle &&
-        gradlew.bat test -x :salmon-win:test -DENC_THREADS=1 -DAES_PROVIDER_TYPE=Default  -i
+      run: cd ./scripts/tests/java && test_java_ci.bat
