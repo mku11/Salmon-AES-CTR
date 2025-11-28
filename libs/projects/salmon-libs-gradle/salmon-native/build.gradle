@@ -31,6 +31,8 @@ if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch
     project.ext.set('arch', 'aarch64')
 }
 
+println "arch: " + project.arch 
+
 // set to true to enable opencl or set via env vars
 // make sure you have installed OpenCL in your system see README for instructions
 project.ext.set('ENABLE_GPU', System.getProperty('ENABLE_GPU', "false").equals("true"))
