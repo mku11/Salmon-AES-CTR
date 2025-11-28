@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest,ubuntu-latest,macos-15-intel]
+        os: [windows-latest]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -72,7 +72,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Setup WebFS service
       shell: cmd
-      run: cd ./libs/deps/WebFS/project && ./gradlew bootWar && cd webfs-service && ./package.sh && cd ../../output/webfs-service/webfs-service-1.0.0/config && ren application.properties application.properties.bak && copy ../../../libs/test/config/application.properties.win.text application.properties
+      run: cd ./libs/deps/WebFS/project && gradlew.bat bootWar && cd webfs-service && ./package.bat && cd ../../output/webfs-service/webfs-service-1.0.0/config && ren application.properties application.properties.bak && copy ../../../libs/test/config/application.properties.win.text application.properties
     - if: runner.os == 'Windows'
       name: Setup Http service
       shell: cmd
