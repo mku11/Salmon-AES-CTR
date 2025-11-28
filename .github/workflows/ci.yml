@@ -76,7 +76,7 @@ jobs:
     - if: ${{ matrix.os == 'macos-latest' }}
       name: Build GCC Native Libraries on MacOS aarch64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 USE_OPENCL=1 ENABLE_JNI=1 package
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
     - if: runner.os == 'Windows'
       name: Build Java Libraries on Windows
       shell: cmd
