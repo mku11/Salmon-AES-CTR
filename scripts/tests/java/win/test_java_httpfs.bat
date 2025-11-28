@@ -1,7 +1,7 @@
 set CURRDIR=%CD%
 
 set HTTP_SERVER_URL=http://localhost
-set TEST_DIR="d:\tmp\salmon\test"
+set TEST_DIR="c:\tmp\salmon\test"
 set TEST_MODE=Http
 
 cd ..\..\..\..\libs\projects\salmon-libs-gradle

@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-set TEST_DIR="d:/tmp/salmon/test"
+set TEST_DIR="c:/tmp/salmon/test"
 set TEST_MODE=Local
 
 cd ..\..\..\..\libs\projects\salmon-libs-gradle

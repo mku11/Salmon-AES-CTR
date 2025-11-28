@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-set TEST_DIR="d:/tmp/salmon/test"
+set TEST_DIR="c:/tmp/salmon/test"
 set TEST_MODE=Local
 set ENC_THREADS=2
 
