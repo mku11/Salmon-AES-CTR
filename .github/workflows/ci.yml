@@ -86,7 +86,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Start Http Server
       shell: cmd
-      run: npx http-server C:\tmp\salmon -p 8880 &
+      run: cd ./scripts/misc && start_http_server.bat &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
