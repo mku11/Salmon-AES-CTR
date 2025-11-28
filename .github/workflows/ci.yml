@@ -78,6 +78,9 @@ jobs:
       shell: cmd
       run: npm install -g http-server
     - if: runner.os == 'Windows'
+      name: Start Http Server
+      run: cd ./scripts/misc && start_http_server.bat &
+    - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
-      run: cd ./scripts/tests/java/win && test_java_ci.bat
+      run: cd ./scripts/tests/java/win && test_java_httpfs.bat
