@@ -17,7 +17,7 @@ env:
   TEST_DIR: "C:/tmp/salmon/test"
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
-  WS_SERVER_URL=http://localhost:8080
+  WS_SERVER_URL: http://localhost:8080
   
 jobs:
   java_build_matrix:
