@@ -11,8 +11,8 @@ OPENCL_KERNEL=$(SALMON_ROOT)/src/kernels/salmon-aes-kernel.c
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 SALMON_JNI_INCLUDE=$(SALMON_JNI_ROOT)/include
 
-OPENCL_INCLUDE?=
-OPENCL_LIB?=
+OPENCL_INCLUDE?=.
+OPENCL_LIB?=.
 
 $(info Usage:)
 $(info make PLATFORM=<value> ARCH=<value> ENABLE_JNI=<value>  USE_OPENCL=<value> OPENCL_INCLUDE=<path> OPENCL_LIB=<path>)
@@ -93,7 +93,7 @@ endif
 
 # __constant and __global is needed only for OpenCL kernel compiler for macos
 # for gcc and clang we define them to empty value sto suppress the errors
-CFLAGS+=-D__constant=  -D__global=
+CFLAGS+= -D__constant= -D__global=
 
 _SALMON_DEPS = salmon.h salmon-aes-intr.h salmon-aes-opencl.h
 SALMON_DEPS = $(patsubst %,$(SALMON_INCLUDE)/%,$(_SALMON_DEPS))
