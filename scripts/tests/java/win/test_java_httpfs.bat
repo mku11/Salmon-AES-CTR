@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-set HTTP_SERVER_URL=http://localhost
+set HTTP_SERVER_URL=http://localhost:8880
 set TEST_DIR="c:\tmp\salmon\test"
 set TEST_MODE=Http
 

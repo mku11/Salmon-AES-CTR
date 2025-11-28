@@ -19,6 +19,7 @@ env:
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
   WS_SERVER_URL: http://localhost:8080
+  HTTP_PORT: 8880
   
 jobs:
   java_build_matrix:
@@ -85,7 +86,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Start Http Server
       shell: cmd
-      run: npx http-server $HTDOCS -p 80 &
+      run: npx http-server $HTDOCS -p $HTTP_PORT &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd

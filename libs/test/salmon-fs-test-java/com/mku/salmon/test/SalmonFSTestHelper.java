@@ -100,8 +100,7 @@ public class SalmonFSTestHelper {
     static Credentials credentials = new Credentials("user", "password");
 
     // HTTP server (Read-only)
-//    static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
-    static String HTTP_SERVER_DEFAULT_URL = "http://localhost";
+    static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8880";
     static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
             System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;
     static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
