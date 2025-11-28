@@ -14,16 +14,17 @@ on:
     branches: [ "wip-3.0.2" ]
 
 env:
-  HTDOCS: C:\tmp\salmon
+  
   TEST_DIR: C:\tmp\salmon\test
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
-  WS_SERVER_URL: http://localhost:8080
-  HTTP_PORT: 8880
   
+  # TODO: move to container
+  # WS_SERVER_URL: http://localhost:8080
+  # HTTP_PORT: 8880
+  # HTDOCS: C:\tmp\salmon
 jobs:
   java_build_matrix:
-    container: cont
     strategy:
       matrix:
         java_version: [11]
@@ -72,22 +73,23 @@ jobs:
       name: Build Java Libraries on Linux/MacOS
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
-    - if: runner.os == 'Windows'
-      name: Setup WebFS service
-      shell: cmd
-      run: cd ./scripts/misc && setup_webfs.bat
-    - if: runner.os == 'Windows'
-      name: Setup Http service
-      shell: cmd
-      run: npm install -g http-server
-    - if: runner.os == 'Windows'
-      name: Setup directories
-      shell: cmd
-      run: mkdir $HTDOCS && mkdir $TEST_DIR
-    - if: runner.os == 'Windows'
-      name: Start Http Server
-      run: cd ./scripts/misc && start_http_server.bat &
+    # TODO: move to container
+    # - if: runner.os == 'Windows'
+      # name: Setup WebFS service
+      # shell: cmd
+      # run: cd ./scripts/misc && setup_webfs.bat
+    # - if: runner.os == 'Windows'
+      # name: Setup Http service
+      # shell: cmd
+      # run: npm install -g http-server
+    # - if: runner.os == 'Windows'
+      # name: Setup directories
+      # shell: cmd
+      # run: mkdir $HTDOCS && mkdir $TEST_DIR
+    # - if: runner.os == 'Windows'
+      # name: Start Http Server
+      # run: cd ./scripts/misc && start_http_server.bat &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
-      run: cd ./scripts/tests/java/win && test_java_httpfs.bat
+      run: cd ./scripts/tests/java/win && test_java_ci.bat
