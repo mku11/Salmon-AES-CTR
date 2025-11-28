@@ -80,11 +80,11 @@ jobs:
       run: npm install -g http-server
     - if: runner.os == 'Windows'
       name: Setup directories
-      run: |
-        mkdir $HTDOCS
-        mkdir $TEST_DIR
+      shell: cmd
+      run: mkdir $HTDOCS && mkdir $TEST_DIR
     - if: runner.os == 'Windows'
       name: Start Http Server
+      shell: cmd
       run: npx http-server $HTDOCS -p 80 &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
