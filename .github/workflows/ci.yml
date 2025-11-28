@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         java_version: [11]
-        os: [windows-latest]
+        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel]
     name: build.java.${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -93,3 +93,7 @@ jobs:
       name: Test Java Libraries on Windows
       shell: cmd
       run: cd ./scripts/tests/java/win && test_java_ci.bat
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Test Java Libraries on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/tests/java/linux && test_java_ci.sh
