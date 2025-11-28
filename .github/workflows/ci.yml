@@ -80,4 +80,4 @@ jobs:
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
-      run: cd ./scripts/tests/java && test_java_ci.bat
+      run: cd ./scripts/tests/java/win && test_java_ci.bat
