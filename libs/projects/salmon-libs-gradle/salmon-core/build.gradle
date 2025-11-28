@@ -8,6 +8,32 @@ group 'com.mku.salmon'
 description = 'Salmon AES256 CTR core encryption library'
 version '3.0.2'
 
+import org.gradle.internal.os.OperatingSystem
+OperatingSystem os = OperatingSystem.current();
+
+println "OS: ${os.familyName}"
+println "ARCH: ${System.getProperty("os.arch")}"
+
+if (os.isLinux()) {
+    project.ext.set('os', 'linux')
+} else if (os.isWindows()) {
+    project.ext.set('os', 'win')
+} else if (os.isMacOsX()) {
+    project.ext.set('os', 'macos')
+}
+
+if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
+    project.ext.set('arch', 'x86_64')
+} else if (System.getProperty("os.arch").equals("aarch64")) {
+    project.ext.set('arch', 'aarch64')
+}
+
+project.ext.set('libPath', '../salmon-native/build/libs/salmon/shared')
+if(project.arch == 'aarch64') {
+	// for arm64 we use the gcc version since gradle does not seem to support that build
+	project.ext.set('libPath', '../../salmon-libs-gcc/lib/aarch64');
+}
+
 repositories {
     mavenCentral()
 }
@@ -31,7 +57,7 @@ test {
 
 tasks.withType(Test) {
     useJUnitPlatform()
-    systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
+    systemProperty "java.library.path", project.libPath
 }
 
 sourceSets {
@@ -46,7 +72,7 @@ jmh {
     iterations = 1
     jmhTimeout = '5s'
     fork = 1
-    jvmArgs = ['-Djava.library.path=../salmon-native/build/libs/salmon/shared']
+    jvmArgs = ['-Djava.library.path=' + project.libPath]
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

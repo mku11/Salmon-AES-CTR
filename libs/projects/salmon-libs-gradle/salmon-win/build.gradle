@@ -7,6 +7,32 @@ group 'com.mku.salmon'
 description = 'Salmon AES256 CTR encryption library for windows'
 version '3.0.2'
 
+import org.gradle.internal.os.OperatingSystem
+OperatingSystem os = OperatingSystem.current();
+
+println "OS: ${os.familyName}"
+println "ARCH: ${System.getProperty("os.arch")}"
+
+if (os.isLinux()) {
+    project.ext.set('os', 'linux')
+} else if (os.isWindows()) {
+    project.ext.set('os', 'win')
+} else if (os.isMacOsX()) {
+    project.ext.set('os', 'macos')
+}
+
+if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
+    project.ext.set('arch', 'x86_64')
+} else if (System.getProperty("os.arch").equals("aarch64")) {
+    project.ext.set('arch', 'aarch64')
+}
+
+project.ext.set('libPath', '../salmon-native/build/libs/salmon/shared')
+if(project.arch == 'aarch64') {
+	// for arm64 we use the gcc version since gradle does not seem to support that build
+	project.ext.set('libPath', '../../salmon-libs-gcc/lib/aarch64');
+}
+
 repositories {
     mavenCentral()
 }
@@ -28,7 +54,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
+    systemProperty "java.library.path", project.libPath
 	afterTest { desc, result -> 
         logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
     }
@@ -36,7 +62,7 @@ test {
 
 tasks.withType(Test) {
     useJUnitPlatform()
-    systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
+    systemProperty "java.library.path", project.libPath
 }
 
 sourceSets {
