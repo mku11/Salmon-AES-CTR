@@ -1,0 +1,2 @@
+rootProject.name = "salmon-android-libs"
+include ':salmon-native-android'
