@@ -1,4 +1,6 @@
 # salmon makefile
+# For building use scripts in scripts/misc/deploy/ from the project root dir
+
 SALMON_VERSION=3.0.2
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
@@ -11,6 +13,13 @@ OPENCL_KERNEL=$(SALMON_ROOT)/src/kernels/salmon-aes-kernel.c
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 SALMON_JNI_INCLUDE=$(SALMON_JNI_ROOT)/include
 
+# OpenCL library paths
+# for windows the paths should be:
+# ..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\include
+# ..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib
+# for linux:
+# /usr/include
+# /usr/lib/x86_64-linux-gnu
 OPENCL_INCLUDE?=.
 OPENCL_LIB?=.
 
@@ -20,6 +29,9 @@ $(info PLATFORM is the target OS, value: win, linux, macos)
 $(info ARCH is the target architecture, value: x86_64, aarch64)
 $(info ENABLE_JNI to use this lib from Java, value: 0 to disable, 1 to enable)
 $(info USE_OPENCL to include GPU accel, value: 0 to disable, 1 to enable)
+$(info OPENCL_INCLUDE the path to OpenCL headers, ie: /usr/include)
+$(info OPENCL_LIB the path to OpenCL library, ie: /usr/lib/x86_64-linux-gnu)
+$(info DEBUG to add debug symbols, value: 0 to disable, 1 to enable)
 $(info Example: make PLATFORM=win ARCH=x86_64 ENABLE_JNI=1 USE_OPENCL=1)
 $(info )
 
@@ -52,6 +64,12 @@ endif
 CFLAGS+=-I$(SALMON_INCLUDE)
 CFLAGS+=-fPIC
 LIBS=-lm
+
+ifeq ($(DEBUG),1)
+CFLAGS+=-g -O0
+else
+CFLAGS+=-O3
+endif
 
 ifeq ($(ENABLE_JNI),1)
   CFLAGS+=-I$(SALMON_JNI_INCLUDE) -I"$(JAVA_HOME)/include"
