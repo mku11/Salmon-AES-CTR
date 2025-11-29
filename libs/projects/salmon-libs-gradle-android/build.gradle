@@ -1,15 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-        maven {
-			// uncomment for local repo
-			allowInsecureProtocol true
-			url 'http://localhost/repository/maven/releases'
-
-			// official salmon repo
-			// url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-		}
-        // mavenLocal()
         google()
         jcenter()
         maven {
@@ -26,21 +17,17 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-			// uncomment for local repo
-			allowInsecureProtocol true
-			url 'http://localhost/repository/maven/releases'
-
-			// official salmon repo
-			// url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-		}
-        // mavenLocal()
         google()
         jcenter()
         maven {
             url 'https://maven.google.com'
         }
     }
+	
+	// get jar file path from local
+	ext.fromLocal = { pkg, ver ->
+		return '../../../../output/maven/releases/com/mku/salmon/' + pkg + '/' + ver + '/' + pkg + '-' + ver + '.jar'
+	}
 }
 
 task clean(type: Delete) {

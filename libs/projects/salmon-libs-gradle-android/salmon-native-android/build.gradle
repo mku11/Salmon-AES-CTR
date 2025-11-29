@@ -8,14 +8,6 @@ description = 'Salmon AES256 CTR android native encryption library'
 version '3.0.2'
 
 repositories {
-    maven {
-        // uncomment for local repo
-        allowInsecureProtocol true
-        url 'http://localhost/repository/maven/releases'
-
-        // official salmon repo
-        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
     mavenCentral()
 }
 
@@ -61,7 +53,6 @@ android {
         }
     }
     sourceSets {
-        main.java.srcDirs += "../../../src/android/src/salmon-android-native"
         // workaround: since we use external source directories the IDE
         // cannot see the c source so we add them here as java files
         main.java.srcDirs += '../../../src/c'
@@ -71,10 +62,6 @@ android {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-dependencies {
-    implementation("com.mku.salmon:salmon-core:${version}")
 }
 
 publishing {
