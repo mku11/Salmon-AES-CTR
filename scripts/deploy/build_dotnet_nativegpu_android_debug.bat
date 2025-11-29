@@ -5,5 +5,5 @@ set CURRDIR=%CD%
 
 cd ..\..\libs\projects\SalmonLibs.VS2022
 msbuild -t:restore & ^
-msbuild /property:Configuration=DebugGPU & ^
+msbuild /property:Configuration=DebugGPU /property:Platform=x64 & ^
 cd %CURRDIR%
