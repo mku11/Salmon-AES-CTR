@@ -129,7 +129,6 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
             if on_progress_changed:
                 on_progress_changed(total_part_bytes_read, count)
     except Exception as ex:
-        print(ex, file=sys.stderr)
         raise ex
     finally:
         if target_stream:

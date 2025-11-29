@@ -124,7 +124,6 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
             if on_progress_changed:
                 on_progress_changed(total_part_bytes_written, count)
     except Exception as ex:
-        print(ex, file=sys.stderr)
         raise ex
     finally:
         if target_stream:

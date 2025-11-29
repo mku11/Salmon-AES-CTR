@@ -579,7 +579,7 @@ public class SalmonFSTestHelper
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: "+ ex.Message);
         }
 
         Assert.IsFalse(success);
@@ -654,7 +654,7 @@ public class SalmonFSTestHelper
         catch (Exception ex)
         {
             importSuccess = false;
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex.Message);
         }
 
         Assert.AreEqual(shouldImport, importSuccess);
@@ -843,7 +843,7 @@ public class SalmonFSTestHelper
         }
         catch (RangeExceededException ex)
         {
-            Debug.WriteLine(ex);
+            Debug.WriteLine("Caught: " + ex.Message);
             caught = true;
         }
         Assert.IsTrue(caught);
