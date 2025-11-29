@@ -22,84 +22,6 @@ env:
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
   
 jobs:
-  # java_build_matrix:
-    # strategy:
-      # matrix:
-        # java_version: [11]
-        # os: [ubuntu-latest]
-    # name: build.java${{ matrix.java_version }}. ${{ matrix.os }}
-    # runs-on: ${{ matrix.os }}
-    # permissions:
-      # contents: read 
-    # steps:
-    # - name: Checkout sources
-      # uses: actions/checkout@v4
-      # with:
-        # ref: ${{ github.ref }}
-    # - if: runner.os == 'Windows'
-      # name: Get submodules on Windows
-      # shell: cmd
-      # run: cd ./scripts/misc && init_gitmodules.bat
-    # - if: runner.os == 'Linux' || runner.os == 'macOS'
-      # name: Get submodules on Linux/MacOS
-      # shell: bash
-      # run: cd ./scripts/misc && ./init_gitmodules.sh
-    # - if: runner.os == 'Windows'
-      # name: Get OpenCL for Windows
-      # shell: cmd
-      # run: cd ./scripts/misc && get_opencl.bat
-    # - if: runner.os == 'Linux'
-      # name: Get OpenCL for Linux
-      # shell: bash
-      # run: sudo apt install -y ocl-icd-opencl-dev
-    # - if: runner.os == 'macOS'
-      # name: Get OpenCL for MacOS
-      # shell: bash
-      # run: echo "OpenCL already installed"
-    # - name: Setup Java
-      # uses: actions/setup-java@v4
-      # with:
-        # distribution: 'temurin'
-        # java-version: ${{ matrix.java_version }}
-    # - name: Setup Gradle
-      # uses: gradle/actions/setup-gradle@v5
-    # - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
-      # name: Build GCC Native Libraries on Linux aarch64
-      # shell: bash
-      # run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=aarch64 USE_OPENCL=1 ENABLE_JNI=1 package
-    # - if: ${{ matrix.os == 'macos-15-intel' }}
-      # name: Build GCC Native Libraries on MacOS x86_64
-      # shell: bash
-      # run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64  ENABLE_JNI=1 package
-    # - if: ${{ matrix.os == 'macos-latest' }}
-      # name: Build GCC Native Libraries on MacOS aarch64
-      # shell: bash
-      # run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
-    # - if: runner.os == 'Windows'
-      # name: Build Java Libraries on Windows
-      # shell: cmd
-      # run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\include -DOPENCL_LIB=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\lib -i
-    # - if: runner.os == 'Linux' || runner.os == 'macOS'
-      # name: Build Java Libraries on Linux/MacOS
-      # shell: bash
-      # run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
-    # - if: runner.os == 'Windows'
-      # name: Setup directories
-      # shell: cmd
-      # run: mkdir $WIN_HTDOCS && mkdir $WIN_TEST_DIR
-    # - if: runner.os == 'Linux' || runner.os == 'macOS'
-      # name: Setup directories on Linux/MacOS
-      # shell: bash
-      # run: mkdir $LINUX_HTDOCS && mkdir $LINUX_TEST_DIR
-    # - if: runner.os == 'Windows'
-      # name: Test Java Libraries on Windows
-      # shell: cmd
-      # run: cd ./scripts/tests/java/win && test_java_ci.bat
-    # - if: runner.os == 'Linux' || runner.os == 'macOS'
-      # name: Test Java Libraries on Linux/MacOS
-      # shell: bash
-      # run: cd ./scripts/tests/java/linux_mac && ./test_java_ci.sh
-      
   dotnet_build_matrix:
     strategy:
       matrix:
@@ -154,7 +76,7 @@ jobs:
       name: Build Android Native Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle-android && gradlew.bat build :salmon-native-android -x test -i
-     - name: Salmon .NET Build
+    - name: Salmon .NET Build
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=DebugGPU /p:Platform=x64
     - if: runner.os == 'Windows'
