@@ -166,7 +166,7 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.DebugGPU.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
@@ -217,7 +217,7 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.ReleaseGPU.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
@@ -270,7 +270,7 @@
       <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.DebugGPU.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
@@ -323,7 +323,7 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.ReleaseGPU.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
