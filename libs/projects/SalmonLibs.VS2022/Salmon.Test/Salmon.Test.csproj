@@ -40,7 +40,7 @@
     <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
     <Exec Command="copy ..\x64\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
 	
   </Target>
