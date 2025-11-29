@@ -177,10 +177,6 @@ jobs:
     
     # Test
     - if: runner.os == 'Windows'
-      name: Setup directories
-      shell: cmd
-      run: mkdir $WIN_HTDOCS && mkdir $WIN_TEST_DIR
-    - if: runner.os == 'Windows'
       name: Test .NET Libraries on Windows
       shell: cmd
       run: cd ./scripts/tests/csharp/win && test_csharp_ci.bat
