@@ -114,6 +114,7 @@ model {
 		   			}
                 }
 
+				cCompiler.args '-g'
                 cCompiler.args '-O2'
                 cCompiler.args '-maes'
 				
