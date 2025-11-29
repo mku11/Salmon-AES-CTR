@@ -144,10 +144,10 @@
       <EnableUAC>false</EnableUAC>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGPU|Win32'">
@@ -166,10 +166,10 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -191,10 +191,10 @@
       <EnableUAC>false</EnableUAC>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGPU|Win32'">
@@ -217,10 +217,10 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
 	<PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -243,10 +243,10 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGPU|x64'">
@@ -269,6 +269,12 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>NuGet.exe pack SalmonNative.Debug.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -290,10 +296,10 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGPU|x64'">
@@ -317,10 +323,10 @@
 	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.Release.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Creating nuget package</Message>
+      <Message>Creating Nuget Package: SalmonNative $(Configuration)|$(Platform)</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
