@@ -14,7 +14,6 @@ on:
     branches: [ "wip-3.0.2" ]
 
 env:
-  
   WIN_TEST_DIR: C:\tmp\salmon\test
   LINUX_TEST_DIR: /tmp/salmon/test
   WIN_HTDOCS: C:\tmp\salmon
@@ -22,13 +21,8 @@ env:
   ENABLE_GPU: true
   OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
   
-  # TODO: move to container
-  WS_SERVER_URL: http://localhost:8080
-  HTTP_PORT: 8880
-  
 jobs:
   java_build_matrix:
-    container: javacont
     strategy:
       matrix:
         java_version: [11]
@@ -89,13 +83,6 @@ jobs:
       name: Build Java Libraries on Linux/MacOS
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
-    # - if: runner.os == 'Linux'
-      # name: Setup WebFS service
-      # shell: cmd
-      # run: cd ./scripts/misc && setup_webfs.sh
-    - if: runner.os == 'Linux'
-      name: Setup Http service
-      run: npm install -g http-server
     - if: runner.os == 'Windows'
       name: Setup directories
       shell: cmd
@@ -104,10 +91,6 @@ jobs:
       name: Setup directories on Linux/MacOS
       shell: bash
       run: mkdir $LINUX_HTDOCS && mkdir $LINUX_TEST_DIR
-    - if: runner.os == 'Linux'
-      name: Start Http Server
-      shell: bash
-      run: cd ./scripts/misc && ./start_http_server.sh &
     - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
