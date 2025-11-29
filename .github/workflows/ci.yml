@@ -88,14 +88,6 @@ jobs:
       
     # Test
     - if: runner.os == 'Windows'
-      name: Setup directories
-      shell: cmd
-      run: mkdir $WIN_HTDOCS && mkdir $WIN_TEST_DIR
-    - if: runner.os == 'Linux' || runner.os == 'macOS'
-      name: Setup directories on Linux/MacOS
-      shell: bash
-      run: mkdir $LINUX_HTDOCS && mkdir $LINUX_TEST_DIR
-    - if: runner.os == 'Windows'
       name: Test Java Libraries on Windows
       shell: cmd
       run: cd ./scripts/tests/java/win && test_java_ci.bat
