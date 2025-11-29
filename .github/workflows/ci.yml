@@ -16,11 +16,6 @@ on:
 env:
   WIN_TEST_DIR: C:\tmp\salmon\test
   LINUX_TEST_DIR: /tmp/salmon/test
-  WIN_HTDOCS: C:\tmp\salmon
-  LINUX_HTDOCS: /tmp/salmon
-  ENABLE_GPU: true
-  OPENCL_SDK_WIN_VERSION: OpenCL-SDK-v2025.07.23-Win-x64
-  
 jobs:
   dotnet_build_matrix:
     strategy:
@@ -45,18 +40,6 @@ jobs:
       name: Get submodules on Linux/MacOS
       shell: bash
       run: cd ./scripts/misc && ./init_gitmodules.sh
-    - if: runner.os == 'Windows'
-      name: Get OpenCL for Windows
-      shell: cmd
-      run: cd ./scripts/misc && get_opencl.bat
-    - if: runner.os == 'Linux'
-      name: Get OpenCL for Linux
-      shell: bash
-      run: sudo apt install -y ocl-icd-opencl-dev
-    - if: runner.os == 'macOS'
-      name: Get OpenCL for MacOS
-      shell: bash
-      run: echo "OpenCL already installed"
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -80,10 +63,17 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: gradle-${{ runner.os }}
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
-          gradle-${{ runner.os }}
-          gradle-
+          ${{ runner.os }}-gradle-
+    - name: Cache Nuget packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.vcxproj*', '**/*.csproj', '**/packages.config',) }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     - if: runner.os == 'Windows'
       name: Build Gradle Android Native Libraries on Windows
       shell: cmd
@@ -94,7 +84,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Build .NET on Windows
       working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild /property:Configuration=DebugGPU /p:Platform=x64
+      run: msbuild /property:Configuration=Debug /p:Platform=x64
     - if: runner.os == 'Windows'
       name: Setup directories
       shell: cmd
