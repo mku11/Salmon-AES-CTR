@@ -5,6 +5,15 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
+# Build and Test code
+# This workflow doesn't support:
+# * GPU build and tests
+# * SalmonWin tests (windows registry and connection to Salmon WinService)
+# * Salmon HttpFS and WSFS tests (need HTTP server and WebFS service in a container)
+# * Android tests
+# * .NET Android tests
+
+# Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
 name: BuildTest
 
 on:
@@ -17,17 +26,20 @@ env:
   WIN_TEST_DIR: C:\tmp\salmon\test
   LINUX_TEST_DIR: /tmp/salmon/test
 jobs:
-  dotnet_build_matrix:
+
+  # Java
+  java_build_matrix:
     strategy:
       matrix:
         java_version: [11]
-        dotnet_version: [8.0.x]
-        os: [windows-latest]
-    name: build.dotnet${{ matrix.dotnet_version }}.java${{ matrix.java_version }}. ${{ matrix.os }}
+        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
+    name: build.java${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
     steps:
+    
+    # Git
     - name: Checkout sources
       uses: actions/checkout@v4
       with:
@@ -40,6 +52,86 @@ jobs:
       name: Get submodules on Linux/MacOS
       shell: bash
       run: cd ./scripts/misc && ./init_gitmodules.sh
+    
+    # Toolchains and Build envs
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ matrix.java_version }}
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v5
+      
+    # GCC native libraries
+    - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
+      name: Build GCC Native Libraries on Linux aarch64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=aarch64 USE_OPENCL=1 ENABLE_JNI=1 package
+    - if: ${{ matrix.os == 'macos-15-intel' }}
+      name: Build GCC Native Libraries on MacOS x86_64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64  ENABLE_JNI=1 package
+    - if: ${{ matrix.os == 'macos-latest' }}
+      name: Build GCC Native Libraries on MacOS aarch64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
+    
+    # Gradle Build
+    - if: runner.os == 'Windows'
+      name: Build Java Libraries on Windows
+      shell: cmd
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\include -DOPENCL_LIB=\\..\\..\\libs\\deps\\OpenCL\\$OPENCL_SDK_WIN_VERSION\\lib -i
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Build Java Libraries on Linux/MacOS
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -DENABLE_GPU=$ENABLE_GPU -DOPENCL_INCLUDE=/usr/include -DOPENCL_LIB=/usr/lib/x86_64-linux-gnu/ -i
+      
+    # Test
+    - if: runner.os == 'Windows'
+      name: Setup directories
+      shell: cmd
+      run: mkdir $WIN_HTDOCS && mkdir $WIN_TEST_DIR
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Setup directories on Linux/MacOS
+      shell: bash
+      run: mkdir $LINUX_HTDOCS && mkdir $LINUX_TEST_DIR
+    - if: runner.os == 'Windows'
+      name: Test Java Libraries on Windows
+      shell: cmd
+      run: cd ./scripts/tests/java/win && test_java_ci.bat
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Test Java Libraries on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/tests/java/linux_mac && ./test_java_ci.sh
+      
+  # C# .NET
+  dotnet_build_matrix:
+    strategy:
+      matrix:
+        java_version: [11]
+        dotnet_version: [8.0.x]
+        os: [windows-latest]
+    name: build.dotnet${{ matrix.dotnet_version }}.java${{ matrix.java_version }}. ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read 
+    steps:
+    
+    # Git
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+    - if: runner.os == 'Windows'
+      name: Get submodules on Windows
+      shell: cmd
+      run: cd ./scripts/misc && init_gitmodules.bat
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Get submodules on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/misc && ./init_gitmodules.sh
+    
+    # Toolchains and Build envs
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
@@ -53,6 +145,8 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
+      
+    # Caches
     - name: Cache Gradle packages
       uses: actions/cache@v4
       with:
@@ -70,10 +164,14 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.vcxproj*', '**/*.csproj', '**/packages.config') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    
+    # Gradle Build
     - if: runner.os == 'Windows'
       name: Build Gradle Android Native Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle-android && gradlew.bat :salmon-native-android:build --settings-file settings-native.gradle -x test -i
+    
+    # MSBuild Build
     - name: Restore .NET dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild -t:restore
@@ -81,6 +179,8 @@ jobs:
       name: Build .NET on Windows
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=Debug /p:Platform=x64
+    
+    # Test
     - if: runner.os == 'Windows'
       name: Setup directories
       shell: cmd
