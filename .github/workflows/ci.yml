@@ -74,14 +74,25 @@ jobs:
       uses: darenm/Setup-VSTest@v1.2
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}
+        restore-keys: |
+          gradle-${{ runner.os }}
+          gradle-
     - if: runner.os == 'Windows'
-      name: Build Android Native Libraries on Windows
+      name: Build Gradle Android Native Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle-android && gradlew.bat :salmon-native-android:build --settings-file settings-native.gradle -x test -i
-    - name: Salmon Restore dependencies
+    - name: Restore .NET dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild -t:restore
-    - name: Salmon .NET Build
+    - if: runner.os == 'Windows'
+      name: Build .NET on Windows
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=DebugGPU /p:Platform=x64
     - if: runner.os == 'Windows'

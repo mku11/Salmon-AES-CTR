@@ -189,7 +189,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>..\SalmonNative\x64\Debug;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -220,7 +220,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-	  <AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x32\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -295,7 +295,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-	  <AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+	  <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
