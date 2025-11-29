@@ -38,7 +38,7 @@ public class SalmonNativeTests
     static int DEC_THREADS = 1;
 
     [ClassInitialize]
-    public void ClassInitialize()
+    public static void ClassInitialize(TestContext testContext)
     {
 		SalmonCoreTestHelper.Initialize();
 		
