@@ -299,7 +299,8 @@ public class SalmonFSTestHelper {
     }
 
     public static IFile generateFolder(String name, IFile parent, boolean rand) {
-        String dirName = name + (rand ? "_" + System.currentTimeMillis() : "");
+        String dirName = name + (rand ? "_" + System.currentTimeMillis() 
+			+ "" + (int) Math.round(new Random().nextFloat()*100) : "");
         IFile dir = parent.getChild(dirName);
         if (!dir.exists())
             dir = parent.createDirectory(dirName);

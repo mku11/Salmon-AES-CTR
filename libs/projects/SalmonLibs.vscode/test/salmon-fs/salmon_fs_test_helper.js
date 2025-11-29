@@ -294,7 +294,8 @@ export class SalmonFSTestHelper {
     }
 
     static async generateFolder(name, parent=SalmonFSTestHelper.TEST_OUTPUT_DIR, rand = true) {
-        let dirName = name + (rand ? "_" + Date.now() : "");
+        let dirName = name + (rand ? "_" + Date.now() 
+			+ "" + + Math.round(Math.random()*100): "");
         let dir = await parent.getChild(dirName);
         if(!await dir.exists())
             await dir.mkdir();

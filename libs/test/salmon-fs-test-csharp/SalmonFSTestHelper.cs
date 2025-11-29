@@ -309,7 +309,8 @@ public class SalmonFSTestHelper
 
     public static IFile GenerateFolder(string name, IFile parent, bool rand = true)
     {
-        string dirName = name + (rand ? "_" + Time.Time.CurrentTimeMillis() : "");
+        string dirName = name + (rand ? "_" + Time.Time.CurrentTimeMillis() 
+			+ "" + (int) Math.Round(new Random().NextDouble()*100) : "");
         IFile dir = parent.GetChild(dirName);
         if (!dir.Exists)
             dir.Mkdir();
