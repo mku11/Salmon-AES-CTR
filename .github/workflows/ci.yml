@@ -85,6 +85,10 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=DebugGPU /p:Platform=x64
     - if: runner.os == 'Windows'
+      name: Create Nuget Package
+      working-directory: ./libs/projects/SalmonLibs.VS2022/SalmonNative
+      run: NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases
+    - if: runner.os == 'Windows'
       name: Setup directories
       shell: cmd
       run: mkdir $WIN_HTDOCS && mkdir $WIN_TEST_DIR

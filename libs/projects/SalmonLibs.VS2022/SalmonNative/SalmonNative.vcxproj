@@ -269,12 +269,6 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>..\..\..\deps\OpenCL\OpenCL-SDK-v2025.07.23-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Creating nuget package</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
