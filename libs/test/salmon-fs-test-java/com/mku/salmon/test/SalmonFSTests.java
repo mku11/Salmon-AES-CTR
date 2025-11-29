@@ -470,7 +470,7 @@ public class SalmonFSTests {
         try {
             file2 = file.copy(dir);
         } catch (Exception ex) {
-            System.err.println(ex);
+            System.out.println(ex.getMessage());
             caught = true;
         }
         assertEquals(true, caught);
@@ -510,7 +510,7 @@ public class SalmonFSTests {
         try {
             file3.move(dir.getChild("folder1"));
         } catch (Exception ex) {
-            System.err.println(ex);
+            System.out.println(ex.getMessage());
             caught = true;
         }
         assertTrue(caught);

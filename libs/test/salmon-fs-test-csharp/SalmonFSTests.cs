@@ -566,7 +566,7 @@ public class SalmonFSTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine(ex.Message);
             caught = true;
         }
         Assert.AreEqual(true, caught);
@@ -609,7 +609,7 @@ public class SalmonFSTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine(ex.Message);
             caught = true;
         }
         Assert.IsTrue(caught);

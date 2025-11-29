@@ -1,3 +1,4 @@
+@ECHO ON
 set CURRDIR=%CD%
 
 :: ALL

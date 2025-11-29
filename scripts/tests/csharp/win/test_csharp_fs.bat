@@ -1,3 +1,4 @@
+@ECHO ON
 set CURRDIR=%CD%
 
 :: to run type VsDevCmd.bat in the windows console before running this script
