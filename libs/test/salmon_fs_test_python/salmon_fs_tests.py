@@ -61,7 +61,6 @@ class SalmonFSTests(TestCase):
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
-        threads = 2
 
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
         print("test_dir: " + test_dir)
