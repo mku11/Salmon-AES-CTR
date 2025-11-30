@@ -14,4 +14,4 @@ dotnet test --filter "ClassName=Mku.Salmon.Test.SalmonCoreTests" --no-build --lo
 export AES_PROVIDER_TYPE=AesIntrinsics
 dotnet test --filter "ClassName=Mku.Salmon.Test.SalmonCoreTests" --no-build --logger:"console;verbosity=detailed" -c Debug
 
-cd %CURRDIR%
+cd $CURRDIR

@@ -1,4 +1,3 @@
-#!/bin/bash -x
 CURRDIR=$(pwd)
 
 export ENABLE_GPU=false
