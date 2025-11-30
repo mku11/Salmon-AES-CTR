@@ -100,10 +100,9 @@ jobs:
   dotnet_android_native_build_matrix:
     strategy:
       matrix:
-        java_version: [11]
         dotnet_version: [8.0.x]
-        os: [windows-latest]
-    name: build.dotnet${{ matrix.dotnet_version }}.java${{ matrix.java_version }}. ${{ matrix.os }}
+        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
+    name: build.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -126,6 +125,10 @@ jobs:
     # Toolchains and Build envs
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
     - name: Setup Nuget
       uses: nuget/setup-nuget@v2
     - name: Setup VSTest Path
@@ -157,9 +160,10 @@ jobs:
       name: Build Gradle Android Native Libraries on Windows
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle-android && gradlew.bat :salmon-native-android:build --settings-file settings-native.gradle -x test -i
-    
+      
     # MSBuild Build
-    - name: Restore .NET dependencies
+    - if: runner.os == 'Windows'
+      name: Restore .NET dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild -t:restore
     - if: runner.os == 'Windows'
@@ -167,8 +171,34 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=Debug /p:Platform=x64
     
+    # DotNet Build
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Salmon.Core Restore workload dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
+      run: dotnet workload restore
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Salmon.Core Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
+      run: dotnet restore
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Salmon.Core Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
+      run: dotnet build --no-restore
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Salmon.FS Restore workload dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet workload restore
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Salmon.FS Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet restore
+    - if: runner.os == 'Linux' || runner.os == 'macOS'  
+      name: Salmon.FS Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet build --no-restore
+      
     # Test
     - if: runner.os == 'Windows'
       name: Test .NET Libraries on Windows
-      shell: cmd
-      run: cd ./scripts/tests/csharp/win && test_csharp_ci.bat
+      working-directory: ./scripts/tests/csharp/win
+      run: test_csharp_ci.bat
