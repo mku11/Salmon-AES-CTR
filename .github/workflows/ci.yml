@@ -186,6 +186,10 @@ jobs:
       name: Build .NET on Windows
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=Debug /p:Platform=x64
+    - if: runner.os == 'Windows'
+      name: Copy Native Libraries to SalmonTest
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: copy .\SalmonNative\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net8.0-windows\
     
     # DotNet Build
     # SalmonCore
@@ -256,3 +260,94 @@ jobs:
       name: Test .NET Libraries on Linux/MacOS
       shell: bash
       run: cd ./scripts/tests/csharp/linux_mac && ./test_csharp_ci.sh
+                
+  # Python
+  python_native_build_matrix:
+    strategy:
+      matrix:
+        python_version: [3.11]
+        os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
+    name: build.python${{ matrix.python_version }}.${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read 
+    steps:
+    
+    # Git
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+    - if: runner.os == 'Windows'
+      name: Get submodules on Windows
+      shell: cmd
+      run: cd ./scripts/misc && init_gitmodules.bat
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Get submodules on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/misc && ./init_gitmodules.sh
+    
+    # Toolchains and Build envs
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v5
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python_version }}
+        cache: 'pip'
+    - run: python -m pip install typeguard pycryptodome wrapt
+    
+    # Caches
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    # Gradle Build
+    - if: runner.os == 'Windows'
+      name: Build Gradle Native Libraries on Windows
+      shell: cmd
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat :salmon-native:build -x test -i
+    
+    # Build xcode native libraries
+    # - if: ${{ matrix.os == 'macos-15-intel' }}
+      # name: Build GCC Native Libraries on MacOS x86_64
+      # shell: bash
+      # run: cd ./libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
+    # - if: ${{ matrix.os == 'macos-latest' }}
+      # name: Build GCC Native Libraries on MacOS aarch64
+      # shell: bash
+      # run: cd ./libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
+    
+    # Build GCC native libraries
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      name: Build GCC Native Libraries on Linux x86_64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=x86_64 ENABLE_JNI=1 package
+    - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
+      name: Build GCC Native Libraries on Linux aarch64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=aarch64 ENABLE_JNI=1 package
+    - if: ${{ matrix.os == 'macos-15-intel' }}
+      name: Build GCC Native Libraries on MacOS x86_64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64 ENABLE_JNI=1 package
+    - if: ${{ matrix.os == 'macos-latest' }}
+      name: Build GCC Native Libraries on MacOS aarch64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
+    
+    # Test
+    - if: runner.os == 'Windows'
+      name: Test Python Libraries on Windows
+      shell: cmd
+      run: cd ./scripts/tests/python/win && test_python_ci.bat
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Test Python Libraries on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/tests/python/linux_mac && ./test_python_ci.sh

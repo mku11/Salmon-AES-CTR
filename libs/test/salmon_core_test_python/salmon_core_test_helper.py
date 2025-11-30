@@ -96,10 +96,12 @@ class SalmonCoreTestHelper:
     testCase: TestCase = TestCase()
 
     prj_path = "../../projects"
-    win_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
-    # mac_path = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
-    mac_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib"
-    linux_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
+    gradle_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/"
+    xcode_path = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/"
+    gcc_path = "/salmon-libs-gcc/lib/"
+    win_path = "salmon.dll"
+    mac_path = "libsalmon.dylib"
+    linux_path = "libsalmon.so"
 
     @staticmethod
     def initialize():
@@ -109,14 +111,28 @@ class SalmonCoreTestHelper:
 
         # set native library path
         platform_os: str = platform.system().upper()
-        print(platform_os)
+        arch: str = platform.processor()
+        
+        print("platform:", platform_os)
+        print("arch:", arch)
 
         if "WINDOWS" in platform_os:
-            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.win_path)
+            if arch == "x86_64":
+                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.win_path)
         elif "MAC" in platform_os or "DARWIN" in platform_os:
-            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
+            if arch == "x86_64":
+                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
+            elif arch = "aarch64":
+                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.xcode_path + "/aarch64"
+                + "/" + SalmonCoreTestHelper.mac_path)
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.linux_path)
+            if arch == "x86_64":
+                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.linux_path)
+            elif arch == "aarch64":
+                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64"
+                + "/" + SalmonCoreTestHelper.linux_path)
 
     @staticmethod
     def close():
