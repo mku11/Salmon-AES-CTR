@@ -49,7 +49,7 @@ describe('salmon-core', () => {
         SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
         SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
-        SalmonCoreTestHelper.initialize();
+        await SalmonCoreTestHelper.initialize();
 
         let providerType = ProviderType.Default;
         let aesProviderType = PARAMS["AES_PROVIDER_TYPE"];

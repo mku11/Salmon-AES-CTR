@@ -66,7 +66,7 @@ describe('salmon-httpfs', () => {
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
-        SalmonCoreTestHelper.initialize();
+        await SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
 
         let providerType = ProviderType.Default;

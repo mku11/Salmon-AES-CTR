@@ -33,8 +33,8 @@ describe('salmon-native', () => {
     var ENC_THREADS = 1;
     var DEC_THREADS = 1;
 
-    beforeAll(() => {
-        SalmonCoreTestHelper.initialize();
+    beforeAll(async () => {
+        await SalmonCoreTestHelper.initialize();
     });
 
     afterAll(() => {

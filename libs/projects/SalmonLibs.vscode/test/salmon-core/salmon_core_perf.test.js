@@ -31,8 +31,8 @@ import { SalmonCoreTestHelper } from './salmon_core_test_helper.js';
 describe('salmon-perf', () => {
     var TEST_PERF_SIZE = 8 * 1024 * 1024;
 	
-    beforeAll(() => {
-        SalmonCoreTestHelper.initialize();
+    beforeAll(async () => {
+        await SalmonCoreTestHelper.initialize();
         if(SalmonCoreTestHelper.isGPUEnabled() && 
             Platform.getPlatform() == PlatformType.Browser)
             WebGPU.enable(true);

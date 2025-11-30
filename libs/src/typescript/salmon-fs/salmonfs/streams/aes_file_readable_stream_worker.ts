@@ -36,11 +36,11 @@ let cacheBuffer: Buffer | null = null;
 
 let stopped: boolean[] = [false];
 async function receive(event: any) {
-    if (event.message = 'start')
+    if (event.message == 'start')
         await startRead(event);
-    else if (event.message = 'stop')
+    else if (event.message == 'stop')
         stopRead();
-    else if (event.message = 'close')
+    else if (event.message == 'close')
         await close();
 }
 

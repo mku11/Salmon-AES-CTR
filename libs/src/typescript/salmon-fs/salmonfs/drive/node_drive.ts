@@ -83,7 +83,7 @@ export class NodeDrive extends AesDrive {
      * When authorization fails.
      */
     public override onUnlockError(): void {
-        console.error("drive failed to unlock");
+        console.log("drive failed to unlock");
     }
 
     /**
