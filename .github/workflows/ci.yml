@@ -28,13 +28,13 @@ env:
   WIN_TEST_DIR: C:\tmp\salmon\test
   LINUX_TEST_DIR: /tmp/salmon/test
 jobs:                
-  # Python
-  python_native_build_matrix:
+  # JavaScript
+  js_native_build_matrix:
     strategy:
       matrix:
-        python_version: [3.11]
+        node_version: [21.x]
         os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
-    name: build.python${{ matrix.python_version }}.${{ matrix.os }}
+    name: build.js${{ matrix.node_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -57,12 +57,10 @@ jobs:
     # Toolchains and Build envs
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
-    - name: Setup Python
-      uses: actions/setup-python@v6
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
       with:
-        python-version: ${{ matrix.python_version }}
-        cache: 'pip'
-    - run: python -m pip install typeguard pycryptodome wrapt
+        node-version: ${{ matrix.node_version }}
     
     # Caches
     - name: Cache Gradle packages
@@ -109,12 +107,16 @@ jobs:
       shell: bash
       run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
     
+    # Transpile
+    - name: Build TS to JS
+      run: cd ./libs/projects/SalmonLibs.vscode && npm run build  
+    
     # Test
     - if: runner.os == 'Windows'
       name: Test Python Libraries on Windows
       shell: cmd
-      run: cd ./scripts/tests/python/win && test_python_ci.bat
+      run: cd ./scripts/tests/javascript/win && test_javascript_ci.bat
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Test Python Libraries on Linux/MacOS
       shell: bash
-      run: cd ./scripts/tests/python/linux_mac && ./test_python_ci.sh
+      run: cd ./scripts/tests/javascript/linux_mac && ./test_javascript_ci.sh

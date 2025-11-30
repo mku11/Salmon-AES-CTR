@@ -1,0 +1,24 @@
+set CURRDIR=%CD%
+
+set NODE_OPTIONS=--experimental-vm-modules
+
+:: ALL
+call test_javascript_core.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_core_multi.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_fs.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_fs_multi.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_native.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+call test_javascript_native_multi.bat
+if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
+
+cd %CURRDIR%
