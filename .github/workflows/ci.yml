@@ -198,7 +198,7 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Salmon.Core Build
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
-      run: dotnet build --no-restore -c Debug /p:Platform=x64
+      run: dotnet build --no-restore -c Debug
     # SalmonFS
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Salmon.FS Restore workload dependencies
@@ -211,7 +211,7 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'  
       name: Salmon.FS Build
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
-      run: dotnet build --no-restore -c Debug /p:Platform=x64
+      run: dotnet build --no-restore -c Debug
     # SalmonTest
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Salmon.Test Restore workload dependencies
@@ -224,10 +224,14 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'  
       name: Salmon.Test Build
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-      run: dotnet build --no-restore -c Debug /p:Platform=x64
+      run: dotnet build --no-restore -c Debug
     
     
     # Build GCC native libraries
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      name: Build GCC Native Libraries on Linux x86_64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=x86_64 ENABLE_JNI=1 package && cp -f ./lib/x86_64/libsalmon.so ../SalmonLibs.VS2022/Salmon.Test/bin/Debug/net8.0-windows/SalmonNative.dll
     - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
       name: Build GCC Native Libraries on Linux aarch64
       shell: bash
