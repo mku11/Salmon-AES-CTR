@@ -26,6 +26,7 @@ import { MemoryStream } from "../../simple-io/streams/memory_stream.js";
 import { AesStream } from "./streams/aes_stream.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";
+import { SecurityException } from "./security_exception.js";
 import { RandomAccessStream } from "../../simple-io/streams/random_access_stream.js";
 
 /**
@@ -72,9 +73,9 @@ export async function encryptData(data: Uint8Array, start: number, count: number
         }
         await stream.flush();
     }
-    catch (ex) {
-        console.error(ex);
-        throw ex;
+    catch (ex: any) {
+        console.log("Encryptor Error:", ex.message);
+        throw new SecurityException("Could not decrypt data", ex);
     }
     finally {
         await outputStream.close();

@@ -72,7 +72,7 @@ describe('salmon-fs', () => {
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
-        SalmonCoreTestHelper.initialize();
+        await SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();     
         
         let providerType = ProviderType.Default;
@@ -101,9 +101,12 @@ describe('salmon-fs', () => {
             let rootDir = await drive.getRoot();
             await rootDir.listFiles();
         } catch (ex) {
-            console.error(ex);
-            if (ex instanceof AuthException)
+            if (ex instanceof AuthException) {
+                console.log("Caught:", ex.message);
                 wrongPassword = true;
+            } else {
+                console.error(ex);
+            }
         }
         expect(wrongPassword).toBeTruthy();
     });
@@ -187,9 +190,12 @@ describe('salmon-fs', () => {
             await SalmonFSTestHelper.importAndExport(await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                 true, 24 + 10, false, true, true);
         } catch (ex) {
-            console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException) {
+                console.log("Caught:", ex.message);
                 integrityFailed = true;
+            } else {
+                console.error(ex);
+            }
         }
 
         expect(integrityFailed).toBeTruthy();
@@ -234,9 +240,10 @@ describe('salmon-fs', () => {
                 false, 0, true,
                 true, false);
         } catch (ex) {
-            console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException) {
+                console.error(ex);
                 failed = true;
+            }
         }
 
         expect(failed).toBeFalsy();
@@ -249,9 +256,12 @@ describe('salmon-fs', () => {
                 true, 20, false,
                 true, true);
         } catch (ex) {
-            console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException) {
+                console.log("Caught:", ex.message);
                 integrityFailed = true;
+            } else {
+                console.error(ex);
+            }
         }
 
         expect(integrityFailed).toBeTruthy();
@@ -317,9 +327,12 @@ describe('salmon-fs', () => {
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true, 45, true);
         } catch (ex) {
-            console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException) {
+                console.log("Caught:", ex.message);
                 caught = true;
+            } else {
+                console.error(ex);
+            }
         }
 
         expect(caught).toBeTruthy();
@@ -430,7 +443,7 @@ describe('salmon-fs', () => {
         try {
             file2 = await file.copy(dir);
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
         expect(true).toBe(caught);
@@ -470,7 +483,7 @@ describe('salmon-fs', () => {
         try {
             await file3.move(await dir.getChild("folder1"));
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
         expect(caught).toBeTruthy();

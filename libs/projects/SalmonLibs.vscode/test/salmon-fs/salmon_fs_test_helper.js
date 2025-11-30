@@ -539,7 +539,7 @@ export class SalmonFSTestHelper {
             await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
             success = true;
         } catch (ex) { 
-            console.log(ex);
+            console.log("Caught:", ex.message);
         }
 
         expect(success).toBeFalsy();
@@ -602,10 +602,13 @@ export class SalmonFSTestHelper {
             let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
             importSuccess = aesFile != null;
         } catch (ex) {
-            console.error(ex);
             // TODO: check specific exception
             if(ex instanceof RangeExceededException)
                 importSuccess = false;
+            if(importSuccess == shouldImport)
+                console.log("Caught:", ex.message);
+            else
+                console.error(ex);
         }
 
         expect(importSuccess).toBe(shouldImport);
@@ -772,7 +775,7 @@ export class SalmonFSTestHelper {
             expect(BitConverter.toLong(nonce, 0, 8)).toBe(5);
         }
         catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
         expect(caught).toBeTruthy();

@@ -88,7 +88,7 @@ describe('salmon-core', () => {
         try {
             await TextEncryptor.encryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES);
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
 
@@ -102,9 +102,12 @@ describe('salmon-core', () => {
         try {
             await TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null);
         } catch (ex) {
-            console.error(ex);
-            if (ex instanceof SecurityException)
+            if (ex instanceof SecurityException) {
+                console.log("Caught:", ex.message);
                 caught = true;
+            } else {
+                console.error(ex);
+            }
         }
 
         expect(caught).toBeTruthy();
@@ -119,7 +122,7 @@ describe('salmon-core', () => {
             let encText = await TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
             await TextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, EncryptionFormat.Generic);
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
         expect(caught).toBeTruthy();
@@ -134,10 +137,9 @@ describe('salmon-core', () => {
             let encText = await TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES);
             await TextDecryptor.decryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES);
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex.message);
             caught = true;
         }
-
         expect(caught).toBeTruthy();
     });
 
@@ -453,9 +455,12 @@ describe('salmon-core', () => {
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, 
                 SalmonCoreTestHelper.MAX_ENC_COUNTER);
         } catch (throwable) {
-            console.error(throwable);
-            if (throwable instanceof RangeExceededException || throwable instanceof Error)
+            if (throwable instanceof RangeExceededException || throwable instanceof Error) {
+                console.log("Caught:", throwable.message);
                 caught = true;
+            } else {
+                console.error(throwable);
+            }
         }
 
         expect(caught).toBeTruthy();

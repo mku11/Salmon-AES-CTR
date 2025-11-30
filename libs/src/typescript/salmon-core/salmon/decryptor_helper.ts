@@ -71,8 +71,8 @@ export async function decryptData(data: Uint8Array, start: number, count: number
             totalChunkBytesRead += bytesRead;
         }
         await outputStream.flush();
-    } catch (ex) {
-        console.error(ex);
+    } catch (ex: any) {
+        console.log("Decryptor Error:", ex.message);
         throw new SecurityException("Could not decrypt data", ex);
     } finally {
         if (inputStream)

@@ -33,10 +33,9 @@ import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { SeekOrigin } from '../../lib/simple-io/streams/random_access_stream.js';
 import { AESCTRTransformer } from '../../lib/salmon-core/salmon/transform/aes_ctr_transformer.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
-import { Platform, OSType } from '../../lib/simple-io/platform/platform.js';
+import { Platform, OSType, PlatformType } from '../../lib/simple-io/platform/platform.js';
 import { NativeProxy } from '../../lib/salmon-core/salmon/bridge/native_proxy.js';
 import { WebGPU } from '../../lib/salmon-core/salmon/bridge/webgpu.js';
 
@@ -74,12 +73,14 @@ export class SalmonCoreTestHelper {
     static decryptor;
 
 	static prjPath = "../../../../projects";
-    static winPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll";
-    // static macPath = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib";
-    static macPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib";
-    static linuxPath = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so";
+	static gradlePath = "salmon-libs-gradle/salmon-native/build/libs/salmon/shared";
+    static xcodePath = "salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release";
+    static gccPath = "salmon-libs-gcc/lib";
+	static winPath = "salmon.dll";
+    static macPath = "libsalmon.dylib";
+    static linuxPath = "libsalmon.so";
 	
-    static initialize() {
+    static async initialize() {
         let enableGPU = PARAMS["AES_PROVIDER_TYPE"] == "AesGPU";
         WebGPU.enable(enableGPU);
         WebGPU.enableLog(enableGPU);
@@ -89,17 +90,55 @@ export class SalmonCoreTestHelper {
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
 		
 		let platformOS = Platform.getOS();
+		let arch = "";
+        let currDir = "";
+        if(Platform.getPlatform() == PlatformType.NodeJs) {
+            arch = process.arch;
+            // for Linux we need the absolute path
+            const { fileURLToPath } = await import('node:url');
+            const __filename = fileURLToPath(import.meta.url);
+            let idx = __filename.lastIndexOf("\\");
+            if(idx < 0)
+                idx = __filename.lastIndexOf("/");
+            if(idx >= 0)
+                currDir = __filename.substring(0,idx);
+        }
+		
+        console.log("currDir:", currDir);
+		console.log("platform:", OSType[platformOS]);
+		console.log("arch:", arch);
+		
+		let libraryPath = "";
 		switch(platformOS) {
 			case OSType.Linux:
-				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.linuxPath);
+				if(arch == 'x64')
+					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
+					+ "/" + SalmonCoreTestHelper.gccPath + "/x86_64"
+					+ "/" + SalmonCoreTestHelper.linuxPath;
+				else if(arch == 'arm')
+					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
+					+ "/" + SalmonCoreTestHelper.gccPath + "/aarch64" 
+					+ "/" + SalmonCoreTestHelper.linuxPath;
 				break;
 			case OSType.Windows:
-				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.winPath);
+				if(arch == 'x64')
+					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
+					+ "/" + SalmonCoreTestHelper.gradlePath 
+					+ "/" + SalmonCoreTestHelper.winPath;
 				break;
 			case OSType.Darwin:
-				NativeProxy.setLibraryPath(SalmonCoreTestHelper.prjPath + SalmonCoreTestHelper.macPath);
+				if(arch == 'x64')
+					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
+					+ "/" + SalmonCoreTestHelper.gccPath + "/x86_64"
+					+ "/" + SalmonCoreTestHelper.macPath;
+				else if(arch == 'arm')
+					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
+					+ "/" + SalmonCoreTestHelper.gccPath + "/aarch64" 
+					+ "/" + SalmonCoreTestHelper.macPath;
 				break;
 		}
+		console.log("library path: " + libraryPath);
+        NativeProxy.setLibraryPath(libraryPath);
     }
 	
     static close() {
@@ -418,7 +457,6 @@ export class SalmonCoreTestHelper {
         try {
             stream.getTransformer().increaseCounter(counter);
         } catch (ex) {
-            console.error(ex);
             if (typeof ex.getCause !== 'undefined' && ex.getCause())
                 throw ex.getCause();
             else
