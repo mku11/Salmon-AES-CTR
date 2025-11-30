@@ -125,16 +125,16 @@ class SalmonCoreTestHelper:
         elif "MAC" in platform_os or "DARWIN" in platform_os:
             if arch == "x86_64":
                 library_path = SalmonCoreTestHelper.prj_path + \
-                + "/" + SalmonCoreTestHelper.gradle_path \
+                + "/" + SalmonCoreTestHelper.gcc_path + "/x86_64" \
                 + "/" + SalmonCoreTestHelper.mac_path
             elif arch == "aarch64":
                 library_path = SalmonCoreTestHelper.prj_path \
-                + "/" + SalmonCoreTestHelper.xcode_path + "/aarch64" \
+                + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64" \
                 + "/" + SalmonCoreTestHelper.mac_path
         elif "LINUX" in platform_os:
             if arch == "x86_64" or arch == "AMD64":
                 library_path = SalmonCoreTestHelper.prj_path \
-                + "/" + SalmonCoreTestHelper.gradle_path \
+                + "/" + SalmonCoreTestHelper.gcc_path + "/x86_64" \
                 + "/" + SalmonCoreTestHelper.linux_path
             elif arch == "aarch64":
                 library_path = SalmonCoreTestHelper.prj_path \
