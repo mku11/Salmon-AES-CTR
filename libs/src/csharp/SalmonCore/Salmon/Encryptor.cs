@@ -267,10 +267,10 @@ public class Encryptor
             }
             stream.Flush();
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
-            throw;
+			Console.WriteLine("Encryptor error: " + ex.Message);
+            throw new SecurityException("Could not encrypt data", ex);
         }
         finally
         {

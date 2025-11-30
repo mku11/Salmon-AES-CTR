@@ -99,7 +99,7 @@ public class SalmonCoreTests
         }
         catch (SecurityException ex)
         {
-            Console.WriteLine("Caught: " + ex);
+            Console.WriteLine("Caught: " + ex.Message);
             caught = true;
         }
 

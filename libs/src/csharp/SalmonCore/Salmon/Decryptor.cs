@@ -282,7 +282,7 @@ public class Decryptor
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Decryptor error: " + ex.Message);
             throw new SecurityException("Could not decrypt data", ex);
         }
         finally

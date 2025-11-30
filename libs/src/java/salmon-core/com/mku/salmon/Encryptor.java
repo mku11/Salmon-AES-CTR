@@ -325,8 +325,8 @@ public class Encryptor {
             }
             stream.flush();
         } catch (IOException ex) {
-            System.out.println("Decryptor error: " + ex.getMessage());
-            throw ex;
+            System.out.println("Encryptor error: " + ex.getMessage());
+            throw new SecurityException("Could not decrypt data", ex);
         } finally {
             outputStream.close();
             if (stream != null)
