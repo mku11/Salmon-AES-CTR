@@ -249,4 +249,4 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Test .NET Libraries on Linux/MacOS
       shell: bash
-      run: ./scripts/tests/csharp/linux_mac && ./test_csharp_ci.sh
+      run: cd ./scripts/tests/csharp/linux_mac && ./test_csharp_ci.sh
