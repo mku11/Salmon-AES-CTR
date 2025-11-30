@@ -61,6 +61,8 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node_version }}
+    - name: Install Node modules
+      run: npm install
     
     # Caches
     - name: Cache Gradle packages
