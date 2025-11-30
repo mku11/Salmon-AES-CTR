@@ -118,10 +118,10 @@ jobs:
     
     # Test
     - if: runner.os == 'Windows'
-      name: Test Python Libraries on Windows
+      name: Test JS Libraries on NodeJS on Windows
       shell: cmd
       run: cd ./scripts/tests/javascript/win && test_javascript_ci.bat
     - if: runner.os == 'Linux' || runner.os == 'macOS'
-      name: Test Python Libraries on Linux/MacOS
+      name: Test JS Libraries on NodeJS on Linux/MacOS
       shell: bash
       run: cd ./scripts/tests/javascript/linux_mac && ./test_javascript_ci.sh
