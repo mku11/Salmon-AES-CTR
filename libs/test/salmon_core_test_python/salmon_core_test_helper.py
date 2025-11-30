@@ -96,9 +96,9 @@ class SalmonCoreTestHelper:
     testCase: TestCase = TestCase()
 
     prj_path = "../../projects"
-    gradle_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/"
-    xcode_path = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/"
-    gcc_path = "/salmon-libs-gcc/lib/"
+    gradle_path = "salmon-libs-gradle/salmon-native/build/libs/salmon/shared"
+    xcode_path = "salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release"
+    gcc_path = "salmon-libs-gcc/lib"
     win_path = "salmon.dll"
     mac_path = "libsalmon.dylib"
     linux_path = "libsalmon.so"
@@ -111,29 +111,38 @@ class SalmonCoreTestHelper:
 
         # set native library path
         platform_os: str = platform.system().upper()
-        arch: str = platform.processor()
+        arch: str = platform.machine()
         
         print("platform:", platform_os)
         print("arch:", arch)
-
+    
+        library_path: str = "";
         if "WINDOWS" in platform_os:
-            if arch == "x86_64":
-                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.win_path)
+            if arch == "x86_64" or arch == "AMD64":
+                library_path = SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.gradle_path \
+                + "/" + SalmonCoreTestHelper.win_path
         elif "MAC" in platform_os or "DARWIN" in platform_os:
             if arch == "x86_64":
-                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
-            elif arch = "aarch64":
-                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path \
-                + "/" + SalmonCoreTestHelper.xcode_path + "/aarch64"
-                + "/" + SalmonCoreTestHelper.mac_path)
-        elif "LINUX" in platform_os:
-            if arch == "x86_64":
-                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.linux_path)
+                library_path = SalmonCoreTestHelper.prj_path + \
+                + "/" + SalmonCoreTestHelper.gradle_path \
+                + "/" + SalmonCoreTestHelper.mac_path
             elif arch == "aarch64":
-                NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path \
-                + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64"
-                + "/" + SalmonCoreTestHelper.linux_path)
-
+                library_path = SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.xcode_path + "/aarch64" \
+                + "/" + SalmonCoreTestHelper.mac_path
+        elif "LINUX" in platform_os:
+            if arch == "x86_64" or arch == "AMD64":
+                library_path = SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.gradle_path \
+                + "/" + SalmonCoreTestHelper.linux_path
+            elif arch == "aarch64":
+                library_path = SalmonCoreTestHelper.prj_path \
+                + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64" \
+                + "/" + SalmonCoreTestHelper.linux_path
+        print("library path: " + library_path)
+        NativeProxy.set_library_path(library_path);
+        
     @staticmethod
     def close():
         if SalmonCoreTestHelper.encryptor:
