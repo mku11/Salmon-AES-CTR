@@ -133,7 +133,8 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}
     - name: Setup Nuget
       uses: nuget/setup-nuget@v2
-    - name: Setup VSTest Path
+    - if: runner.os == 'Windows'
+      name: Setup VSTest Path
       uses: darenm/Setup-VSTest@v1.2
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
