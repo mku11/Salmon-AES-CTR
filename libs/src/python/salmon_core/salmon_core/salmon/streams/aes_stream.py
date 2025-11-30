@@ -562,7 +562,7 @@ class AesStream(RandomAccessStream):
             except (SecurityException, RangeExceededException, IntegrityException) as ex:
                 if isinstance(ex, IntegrityException) and self.__fail_silently:
                     return -1
-                raise IOError("Could not read from stream: ") from ex
+                raise IOError("Could not read from stream") from ex
         return v_bytes
 
     def write(self, buffer: bytearray, offset: int, count: int):

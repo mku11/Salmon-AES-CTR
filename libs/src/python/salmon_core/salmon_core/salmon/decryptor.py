@@ -107,7 +107,7 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
             total_chunk_bytes_read += bytes_read
         output_stream.flush()
     except (IOError, SecurityException, IntegrityException) as ex:
-        print(ex, file=sys.stderr)
+        print("Encryptor error:", ex)
         raise SecurityException("Could not decrypt data") from ex
     finally:
         if input_stream:
@@ -278,7 +278,6 @@ class Decryptor:
                 # catch any errors within the children processes
                 f.result()
             except Exception as ex1:
-                print(ex1, file=sys.stderr)
                 ex = ex1
                 # cancel all tasks
                 shm_cancel.buf[0] = 1

@@ -584,7 +584,7 @@ class SalmonFSTestHelper:
             SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
             success = True
         except Exception as ignored:
-            print("failed: " + str(ignored), file=sys.stderr)
+            print("Caught:", ignored)
         SalmonFSTestHelper.testCase.assertFalse(success)
         drive.close()
 
@@ -825,7 +825,7 @@ class SalmonFSTestHelper:
             nonce = sequencer.next_nonce("AAAA")
             SalmonFSTestHelper.testCase.assertEqual(5, BitConverter.to_long(nonce, 0, 8))
         except RangeExceededException as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
         SalmonFSTestHelper.testCase.assertTrue(caught)
 

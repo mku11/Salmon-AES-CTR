@@ -292,7 +292,6 @@ class AesFileImporter:
             if self.__lastException:
                 raise self.__lastException
         except Exception as ex:
-            print(ex, file=sys.stderr)
             self.__failed = True
             self.__stopped[0] = True
             raise ex

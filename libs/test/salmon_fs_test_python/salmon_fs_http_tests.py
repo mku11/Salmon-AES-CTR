@@ -108,7 +108,7 @@ class SalmonFSHttpTests(TestCase):
             drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                    SalmonCoreTestHelper.TEST_FALSE_PASSWORD)
         except Exception as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             wrong_password = True
         self.assertTrue(wrong_password)
 

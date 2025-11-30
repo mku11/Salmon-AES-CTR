@@ -97,7 +97,7 @@ class SalmonCoreTests(TestCase):
         try:
             TextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES)
         except (TypeCheckError, SecurityException) as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
 
         self.assertTrue(caught)
@@ -109,7 +109,7 @@ class SalmonCoreTests(TestCase):
         try:
             TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None)
         except (TypeCheckError, SecurityException) as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
         except Exception as e:
             print(e, file=sys.stderr)
@@ -125,7 +125,7 @@ class SalmonCoreTests(TestCase):
                                                     SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
             TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, EncryptionFormat.Generic)
         except Exception as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
 
         self.assertTrue(caught)
@@ -139,7 +139,7 @@ class SalmonCoreTests(TestCase):
                                                     SalmonCoreTestHelper.TEST_NONCE_BYTES)
             TextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES)
         except Exception as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
 
         self.assertTrue(caught)
@@ -466,7 +466,7 @@ class SalmonCoreTests(TestCase):
     def test_hold_ctr_value(self):
         caught = False
         try:
-            SalmonCoreTestHelper.testCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES,
+            SalmonCoreTestHelper.test_counter_value(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                   SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                   SalmonCoreTestHelper.MAX_ENC_COUNTER - 1)
         except Exception as throwable:

@@ -61,12 +61,14 @@ class SalmonFSTests(TestCase):
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
+        threads = 2
 
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
         print("test_dir: " + test_dir)
         print("test_mode: " + str(test_mode))
         print("threads: " + str(threads))
-        print("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL)
+        if test_mode == TestMode.WebService:
+            print("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL)
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
@@ -200,8 +202,9 @@ class SalmonFSTests(TestCase):
                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                 True, 24 + 10, False, True, True)
         except Exception as ex:
-            print(str(ex.__cause__), file=sys.stderr)
+
             if isinstance(ex.__cause__, IntegrityException) or "Data corrupt or tampered" in str(ex.__cause__):
+                print("Caught:", ex)
                 integrity_failed = True
             else:
                 raise ex
@@ -442,7 +445,7 @@ class SalmonFSTests(TestCase):
         try:
             file2 = file.copy(v_dir)
         except Exception as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
 
         self.assertEqual(True, caught)
@@ -482,7 +485,7 @@ class SalmonFSTests(TestCase):
         try:
             file3.move(v_dir.get_child("folder1"))
         except Exception as ex:
-            print(ex, file=sys.stderr)
+            print("Caught:", ex)
             caught = True
 
         self.assertTrue(caught)
