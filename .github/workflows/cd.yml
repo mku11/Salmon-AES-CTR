@@ -9,7 +9,7 @@
 # This workflow should only run in the main branch
 
 # Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
-name: BuildPackageRelease
+name: CD.BuildPackageRelease
 
 on:
   push:

@@ -14,7 +14,7 @@
 # * .NET Android tests
 
 # Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
-name: BuildTest
+name: CI.BuildTest
 
 on:
   push:
@@ -123,9 +123,11 @@ jobs:
       run: cd ./scripts/misc && ./init_gitmodules.sh
     
     # Toolchains and Build envs
-    - name: Setup MSBuild.exe
+    - if: runner.os == 'Windows'
+      name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
-    - name: Setup .NET
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
