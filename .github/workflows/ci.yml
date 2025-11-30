@@ -61,8 +61,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node_version }}
-    - name: Install Node modules
-      run: npm install
     
     # Caches
     - name: Cache Gradle packages
@@ -109,6 +107,11 @@ jobs:
       shell: bash
       run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 package
     
+    # Install Node modules
+    - name: Install Node modules
+      working-directory: ./libs/projects/SalmonLibs.vscode
+      run: npm install
+      
     # Transpile
     - name: Build TS to JS
       run: cd ./libs/projects/SalmonLibs.vscode && npm run build  
