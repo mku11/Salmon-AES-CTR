@@ -41,10 +41,4 @@
 	<!-- Uncomment to enable stepping in to native code from visual studio -->
     <!-- <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" /> -->
   </ItemGroup>
-
-	<!-- Uncomment to enable stepping in to native code from visual studio -->
-  <!-- <Target Name="PostBuild" BeforeTargets="PostBuildEvent"> -->
-    <!-- <Exec Command="copy ..\x64\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" /> -->
-  <!-- </Target> -->
-
 </Project>

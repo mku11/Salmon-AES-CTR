@@ -12,6 +12,8 @@
 # * Salmon HttpFS and WSFS tests (need HTTP server and WebFS service in a container)
 # * Android tests
 # * .NET Android tests
+# * Python build and tests
+# * JavaScript build and tests
 
 # Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
 name: CI.BuildTest
@@ -248,7 +250,7 @@ jobs:
     # Test
     - if: runner.os == 'Windows'
       name: Test .NET Libraries on Windows
-      shell: bash
+      shell: cmd
       run: cd ./scripts/tests/csharp/win && test_csharp_ci.bat
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Test .NET Libraries on Linux/MacOS
