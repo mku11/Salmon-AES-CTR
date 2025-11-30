@@ -1,4 +1,4 @@
-CURRDIR=(pwd)
+CURRDIR=$(pwd)
 
 # ALL
 ./test_python_core.sh
