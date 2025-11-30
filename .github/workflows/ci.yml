@@ -249,7 +249,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Test .NET Libraries on Windows
       shell: bash
-      run: ./scripts/tests/csharp/win && test_csharp_ci.bat
+      run: cd ./scripts/tests/csharp/win && test_csharp_ci.bat
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Test .NET Libraries on Linux/MacOS
       shell: bash

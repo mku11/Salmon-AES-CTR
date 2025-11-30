@@ -99,7 +99,7 @@ public class SalmonCoreTests
         }
         catch (SecurityException ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex);
             caught = true;
         }
 
@@ -118,7 +118,7 @@ public class SalmonCoreTests
         }
         catch (SecurityException ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex.Message);
             caught = true;
         }
         catch (Exception e)
@@ -142,7 +142,7 @@ public class SalmonCoreTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex.Message);
             caught = true;
         }
 
@@ -163,7 +163,7 @@ public class SalmonCoreTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex.Message);
             caught = true;
         }
 
@@ -544,9 +544,13 @@ public class SalmonCoreTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
-            if (ex.InnerException.GetType() == typeof(RangeExceededException) || ex.InnerException.GetType() == typeof(ArgumentOutOfRangeException))
+
+            if (ex.InnerException.GetType() == typeof(RangeExceededException) || ex.InnerException.GetType() == typeof(ArgumentOutOfRangeException)) {
                 caught = true;
+				Console.WriteLine("Caught: " + ex.Message);
+			} else {
+				Console.Error.WriteLine(ex);
+			}
         }
 
         Assert.IsTrue(caught);
@@ -564,9 +568,13 @@ public class SalmonCoreTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
-            if (ex.GetType() == typeof(RangeExceededException))
+            
+            if (ex.GetType() == typeof(RangeExceededException)) {
                 caught = true;
+				Console.WriteLine("Caught: " + ex.Message);
+			} else {
+				Console.Error.WriteLine(ex);
+			}
         }
 
         Assert.IsFalse(caught);

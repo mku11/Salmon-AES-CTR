@@ -471,11 +471,12 @@ public class SalmonFSTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
-            if (ex.GetType() == typeof(IntegrityException))
+            if (ex.GetType() == typeof(IntegrityException)) {
                 caught = true;
-            else
+				Console.Error.WriteLine(ex);
+            } else {
                 throw;
+			}
         }
 
         Assert.IsFalse(caught);
