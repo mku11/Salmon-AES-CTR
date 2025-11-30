@@ -124,7 +124,7 @@ class SalmonCoreTestHelper:
                 + "/" + SalmonCoreTestHelper.win_path
         elif "MAC" in platform_os or "DARWIN" in platform_os:
             if arch == "x86_64":
-                library_path = SalmonCoreTestHelper.prj_path + \
+                library_path = SalmonCoreTestHelper.prj_path \
                 + "/" + SalmonCoreTestHelper.gcc_path + "/x86_64" \
                 + "/" + SalmonCoreTestHelper.mac_path
             elif arch == "aarch64":
