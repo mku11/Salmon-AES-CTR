@@ -36,11 +36,13 @@ let cacheBuffer: Buffer | null = null;
 
 let stopped: boolean[] = [false];
 async function receive(event: any) {
-    if (event.message == 'start')
-        await startRead(event);
-    else if (event.message == 'stop')
+    let params = Platform.getPlatform() == PlatformType.NodeJs ? 
+        event : event.data;
+    if (params.message == 'start')
+        await startRead(params);
+    else if (params.message == 'stop')
         stopRead();
-    else if (event.message == 'close')
+    else if (params.message == 'close')
         await close();
 }
 
@@ -55,9 +57,8 @@ async function close() {
         cacheBuffer.clear();
 }
 
-async function startRead(event: any): Promise<void> {
+async function startRead(params: any): Promise<void> {
     try {
-        let params = Platform.getPlatform() == PlatformType.NodeJs ? event : event.data;
         if(params.allowClearTextTraffic)
             HttpSyncClient.setAllowClearTextTraffic(true);
         let chunkBytesRead: number = 0;
