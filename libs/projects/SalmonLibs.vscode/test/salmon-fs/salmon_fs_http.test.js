@@ -92,7 +92,7 @@ describe('salmon-httpfs', () => {
         try {
             let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD);
         } catch (ex) {
-            console.error(ex);
+            console.log("Caught:", ex);
             wrongPassword = true;
         }
         expect(wrongPassword).toBeTruthy();
