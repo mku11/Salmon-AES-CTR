@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { addBestParameters, addBestTestSuites, addBestUserNotes } from '../best/assets/js/best.js';
-import { ProviderType } from "../../lib/salmon-core/salmon/streams/provider_type.js";
+import { ProviderType } from "../lib/salmon-core/salmon/streams/provider_type.js";
 
 // set test parameters for Best
 var testParams = [
