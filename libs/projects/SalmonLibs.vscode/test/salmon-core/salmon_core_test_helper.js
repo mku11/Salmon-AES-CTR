@@ -115,7 +115,7 @@ export class SalmonCoreTestHelper {
 					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
 					+ "/" + SalmonCoreTestHelper.gccPath + "/x86_64"
 					+ "/" + SalmonCoreTestHelper.linuxPath;
-				else if(arch == 'arm')
+				else if(arch == 'arm64')
 					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
 					+ "/" + SalmonCoreTestHelper.gccPath + "/aarch64" 
 					+ "/" + SalmonCoreTestHelper.linuxPath;
@@ -131,7 +131,7 @@ export class SalmonCoreTestHelper {
 					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
 					+ "/" + SalmonCoreTestHelper.gccPath + "/x86_64"
 					+ "/" + SalmonCoreTestHelper.macPath;
-				else if(arch == 'arm')
+				else if(arch == 'arm64')
 					libraryPath = currDir + "/" + SalmonCoreTestHelper.prjPath 
 					+ "/" + SalmonCoreTestHelper.gccPath + "/aarch64" 
 					+ "/" + SalmonCoreTestHelper.macPath;
