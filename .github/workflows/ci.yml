@@ -8,12 +8,12 @@
 # Build and Test code
 # This workflow doesn't support:
 # * GPU build and tests
-# * SalmonWin tests (windows registry and connection to Salmon WinService)
+# * Salmon WinService
+# * SalmonWin Java and C# tests
 # * Salmon HttpFS and WSFS tests (need HTTP server and WebFS service in a container)
 # * Android tests
 # * .NET Android tests
-# * Python build and tests
-# * JavaScript build and tests
+# * JS Web Browser tests
 
 # Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
 name: CI.BuildTest
