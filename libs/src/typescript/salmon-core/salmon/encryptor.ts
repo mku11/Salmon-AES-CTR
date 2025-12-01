@@ -36,7 +36,7 @@ import { Platform, PlatformType } from "../../simple-io/platform/platform.js";
  * Make sure you use setWorkerPath() with the correct worker script.
  */
 export class Encryptor {
-    #workerPath = './lib/salmon-core/salmon/encryptor_worker.js';
+    #workerPath: string = "";
 
     /**
      * The number of parallel threads to use.
@@ -91,7 +91,7 @@ export class Encryptor {
      */
     public async encrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array,
         format: EncryptionFormat = EncryptionFormat.Salmon,
-        integrity: boolean = false, hashKey: Uint8Array | null = null, 
+        integrity: boolean = false, hashKey: Uint8Array | null = null,
         chunkSize: number = 0): Promise<Uint8Array> {
         if (key == null)
             throw new SecurityException("Key is missing");
@@ -130,7 +130,7 @@ export class Encryptor {
      * @param {boolean} integrity  True to apply integrity.
      */
     async #encryptDataParallel(data: Uint8Array, outData: Uint8Array,
-        key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array, 
+        key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         format: EncryptionFormat,
         chunkSize: number, integrity: boolean): Promise<void> {
 
@@ -151,13 +151,13 @@ export class Encryptor {
             else
                 partSize = minPartSize;
             runningThreads = Math.floor(data.length / partSize);
-			if (runningThreads > this.#threads)
-				runningThreads = this.#threads;
+            if (runningThreads > this.#threads)
+                runningThreads = this.#threads;
         }
 
-        await this.#submitEncryptJobs(runningThreads, partSize, 
-            data, outData, 
-            key, hashKey, nonce, format, 
+        await this.#submitEncryptJobs(runningThreads, partSize,
+            data, outData,
+            key, hashKey, nonce, format,
             integrity, chunkSize);
     }
 
@@ -180,32 +180,34 @@ export class Encryptor {
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         format: EncryptionFormat, integrity: boolean, chunkSize: number): Promise<void> {
         this.#promises = [];
+        if (!this.#workerPath)
+            this.#workerPath = await Platform.getAbsolutePath("encryptor_worker.js", import.meta.url);
         for (let i = 0; i < runningThreads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if (Platform.getPlatform() == PlatformType.Browser) {
-                    if(this.#workers[i] == null)
+                    if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                     this.#workers[i].removeEventListener('error', null);
-				    this.#workers[i].removeEventListener('message', null);
+                    this.#workers[i].removeEventListener('message', null);
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
-                        if(event.data instanceof Error)
-							reject(event.data);
-						else
-							resolve(event.data);
+                        if (event.data instanceof Error)
+                            reject(event.data);
+                        else
+                            resolve(event.data);
                     });
                     this.#workers[i].addEventListener('error', (event: any) => {
                         reject(event);
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    if(this.#workers[i] == null)
+                    if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath);
                     this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
-						if(event.data instanceof Error)
-							reject(event);
-						else
-							resolve(event);
+                        if (event.data instanceof Error)
+                            reject(event);
+                        else
+                            resolve(event);
                     });
                     this.#workers[i].on('error', (event: any) => {
                         reject(event);
@@ -233,24 +235,23 @@ export class Encryptor {
                 }
             }
         }).catch((event) => {
-			console.error(event);
-			if(event instanceof Error) {
-				throw event;
-			} else {
-				throw new Error("Could not run Worker, make sure you set the correct workerPath");
-			}
+            console.log("Encryptor Error:", event);
+            if (event instanceof Error) {
+                throw event;
+            } else {
+                throw new Error("Could not run Worker, make sure you set the correct workerPath");
+            }
         });
     }
 
     public close(): void {
-        for(let i=0; i<this.#workers.length; i++) {
+        for (let i = 0; i < this.#workers.length; i++) {
             this.#workers[i].terminate();
-            this.#workers[i] = null; 
+            this.#workers[i] = null;
         }
         this.#promises = [];
     }
 
-    
     /**
      * Set the path where the decryptor worker. This needs to be a relative path starting from
      * the root of your main javascript app.
@@ -260,7 +261,7 @@ export class Encryptor {
         this.#workerPath = path;
     }
 
-    
+
     /**
      * Get the current path for the worker javascript.
      * @returns {string} The path to the worker javascript.
@@ -268,6 +269,4 @@ export class Encryptor {
     public getWorkerPath(): string {
         return this.#workerPath;
     }
-
-
 }

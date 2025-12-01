@@ -44,7 +44,7 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
     // default threads is one but you can increase it
     static readonly #DEFAULT_THREADS: number = 1;
 
-    #workerPath = './lib/salmon-fs/salmonfs/streams/aes_file_readable_stream_worker.js';
+    #workerPath = "";
     #aesFile: AesFile | null = null;
     #threads: number = 0;
     #promises: Promise<any>[] = [];
@@ -142,6 +142,8 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
         }
         let bytesRead: number = 0;
         this.#promises = [];
+        if (!this.#workerPath)
+            this.#workerPath = await Platform.getAbsolutePath("aes_file_readable_stream_worker.js", import.meta.url);
         for (let i = 0; i < this.#threads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if(this.#aesFile == null)

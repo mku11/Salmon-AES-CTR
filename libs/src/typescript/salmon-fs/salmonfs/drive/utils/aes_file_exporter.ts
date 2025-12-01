@@ -40,7 +40,6 @@ import { Platform, PlatformType } from "../../../../simple-io/platform/platform.
 export class AesFileExporter extends FileExporter {
     public constructor(bufferSize: number, threads: number) {
         super();
-        super.setWorkerPath('./lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter_worker.js');
         super.initialize(bufferSize, threads);
     }
 
@@ -51,10 +50,13 @@ export class AesFileExporter extends FileExporter {
      * @returns {Promise<number>} The minimum file part.
      */
     async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number> {
+        if (!this.getWorkerPath()) {
+            let workerPath = await Platform.getAbsolutePath("aes_file_exporter_worker.js", import.meta.url);
+            super.setWorkerPath(workerPath);
+        }
         // we force the whole content to use 1 thread if:
-        if(
-            // we are in the browser and the target is a local file (chromes crswap clash between writers)
-            targetFile.constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
+        if(targetFile.constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
+            // we are in the browser and the target is a local file (chromes crswap clashes between writers)
             return await (sourceFile as AesFile).getLength();
         }
         return await (sourceFile as AesFile).getMinimumPartSize();

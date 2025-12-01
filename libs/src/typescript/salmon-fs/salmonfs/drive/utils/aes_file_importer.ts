@@ -49,7 +49,6 @@ export class AesFileImporter extends FileImporter {
      */
     public constructor(bufferSize: number = 0, threads: number = 1) {
         super();
-        super.setWorkerPath('./lib/salmon-fs/salmonfs/drive/utils/aes_file_importer_worker.js');
         super.initialize(bufferSize, threads);
     }
 
@@ -59,6 +58,10 @@ export class AesFileImporter extends FileImporter {
      * @param {boolean} integrity True if integrity enabled
      */
     async onPrepare(targetFile: IVirtualFile, integrity: boolean) {
+        if (!this.getWorkerPath()) {
+            let workerPath = await Platform.getAbsolutePath("aes_file_importer_worker.js", import.meta.url);
+            super.setWorkerPath(workerPath);
+        }
         (targetFile as AesFile).setAllowOverwrite(true);
         // we use default chunk file size
         await (targetFile as AesFile).setApplyIntegrity(integrity);
@@ -72,9 +75,8 @@ export class AesFileImporter extends FileImporter {
      */
     async getMinimumPartSize(sourceFile: IFile, targetFile: IVirtualFile): Promise<number> {
         // we force the whole content to use 1 thread if:
-        if(
-            // we are in the browser and the target is a local file (chromes crswap clash between writers)
-            targetFile.getRealFile().constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
+        if(targetFile.getRealFile().constructor.name === 'File' && Platform.getPlatform() == PlatformType.Browser) {
+            // we are in the browser and the target is a local file (chromes crswap clashes between writers)
             return await sourceFile.getLength();
         }
         return await (targetFile as AesFile).getMinimumPartSize();

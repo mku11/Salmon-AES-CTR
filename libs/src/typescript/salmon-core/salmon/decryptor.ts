@@ -38,7 +38,7 @@ import { Platform, PlatformType } from "../../simple-io/platform/platform.js";
  * Make sure you use setWorkerPath() with the correct worker script.
  */
 export class Decryptor {
-    #workerPath: string = './lib/salmon-core/salmon/decryptor_worker.js';
+    #workerPath: string = "";
 
     /**
      * The number of parallel threads to use.
@@ -164,6 +164,8 @@ export class Decryptor {
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array | null,
         format: EncryptionFormat, integrity: boolean, chunkSize: number): Promise<void> {
         this.#promises = [];
+        if (!this.#workerPath)
+            this.#workerPath = await Platform.getAbsolutePath("decryptor_worker.js", import.meta.url);
         for (let i = 0; i < runningThreads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if (Platform.getPlatform() == PlatformType.Browser) {
@@ -216,7 +218,7 @@ export class Decryptor {
                 }
             }
         }).catch((event) => {
-			console.error(event);
+			console.log("Decryptor Error:", event);
 			if(event instanceof Error) {
 				throw event;
 			} else {
@@ -235,7 +237,7 @@ export class Decryptor {
         }
         this.#promises = [];
     }
-
+    
     /**
      * Set the path where the decryptor worker. This needs to be a relative path starting from
      * the root of your main javascript app.
