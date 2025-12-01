@@ -190,7 +190,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Copy Native Libraries to SalmonTest
       working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: copy .\SalmonNative\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net8.0-windows\
+      run: copy /Y .\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net8.0-windows\
     
     # DotNet Build
     # SalmonCore
