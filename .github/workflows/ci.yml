@@ -189,7 +189,7 @@ jobs:
       run: msbuild /property:Configuration=Debug /p:Platform=x64
     - if: runner.os == 'Windows'
       name: Copy Native Libraries to SalmonTest
-      shell: bash
+      shell: cmd
       run: cd ./libs/projects/SalmonLibs.VS2022 && copy /Y .\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net8.0-windows\
     
     # DotNet Build
