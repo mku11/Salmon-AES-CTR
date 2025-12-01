@@ -43,7 +43,7 @@ describe('salmon-fs', () => {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
         // for WS drives make sure you start the WebFS Service
         let testDir = PARAMS["TEST_DIR"] != undefined && PARAMS["TEST_DIR"] !== "" ?
-                PARAMS["TEST_DIR"] : "d:\\tmp\\salmon\\test";
+                PARAMS["TEST_DIR"] : "c:\\tmp\\salmon\\test";
         let testMode = PARAMS["TEST_MODE"] != undefined && PARAMS["TEST_MODE"] !== "" ?
                 TestMode[PARAMS["TEST_MODE"]] : TestMode.Local;
         let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
