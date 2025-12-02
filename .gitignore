@@ -87,3 +87,4 @@ webgpu-logger
 best
 
 libs/deps/OpenCL*
+samples/libs/*
