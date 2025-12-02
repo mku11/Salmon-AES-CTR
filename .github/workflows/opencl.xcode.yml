@@ -1,4 +1,4 @@
-name: CD.OpenCL
+name: CD.OpenCL.xcode
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-15-intel,macos-latest]
-    name: build.gcc.${{ matrix.os }}
+    name: build.xcode.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -36,11 +36,11 @@ jobs:
           
     # Build xcode native libraries
     - if: ${{ matrix.os == 'macos-15-intel' }}
-      name: Build GCC Native Libraries on MacOS x86_64
+      name: Build xcode Native Libraries on MacOS x86_64
       shell: bash
       run: cd ./libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
     - if: ${{ matrix.os == 'macos-latest' }}
-      name: Build GCC Native Libraries on MacOS aarch64
+      name: Build xcode Native Libraries on MacOS aarch64
       shell: bash
       run: cd ./libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
       
