@@ -1,0 +1,91 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+# Build, Package, and Release
+# This workflow should only run in the main branch
+
+# Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
+name: CD.BuildPackageRelease.Test
+
+on:
+  push:
+    branches: [ "wip-3.0.2" ]
+    tags:
+      - "v*.*.*"
+      
+jobs: 
+
+  gcc_build_matrix:
+    strategy:
+      matrix:
+        os: [macos-15-intel, macos-latest]
+    name: build.gcc.${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read 
+    steps:
+    
+    # Git
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+    - name: Update Homebrew
+      run: brew update
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Get OpenCL
+      shell: bash
+      run: brew install opencl-headers
+          
+    # Build GCC native libraries
+    - if: ${{ matrix.os == 'macos-15-intel' }}
+      name: Build GCC Native Libraries on MacOS x86_64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64 ENABLE_JNI=1 ENABLE_GPU=1 package
+    - if: ${{ matrix.os == 'macos-latest' }}
+      name: Build GCC Native Libraries on MacOS aarch64
+      shell: bash
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 ENABLE_GPU=1 package
+    
+    # upload artifacts
+    - if: ${{ matrix.os == 'macos-15-intel' }}
+      name: Upload GCC MacOS x64 Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: salmon-gcc-macos-x86_64
+          path: /output/salmon-gcc-macos-x86_64.3.0.2.tar.gz
+    
+    - if: ${{ matrix.os == 'macos-latest' }}
+      name: Upload GCC MacOS aarch64 Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: salmon-gcc-macos-aarch64
+          path: /output/salmon-gcc-macos-aarch64.3.0.2.tar.gz
+          
+  # Release
+  # release:
+    # strategy:
+      # matrix:
+        # os: [windows-latest]
+    # name: release
+    # runs-on: ${{ matrix.os }}
+    # - name: Download GCC MacOS x64 package
+      # uses: actions/download-artifact@v5
+        # with:
+          # name: salmon-gcc-macos-x86_64
+    # - name: Download GCC MacOS aarch64 package
+      # uses: actions/download-artifact@v5
+        # with:
+          # name: salmon-gcc-macos-aarch64
+    # - name: Release
+      # uses: softprops/action-gh-release@v2
+      # if: github.ref_type == 'tag'
+      # with:
+        # files: |
+          # output/salmon-gcc-macos-x86_64-3.0.2.zip
+          # output/salmon-gcc-macos-aarch64-3.0.2.zip
+          
