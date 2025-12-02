@@ -230,7 +230,7 @@ jobs:
       run: zip -r output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip output/maven/releases/com/mku/salmon
     
     # Upload Java Common Artifacts
-    - if: ${{ matrix.os == 'Windows' }}
+    - if: ${{ matrix.os == 'windows-latest' }}
       name: Upload Java Common Packages
       uses: actions/upload-artifact@v4
       with:
@@ -238,13 +238,13 @@ jobs:
         path: ./output/salmon-java.${{ github.ref_name }}.zip
         
     # Upload Java Native Artifacts
-    - if: ${{ matrix.os == 'Windows' }}
+    - if: ${{ matrix.os == 'windows-latest' }}
       name: Upload Java Windows x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-win-x86_64
         path: ./output/salmon-java-win-x86_64.${{ github.ref_name }}.zip
-    - if: ${{ matrix.os == 'macOS' }}
+    - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Upload Java MacOS x64 Packages
       uses: actions/upload-artifact@v4
       with:
