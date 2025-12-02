@@ -24,7 +24,7 @@ allprojects {
         }
     }
 	
-	// get jar file path from local
+	// get jar file path from local build
 	ext.fromLocal = { pkg, ver ->
 		return '../../../../output/maven/releases/com/mku/salmon/' + pkg + '/' + ver + '/' + pkg + '-' + ver + '.jar'
 	}
