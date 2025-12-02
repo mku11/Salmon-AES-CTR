@@ -6,13 +6,19 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
 # Build and Test code
-# This workflow doesn't support:
+# This workflow supports testing for
+# * SalmonCore (Java,C#,Python,JS)
+# * SalmonFS (Java,C#,Python,JS)
+# * SalmonNative: Aes, AesIntrinsics (Java,C#,Python,JS)
+
+# This workflow doesn't support the following, see scripts/tests for scripts to run tests locally
 # * GPU build and tests
 # * Salmon WinService
 # * SalmonWin Java and C# tests
-# * Salmon HttpFS and WSFS tests (need HTTP server and WebFS service in a container)
-# * Android tests
-# * .NET Android tests
+# * Salmon HttpFS (needs service container)
+# * Salmon WSFS tests (needs service container)
+# * Android tests (needs instrumentation)
+# * .NET Android tests (needs instrumentation)
 # * JS Web Browser tests
 
 # Note: if you have cache misses then make sure this workflow runs in the main branch first for the same cache keys.
@@ -83,7 +89,7 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Build Java Libraries on Linux/MacOS
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x test -i
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x salmon-win -x test -i
       
     # Build GCC native libraries
     - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
