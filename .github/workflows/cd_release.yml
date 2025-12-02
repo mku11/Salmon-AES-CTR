@@ -73,12 +73,12 @@ jobs:
     steps:
     - name: Download GCC MacOS x64 package
       uses: actions/download-artifact@v5
-        with:
-          name: salmon-gcc-macos-x86_64
+      with:
+        name: salmon-gcc-macos-x86_64
     - name: Download GCC MacOS aarch64 package
       uses: actions/download-artifact@v5 
-        with:
-          name: salmon-gcc-macos-aarch64
+      with:
+        name: salmon-gcc-macos-aarch64
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
