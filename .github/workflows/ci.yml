@@ -7,12 +7,12 @@
 
 # Build and Test code
 # This workflow supports testing for
-# * SalmonCore (Java,C#,Python,JS)
-# * SalmonFS (Java,C#,Python,JS)
-# * SalmonNative: Aes, AesIntrinsics (Java,C#,Python,JS)
+# * SalmonCore (Java,C#,Python,NodeJS)
+# * SalmonFS (Java,C#,Python,NodeJS)
+# * SalmonNative: Aes, AesIntrinsics (Java,C#,Python,NodeJS)
 
 # This workflow doesn't support the following, see scripts/tests for scripts to run tests locally
-# * GPU build and tests
+# * SalmonNative AesGPU build and tests
 # * Salmon WinService
 # * SalmonWin Java and C# tests
 # * Salmon HttpFS (needs service container)
