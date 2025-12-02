@@ -331,7 +331,7 @@ jobs:
       matrix:
         dotnet_version: [8.0.x]
         os: [windows-latest]
-    name: build.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
+    name: build.winservice.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -397,73 +397,17 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
       
-    # Package .NET 
+    # Package .NET NuGet Packages
     - if: runner.os == 'Windows'
       name: Package .NET Libs
       shell: cmd
       run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-dotnet.${{ github.ref_name }}.zip -Path output\nuget\releases
-      
-    # Upload .NET Artifacts
-    - if: ${{ matrix.os == 'windows-latest' }}
-      name: Upload .NET Packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: salmon-dotnet
-        path: ./output/salmon-dotnet.${{ github.ref_name }}.zip
-
-  # WinService
-  winservice_build_matrix:
-    strategy:
-      matrix:
-        dotnet_version: [8.0.x]
-        os: [windows-latest]
-    name: build.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read 
-    steps:
     
-    # Git
-    - name: Checkout sources
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref }}
-    - if: runner.os == 'Windows'
-      name: Get submodules on Windows
-      shell: cmd
-      run: cd ./scripts/misc && init_gitmodules.bat
-    
-    # Toolchains and Build envs
-    - if: runner.os == 'Windows'
-      name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
-    - name: Setup Nuget
-      uses: nuget/setup-nuget@v2
-      
-    - name: Cache Nuget packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.vcxproj*', '**/*.csproj', '**/packages.config') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    # MSBuild Build
-    - if: runner.os == 'Windows'
-      name: Restore WinService dependencies
-      working-directory: ./services/winservice/project/SalmonWinService
-      run: msbuild -t:restore
-    - if: runner.os == 'Windows'
-      name: Build WinService
-      working-directory: ./services/winservice/project/SalmonWinService
-      run: msbuild /property:Configuration=Release
-      
     # Package WinService
     - if: runner.os == 'Windows'
       name: Publish WinService
       shell: cmd
-      run: cd .\services\winservice\project && msbuild /t:publish /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml /p:Configuration=Release
+      run: cd .\libs\projects\SalmonLibs.VS2022 && msbuild SalmonWinService /t:publish /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml /p:Configuration=Release
     - if: runner.os == 'Windows'
       name: Package WinService
       shell: cmd
@@ -595,7 +539,7 @@ jobs:
 
   # Release
   salmon_build_release:
-    needs: [gcc_macos_build_matrix, gcc_linux_build_matrix, java_build_matrix, dotnet_build_matrix, winservice_build_matrix, python_build_matrix, ts_js_build_matrix, android_build_matrix]
+    needs: [gcc_macos_build_matrix, gcc_linux_build_matrix, java_build_matrix, dotnet_build_matrix, python_build_matrix, ts_js_build_matrix, android_build_matrix]
     name: Salmon Release
     runs-on: windows-latest
     steps:
