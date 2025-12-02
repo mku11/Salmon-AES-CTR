@@ -381,7 +381,7 @@ jobs:
       run: cd ./libs/projects/salmon_libs_python && ./package.sh
     - if: runner.os == 'Linux'
       name: Package .NET Libs
-      shell: cmd
+      shell: bash
       run: zip -r output/salmon-python.${{ github.ref_name }}.zip output/python/*.tar.gz
       
     # Upload Python Artifacts
