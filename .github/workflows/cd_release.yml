@@ -65,11 +65,12 @@ jobs:
       with:
         name: salmon-gcc-macos-aarch64
         path: ./output/native/salmon-gcc-macos-aarch64.3.0.2.tar.gz
-          
+
   # Release
   salmon_build_release:
     name: Salmon Release
     runs-on: windows-latest
+    steps:
     - name: Download GCC MacOS x64 package
       uses: actions/download-artifact@v5
         with:
