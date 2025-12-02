@@ -89,7 +89,7 @@ jobs:
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Build Java Libraries on Linux/MacOS
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x salmon-win -x test -i
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew build -x :salmon-win:build -x test -i
       
     # Build GCC native libraries
     - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
