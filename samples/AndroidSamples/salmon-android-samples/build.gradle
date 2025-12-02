@@ -10,14 +10,6 @@ ext {
 }
 
 repositories {
-    maven {
-        // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
-
-        // official salmon repo
-        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
     mavenCentral()
 }
 
@@ -60,8 +52,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.3.1"
 
-    implementation("com.mku.salmon:salmon-core:${version}")
-    implementation("com.mku.salmon:salmon-fs:${version}")
-    implementation("com.mku.salmon:salmon-fs-android:${version}")
-	implementation("com.mku.salmon:salmon-native-android:${version}")
+	// Salmon libs installed from local directory
+	// make sure you run get_deps.bat
+    implementation files(fromLocal('salmon-core', ${version}))
+	implementation files(fromLocal('salmon-fs', ${version}))
+	implementation files(fromLocal('salmon-fs-android', ${version}))
+	implementation files(fromLocal('salmon-native-android', ${version}))
 }

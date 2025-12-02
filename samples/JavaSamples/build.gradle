@@ -26,17 +26,14 @@ if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch
 }
 
 repositories {
-    maven {
-        // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
-
-        // official salmon repo
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
     mavenCentral()
 }
 
+// get jar file path from downloaded salmon libs
+ext.fromLocal = { pkg, ver ->
+	return './libs/' + pkg + '-' + ver + '.jar'
+}
+	
 // path to download the native libraries
 project.ext.set('nativeLibsDir', "$buildDir/libs/natives")
 
@@ -48,13 +45,17 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
-    // salmon libs:
-    implementation("com.mku.salmon:salmon-core:${version}")
-    implementation("com.mku.salmon:salmon-fs:${version}")
+    // Salmon libs installed from local directory
+	// make sure you run get_salmon.bat
+    implementation files(fromLocal('salmon-core', ${version}))
+	implementation files(fromLocal('salmon-fs', ${version}))
 	
 	// salmon native libs
-    implementation("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")
-    nativeImplementation("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")	
+// Salmon libs installed from local directory
+	// make sure you run get_salmon.bat
+    implementation files(fromLocal('salmon-core', ${version}))
+	implementation files(fromLocal('salmon-fs', ${version}))   
+	nativeImplementation files(fromLocal('salmon-native-${project.os}-${project.arch}', ${version}))
 }
 
 test {
