@@ -13,7 +13,6 @@ name: CD.BuildPackageRelease.Test
 
 on:
   push:
-    branches: [ "wip-3.0.2" ]
     tags:
       - "v*.*.*"
       
@@ -86,6 +85,6 @@ jobs:
       with:
         draft: true
         files: |
-          salmon-gcc-macos-x86_64-3.0.2.zip
-          salmon-gcc-macos-aarch64-3.0.2.zip
+          salmon-gcc-macos-x86_64.3.0.2.tar.gz
+          salmon-gcc-macos-aarch64.3.0.2.tar.gz
           
