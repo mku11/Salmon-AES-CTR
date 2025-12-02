@@ -187,7 +187,7 @@ jobs:
       shell: bash
       run: brew install opencl-headers
       
-    # Gradle Build Java Common
+    # Gradle Build Java Common Libs
     - if: runner.os == 'Windows'
       name: Build Java Common Libs
       shell: cmd
@@ -196,15 +196,14 @@ jobs:
     # Package Java Common Libs
     - if: runner.os == 'Windows'
       name: Package Java Common Libs
-      uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r salmon-java.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
+      shell: cmd
+      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-java-${{ github.ref_name }}.zip -Path output\maven\releases\com\mku\salmon
         
     # Clean up Java libraries before we generate the native libs
     - if: runner.os == 'Windows'
       name: Clean up Java libraries
       shell: cmd
-      run: rmdir /S /Q ..\..\output\maven
+      run: rmdir /S /Q output\maven
   
     # Gradle Build Salmon Java Native
     - if: runner.os == 'Windows'
@@ -219,19 +218,16 @@ jobs:
     # Package Java Native Libraries
     - if: runner.os == 'Windows'
       name: Package Java Native Libs for Windows x64
-      uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r ./output/salmon-java-windows-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
+      shell: cmd
+      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-java-windows-x86_64.${{ github.ref_name }}.zip -Path output\maven\releases\com\mku\salmon
     - if: runner.os == 'Linux'
       name: Package Java Native Libs for Linux x64
-      uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r ./output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
+      shell: bash
+      run: zip -r output\salmon-java-linux-x86_64.${{ github.ref_name }}.zip output\maven\releases\com\mku\salmon
     - if: runner.os == 'macOS'
       name: Package Java Native Libs for MacOS x64
-      uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r ./output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
+      shell: bash
+      run: zip -r output\salmon-java-macos-x86_64.${{ github.ref_name }}.zip output\maven\releases\com\mku\salmon
     
     # Upload Java Artifacts
     - if: ${{ matrix.os == 'Windows' }}
@@ -265,9 +261,7 @@ jobs:
         path: output
     - if: github.ref_type == 'tag'
       name: Package MultiArch
-      uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r salmon-multi-arch.${{ github.ref_name }}.zip output
+      run: powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path output
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
