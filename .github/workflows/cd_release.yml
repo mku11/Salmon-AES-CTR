@@ -223,11 +223,11 @@ jobs:
     - if: runner.os == 'Linux'
       name: Package Java Native Libs for Linux x64
       shell: bash
-      run: zip -r output\salmon-java-linux-x86_64.${{ github.ref_name }}.zip output\maven\releases\com\mku\salmon
+      run: zip -r output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip output/maven/releases/com/mku/salmon
     - if: runner.os == 'macOS'
       name: Package Java Native Libs for MacOS x64
       shell: bash
-      run: zip -r output\salmon-java-macos-x86_64.${{ github.ref_name }}.zip output\maven\releases\com\mku\salmon
+      run: zip -r output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip output/maven/releases/com/mku/salmon
     
     # Upload Java Artifacts
     - if: ${{ matrix.os == 'Windows' }}
