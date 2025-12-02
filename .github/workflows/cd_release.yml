@@ -343,6 +343,55 @@ jobs:
         name: salmon-dotnet
         path: ./output/salmon-dotnet.${{ github.ref_name }}.zip
 
+
+  # Python
+  python_native_build_matrix:
+    strategy:
+      matrix:
+        python_version: [3.11]
+        os: [ubuntu-latest]
+    name: build.python${{ matrix.python_version }}.${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read 
+    steps:
+    
+    # Git
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+    - if: runner.os == 'Linux' || runner.os == 'macOS'
+      name: Get submodules on Linux/MacOS
+      shell: bash
+      run: cd ./scripts/misc && ./init_gitmodules.sh
+    
+    # Toolchains and Build envs
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python_version }}
+        cache: 'pip'
+    - run: python -m pip install typeguard pycryptodome wrapt
+    
+    # Package Python Libs 
+    - if: runner.os == 'Linux'
+      name: Package Python Libs
+      shell: bash
+      run: cd ./libs/projects/salmon_libs_python && ./package.sh
+    - if: runner.os == 'Linux'
+      name: Package .NET Libs
+      shell: cmd
+      run: zip -r output/salmon-python.${{ github.ref_name }}.zip output/python/*.tar.gz
+      
+    # Upload Python Artifacts
+    - if: ${{ matrix.os == 'windows-latest' }}
+      name: Upload Java Common Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: salmon-python
+        path: ./output/salmon-python.${{ github.ref_name }}.zip
+    
   # Release
   salmon_build_release:
     needs: [gcc_macos_build_matrix, gcc_linux_build_matrix,java_build_matrix,dotnet_build_matrix]
