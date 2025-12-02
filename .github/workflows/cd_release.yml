@@ -13,6 +13,7 @@ name: CD.BuildPackageRelease.Test
 
 on:
   push:
+    # branches: [ "wip-3.0.2" ]
     tags:
       - "v*.*.*"
       
@@ -79,12 +80,16 @@ jobs:
       uses: actions/download-artifact@v5 
       with:
         name: salmon-gcc-macos-aarch64
+    - if: github.ref_type == 'tag'
+      name: Package MultiArch
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r salmon-${{ github.ref }}.zip salmon-gcc-macos-x86_64.3.0.2.tar.gz salmon-gcc-macos-aarch64.3.0.2.tar.gz
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
         draft: true
         files: |
-          salmon-gcc-macos-x86_64.3.0.2.tar.gz
-          salmon-gcc-macos-aarch64.3.0.2.tar.gz
+          salmon-${{ github.ref }}.zip
           
