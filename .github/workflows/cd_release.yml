@@ -331,7 +331,7 @@ jobs:
       matrix:
         dotnet_version: [8.0.x]
         os: [windows-latest]
-    name: build.winservice.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
+    name: build.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -463,8 +463,8 @@ jobs:
       run: zip -r output/salmon-python.${{ github.ref_name }}.zip output/python/*.tar.gz
       
     # Upload Python Artifacts
-    - if: ${{ matrix.os == 'windows-latest' }}
-      name: Upload Java Common Packages
+    - if: runner.os == 'Linux'
+      name: Upload Python Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-python
