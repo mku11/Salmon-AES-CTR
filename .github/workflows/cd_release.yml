@@ -67,25 +67,25 @@ jobs:
         path: ./output/native/salmon-gcc-macos-aarch64.3.0.2.tar.gz
           
   # Release
-  # release:
-    # strategy:
-      # matrix:
-        # os: [windows-latest]
-    # name: release
-    # runs-on: ${{ matrix.os }}
-    # - name: Download GCC MacOS x64 package
-      # uses: actions/download-artifact@v5
-        # with:
-          # name: salmon-gcc-macos-x86_64
-    # - name: Download GCC MacOS aarch64 package
-      # uses: actions/download-artifact@v5
-        # with:
-          # name: salmon-gcc-macos-aarch64
-    # - name: Release
-      # uses: softprops/action-gh-release@v2
-      # if: github.ref_type == 'tag'
-      # with:
-        # files: |
-          # ./output/native/salmon-gcc-macos-x86_64-3.0.2.zip
-          # ./output/native/salmon-gcc-macos-aarch64-3.0.2.zip
+  release:
+    strategy:
+      matrix:
+        os: [windows-latest]
+    name: release
+    runs-on: ${{ matrix.os }}
+    - name: Download GCC MacOS x64 package
+      uses: actions/download-artifact@v5
+        with:
+          name: salmon-gcc-macos-x86_64
+    - name: Download GCC MacOS aarch64 package
+      uses: actions/download-artifact@v5 
+        with:
+          name: salmon-gcc-macos-aarch64
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: |
+          ./output/native/salmon-gcc-macos-x86_64-3.0.2.zip
+          ./output/native/salmon-gcc-macos-aarch64-3.0.2.zip
           
