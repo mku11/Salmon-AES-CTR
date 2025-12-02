@@ -8,13 +8,13 @@
     <OutputType>exe</OutputType>
     <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
 	<SalmonVersion>3.0.2</SalmonVersion>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="install.bat" />
-    <None Remove="README.txt" />
     <None Remove="uninstall.bat" />
   </ItemGroup>
 
@@ -22,35 +22,34 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
-    <PackageReference Include="Salmon.Win" Version="$(SalmonVersion)" />
   </ItemGroup>
 
   <ItemGroup>
 
-    <Compile Include="..\..\src\SalmonWinService\Config\Config.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\Config\Config.cs">
       <Link>SalmonWinService\Config\Config.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\SalmonWinService\Program.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\Program.cs">
       <Link>SalmonWinService\Program.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\SalmonWinService\Service\WinService.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\Service\WinService.cs">
       <Link>SalmonWinService\Service\WinService.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\SalmonWinService\Service\WindowsBackgroundService.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\Service\WindowsBackgroundService.cs">
       <Link>SalmonWinService\Service\WindowsBackgroundService.cs</Link>
     </Compile>
     
     
-    <Compile Include="..\..\src\SalmonWinService\SalmonService\Request.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\SalmonService\Request.cs">
       <Link>SalmonWinService\SalmonService\Request.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\SalmonWinService\SalmonService\Response.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\SalmonService\Response.cs">
       <Link>SalmonWinService\SalmonService\Response.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\SalmonWinService\SalmonService\Sequence\SequenceServer.cs">
+    <Compile Include="..\..\..\src\csharp\SalmonWinService\SalmonService\Sequence\SequenceServer.cs">
       <Link>SalmonWinService\SalmonService\Sequence\SequenceServer.cs</Link>
     </Compile>    
   </ItemGroup>
@@ -59,8 +58,10 @@
     <Content Include="install.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="README.txt">
+    <Content Include="README.md">
+      <PackagePath>\</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>True</Pack>
     </Content>
     <Content Include="uninstall.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -73,5 +74,16 @@
       <Link>NOTICE</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Salmon.Win\Salmon.Win.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>

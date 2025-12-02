@@ -48,7 +48,7 @@ public class WinServiceTests
 {
     private static readonly string TEST_SERVICE_PIPE_NAME = "SalmonService"; // real service pipe name
     private static readonly string TEST_USER_PIPE_NAME = "UserService"; // mock user service pipe name
-    private static readonly string TEST_USER_SEQ_DIR_PATH = "D:\\tmp\\output";
+    private static readonly string TEST_USER_SEQ_DIR_PATH = @"C:\tmp\salmon\test\output";
     private static readonly string TEST_USER_SEQ_FILE_NAME = "seqfile.xml";
     private static readonly string TEST_USER_SEQ_FILE_PATH = TEST_USER_SEQ_DIR_PATH + "\\" + TEST_USER_SEQ_FILE_NAME;
     private static readonly string TEST_REG_KEY = "FILESEQCHKSUM_TEST";
