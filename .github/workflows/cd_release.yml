@@ -68,6 +68,7 @@ jobs:
 
   # Release
   salmon_build_release:
+    needs: gcc_build_matrix
     name: Salmon Release
     runs-on: windows-latest
     steps:
