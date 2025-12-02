@@ -54,14 +54,14 @@ jobs:
     # upload artifacts
     - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Upload GCC MacOS x64 Packages
-        uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
         with:
           name: salmon-gcc-macos-x86_64
           path: /output/salmon-gcc-macos-x86_64.3.0.2.tar.gz
     
     - if: ${{ matrix.os == 'macos-latest' }}
       name: Upload GCC MacOS aarch64 Packages
-        uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4
         with:
           name: salmon-gcc-macos-aarch64
           path: /output/salmon-gcc-macos-aarch64.3.0.2.tar.gz
