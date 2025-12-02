@@ -28,7 +28,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - name: Update Homebrew
-      run: brew update --preinstall
+      run: brew update
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Get OpenCL
       shell: bash
