@@ -57,14 +57,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-macos-x86_64
-        path: /output/native/salmon-gcc-macos-x86_64.3.0.2.tar.gz
+        path: ./output/native/salmon-gcc-macos-x86_64.3.0.2.tar.gz
     
     - if: ${{ matrix.os == 'macos-latest' }}
       name: Upload GCC MacOS aarch64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-macos-aarch64
-        path: /output/native/salmon-gcc-macos-aarch64.3.0.2.tar.gz
+        path: ./output/native/salmon-gcc-macos-aarch64.3.0.2.tar.gz
           
   # Release
   # release:
@@ -86,6 +86,6 @@ jobs:
       # if: github.ref_type == 'tag'
       # with:
         # files: |
-          # output/native/salmon-gcc-macos-x86_64-3.0.2.zip
-          # output/native/salmon-gcc-macos-aarch64-3.0.2.zip
+          # ./output/native/salmon-gcc-macos-x86_64-3.0.2.zip
+          # ./output/native/salmon-gcc-macos-aarch64-3.0.2.zip
           
