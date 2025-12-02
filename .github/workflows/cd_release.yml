@@ -100,30 +100,30 @@ jobs:
       run: sudo apt install ocl-icd-opencl-dev
           
     # Build GCC native libraries
-    - if: ${{ matrix.os == 'macos-15-intel' }}
-      name: Build GCC Native Libraries on MacOS x64
+    - if: ${{ matrix.os == 'ubuntu-latest' }}
+      name: Build GCC Native Libraries on Linux x64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=x86_64 ENABLE_JNI=1 ENABLE_GPU=1 package
-    - if: ${{ matrix.os == 'macos-latest' }}
-      name: Build GCC Native Libraries on MacOS aarch64
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=x86_64 ENABLE_JNI=1 ENABLE_GPU=1 package
+    - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
+      name: Build GCC Native Libraries on Linux aarch64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 ENABLE_GPU=1 package
+      run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=linux ARCH=aarch64 ENABLE_JNI=1 ENABLE_GPU=1 package
     
     # Upload GCC Artifacts
     - if: ${{ matrix.os == 'ubuntu-latest' }}
       name: Upload GCC Linux x64 Packages
       uses: actions/upload-artifact@v4
       with:
-        name: salmon-gcc-macos-x86_64
+        name: salmon-gcc-linux-x86_64
         path: ./output/native/salmon-gcc-linux-x86_64.3.0.2.tar.gz
     - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
       name: Upload GCC Linux aarch64 Packages
       uses: actions/upload-artifact@v4
       with:
-        name: salmon-gcc-macos-aarch64
+        name: salmon-gcc-linux-aarch64
         path: ./output/native/salmon-gcc-linux-aarch64.3.0.2.tar.gz
 
-  java_native_build_matrix:
+  java_build_matrix:
     strategy:
       matrix:
         java_version: [11]
@@ -219,7 +219,7 @@ jobs:
       run: cd ./libs/projects/salmon-libs-gradle && :salmon-native:publish -x test -DENABLE_GPU=true -DOPENCL_INCLUDE=$OPENCL_INCLUDE -DOPENCL_LIB=$OPENCL_LIB -i
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Build Java Native Libraries for Linux/MacOS x64
-      shell: cmd
+      shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -DOPENCL_INCLUDE=$OPENCL_INCLUDE -DOPENCL_LIB=$OPENCL_LIB -i
     
     # Package Java Native Libraries
