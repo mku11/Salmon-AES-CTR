@@ -198,7 +198,7 @@ jobs:
       name: Package Java Common Libs
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r salmon-java.${{ github.ref }}.zip ./output/maven/releases/com/mku/salmon/
+        args: zip -qq -r salmon-java.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
         
     # Clean up Java libraries before we generate the native libs
     - if: runner.os == 'Windows'
@@ -221,17 +221,17 @@ jobs:
       name: Package Java Native Libs for Windows x64
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r ./output/salmon-java-windows-x86_64.${{ github.ref }}.zip ./output/maven/releases/com/mku/salmon/
+        args: zip -qq -r ./output/salmon-java-windows-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
     - if: runner.os == 'Linux'
       name: Package Java Native Libs for Linux x64
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r ./output/salmon-java-linux-x86_64.${{ github.ref }}.zip ./output/maven/releases/com/mku/salmon/
+        args: zip -qq -r ./output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
     - if: runner.os == 'macOS'
       name: Package Java Native Libs for MacOS x64
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r ./output/salmon-java-macos-x86_64.${{ github.ref }}.zip ./output/maven/releases/com/mku/salmon/
+        args: zip -qq -r ./output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip ./output/maven/releases/com/mku/salmon/
     
     # Upload Java Artifacts
     - if: ${{ matrix.os == 'Windows' }}
@@ -239,19 +239,19 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-win-x86_64
-        path: ./output/salmon-java-win-x86_64.${{ github.ref }}.zip
+        path: ./output/salmon-java-win-x86_64.${{ github.ref_name }}.zip
     - if: ${{ matrix.os == 'macOS' }}
       name: Upload Java MacOS x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-macos-x86_64
-        path: ./output/salmon-java-macos-x86_64.${{ github.ref }}.zip
+        path: ./output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip
     - if: ${{ matrix.os == 'ubuntu-latest' }}
       name: Upload Java Linux x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-linux-x86_64
-        path: ./output/salmon-java-linux-x86_64.${{ github.ref }}.zip
+        path: ./output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip
 
   # Release
   salmon_build_release:
@@ -267,11 +267,11 @@ jobs:
       name: Package MultiArch
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r salmon-multi-arch.${{ github.ref }}.zip output
+        args: zip -qq -r salmon-multi-arch.${{ github.ref_name }}.zip output
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
         draft: true
         files: |
-          salmon-multi-arch.${{ github.ref }}.zip
+          salmon-multi-arch.${{ github.ref_name }}.zip
