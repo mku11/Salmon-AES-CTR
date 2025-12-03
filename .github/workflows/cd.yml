@@ -528,8 +528,8 @@ jobs:
       with:
         path: salmon
     - name: Merge Java Libraries
-      shell: bash
-      run: cd salmon\ && robocopy /E /MOVE salmon-java-linux-x86_64\ salmon-java\ && robocopy /E /MOVE salmon-java-mac-x86_64 salmon-java\ && robocopy /E /MOVE salmon-java-win-x86_64 salmon-java\ && robocopy /E /MOVE salmon-android salmon-java\
+      shell: cmd
+      run: cd salmon\ && robocopy /E /MOVE salmon-java-linux-x86_64\ salmon-java\ && robocopy /E /MOVE salmon-java-mac-x86_64\ salmon-java\ && robocopy /E /MOVE salmon-java-win-x86_64\ salmon-java\ && robocopy /E /MOVE salmon-android\ salmon-java\
     - if: github.ref_type == 'tag'
       name: Package MultiArch
       shell: cmd
