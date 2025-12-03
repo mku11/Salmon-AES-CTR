@@ -215,11 +215,11 @@ jobs:
     - if: runner.os == 'Windows'
       name: Build Java Native Libraries for Windows x64
       shell: cmd
-      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat :salmon-native:publish -x test -DENABLE_GPU=true -i
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat :salmon-native:build -x test -DENABLE_GPU=true -i && gradlew.bat :salmon-native:publish -x test -DENABLE_GPU=true -i
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Build Java Native Libraries for Linux/MacOS x64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -i
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:build -x test -DENABLE_GPU=true -i && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -i
             
     # Upload Java Native Artifacts
     - if: ${{ matrix.os == 'windows-latest' }}
@@ -287,7 +287,7 @@ jobs:
     - if: runner.os == 'Windows'
       name: Build Java Common Libs
       shell: cmd
-      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat publish -x test -x :salmon-native:publish -i
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat build -x test -x :salmon-native:build -i && gradlew.bat publish -x test -x :salmon-native:publish -i
       
     # Gradle Build Android Libs
     - if: runner.os == 'Windows'
