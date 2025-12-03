@@ -527,4 +527,4 @@ jobs:
       with:
         draft: true
         files: |
-          salmon-multi-arch.${{ github.ref_name }}.zip
+          ./salmon/salmon-multi-arch.${{ github.ref_name }}.zip
