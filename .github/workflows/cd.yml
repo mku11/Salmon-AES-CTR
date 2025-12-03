@@ -301,7 +301,11 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-android
-        path: output/maven/releases/com/mku/salmon
+        path: |
+          output/maven/releases/com/mku/salmon
+          !output/maven/releases/com/mku/salmon/salmon-core
+          !output/maven/releases/com/mku/salmon/salmon-fs
+          !output/maven/releases/com/mku/salmon/salmon-win
         
   # C# .NET
   dotnet_build_matrix:
