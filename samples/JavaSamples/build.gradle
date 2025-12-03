@@ -28,11 +28,6 @@ if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch
 repositories {
     mavenCentral()
 }
-
-// get jar file path from downloaded salmon libs
-ext.fromLocal = { pkg, ver ->
-	return './libs/' + pkg + '-' + ver + '.jar'
-}
 	
 // path to download the native libraries
 project.ext.set('nativeLibsDir', "$buildDir/libs/natives")
@@ -47,15 +42,11 @@ dependencies {
 
     // Salmon libs installed from local directory
 	// make sure you run get_salmon.bat
-    implementation files(fromLocal('salmon-core', ${version}))
-	implementation files(fromLocal('salmon-fs', ${version}))
+    implementation files('../libs/salmon/salmon-java/salmon-core/3.0.2/salmon-core-3.0.2.jar')
+	implementation files('../libs/salmon/salmon-java/salmon-fs/3.0.2/salmon-fs-3.0.2.jar')
 	
 	// salmon native libs
-// Salmon libs installed from local directory
-	// make sure you run get_salmon.bat
-    implementation files(fromLocal('salmon-core', ${version}))
-	implementation files(fromLocal('salmon-fs', ${version}))   
-	nativeImplementation files(fromLocal('salmon-native-${project.os}-${project.arch}', ${version}))
+	nativeImplementation files("../libs/salmon/salmon-java-${project.os}-${project.arch}/salmon-native/3.0.2/salmon-native-3.0.2-${project.os}-${project.arch}.jar")
 }
 
 test {
