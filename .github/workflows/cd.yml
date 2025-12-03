@@ -519,7 +519,8 @@ jobs:
         path: salmon
     - if: github.ref_type == 'tag'
       name: Package MultiArch
-      run: powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path salmon
+      shell: cmd
+      run: cd salmon && powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path *
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
