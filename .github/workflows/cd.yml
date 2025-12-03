@@ -434,7 +434,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-python
-        path: output/python
+        path: |
+          output/python
+          !./output/native/*.tar.gz
 
 
   # TypeScript/JavaScript
@@ -486,13 +488,17 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-typescript
-        path: ./output/typescript
+        path: |
+          ./output/typescript
+          !./output/typescript/*.zip
     - if: runner.os == 'Linux'
       name: Upload JS Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-javascript
-        path: ./output/javascript
+        path: |
+          ./output/javascript
+          !./output/javascript/*.zip
 
 
   # Release
