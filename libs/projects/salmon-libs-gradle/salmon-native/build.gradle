@@ -48,6 +48,9 @@ project.ext.set('OPENCL_LIB', System.getProperty('OPENCL_LIB', project.DEFAULT_O
 // project.ext.set('OPENCL_INCLUDE', System.getProperty('OPENCL_INCLUDE',"/usr/include")
 // project.ext.set('OPENCL_LIB', System.getProperty('OPENCL_LIB',"/usr/lib/x86_64-linux-gnu/")
 
+println "Using OPENCL_INCLUDE: " + project.OPENCL_INCLUDE
+println "Using OPENCL_LIB: " + project.OPENCL_LIB
+
 repositories {
     mavenCentral()
 }
