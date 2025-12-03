@@ -18,10 +18,6 @@ on:
       - "v*.*.*"
 
 
-env:
-    OPENCL_INCLUDE: .\\libs\\deps\\OpenCL\\OpenCL-SDK-v2025.07.23-Win-x64\\include
-    OPENCL_LIB: .\\libs\\deps\\OpenCL\\OpenCL-SDK-v2025.07.23-Win-x64\\lib
-
 jobs: 
 
   gcc_macos_build_matrix:
@@ -209,11 +205,11 @@ jobs:
     - if: runner.os == 'Windows'
       name: Build Java Native Libraries for Windows x64
       shell: cmd
-      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat :salmon-native:publish -x test -DENABLE_GPU=true -DOPENCL_INCLUDE=$OPENCL_INCLUDE -DOPENCL_LIB=$OPENCL_LIB -i
+      run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat :salmon-native:publish -x test -DENABLE_GPU=true -i
     - if: runner.os == 'Linux' || runner.os == 'macOS'
       name: Build Java Native Libraries for Linux/MacOS x64
       shell: bash
-      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -DOPENCL_INCLUDE=$OPENCL_INCLUDE -DOPENCL_LIB=$OPENCL_LIB -i
+      run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -i
     
     # Package Java Native Libraries
     - if: runner.os == 'Windows'
