@@ -30,6 +30,7 @@ import sys
 from unittest import TestCase
 from typeguard import typechecked
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
@@ -49,6 +50,7 @@ class SalmonCorePerfTests(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         SalmonCoreTestHelper.initialize()
+        print("Data Size: ", SalmonCorePerfTests.TEST_PERF_SIZE)
 
     @classmethod
     def tearDownClass(cls) -> None:
