@@ -333,6 +333,12 @@ jobs:
     - if: runner.os == 'Windows'
       name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
+    - if: runner.os == 'Windows'
+      name: Setup .NET
+      uses: actions/setup-dotnet@v4
+    - if: runner.os == 'Windows'
+      name: Install Android Workload
+      cmd: dotnet workload install android
     - name: Setup Nuget
       uses: nuget/setup-nuget@v2
     - name: Setup Gradle
