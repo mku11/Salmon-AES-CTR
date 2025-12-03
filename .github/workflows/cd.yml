@@ -383,6 +383,12 @@ jobs:
         name: salmon-dotnet
         path: output/nuget/releases
 
+    # Package WinService
+    - if: runner.os == 'Windows'
+      name: Publish WinService
+      shell: cmd
+      run: cd .\libs\projects\SalmonLibs.VS2022 && msbuild SalmonWinService /t:publish /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml /p:Configuration=Release
+      
     # Upload WinService Artifacts
     - if: ${{ matrix.os == 'windows-latest' }}
       name: Upload WinService Package
@@ -436,7 +442,7 @@ jobs:
         name: salmon-python
         path: |
           output/python
-          !./output/native/*.tar.gz
+          !./output/python/*.tar.gz
 
 
   # TypeScript/JavaScript
@@ -510,10 +516,10 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v5
       with:
-        path: output
+        path: salmon
     - if: github.ref_type == 'tag'
       name: Package MultiArch
-      run: powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path output
+      run: powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path salmon
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
