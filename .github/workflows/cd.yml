@@ -55,20 +55,24 @@ jobs:
       shell: bash
       run: cd ./libs/projects/salmon-libs-gcc && make PLATFORM=macos ARCH=aarch64 ENABLE_JNI=1 ENABLE_GPU=1 package
     
-    # upload artifacts
+    # Upload GCC artifacts
     - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Upload GCC MacOS x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-macos-x86_64
-        path: ./output/native/salmon-gcc-macos-x86_64.3.0.2.tar.gz
+        path: |
+          ./output/native
+          !./output/native/*.tar.gz
     
     - if: ${{ matrix.os == 'macos-latest' }}
       name: Upload GCC MacOS aarch64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-macos-aarch64
-        path: ./output/native/salmon-gcc-macos-aarch64.3.0.2.tar.gz
+        path: |
+          ./output/native
+          !./output/native/*.tar.gz
 
   gcc_linux_build_matrix:
     strategy:
@@ -111,13 +115,17 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-linux-x86_64
-        path: ./output/native/salmon-gcc-linux-x86_64.3.0.2.tar.gz
+        path: |
+          ./output/native
+          !./output/native/*.tar.gz
     - if: ${{ matrix.os == 'ubuntu-24.04-arm' }}
       name: Upload GCC Linux aarch64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-gcc-linux-aarch64
-        path: ./output/native/salmon-gcc-linux-aarch64.3.0.2.tar.gz
+        path: |
+          ./output/native
+          !./output/native/*.tar.gz
 
   java_build_matrix:
     strategy:
@@ -189,12 +197,14 @@ jobs:
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle && gradlew.bat publish -x test -x :salmon-native:publish -i
       
-    # Package Java Common Libs
-    - if: runner.os == 'Windows'
-      name: Package Java Common Libs
-      shell: cmd
-      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-java.${{ github.ref_name }}.zip -Path output\maven\releases\com\mku\salmon
-    
+    # Upload Java Common Libraries
+    - if: ${{ matrix.os == 'windows-latest' }}
+      name: Upload Java Common Libs
+      uses: actions/upload-artifact@v4
+      with:
+        name: salmon-java
+        path: output/maven/releases/com/mku/salmon
+        
     # Clean up Java libraries before we generate the native libs
     - if: runner.os == 'Windows'
       name: Clean up Java libraries
@@ -210,48 +220,26 @@ jobs:
       name: Build Java Native Libraries for Linux/MacOS x64
       shell: bash
       run: cd ./libs/projects/salmon-libs-gradle && ./gradlew :salmon-native:publish -x test -DENABLE_GPU=true -i
-    
-    # Package Java Native Libraries
-    - if: runner.os == 'Windows'
-      name: Package Java Native Libs for Windows x64
-      shell: cmd
-      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-java-win-x86_64.${{ github.ref_name }}.zip -Path output\maven\releases\com\mku\salmon
-    - if: runner.os == 'Linux'
-      name: Package Java Native Libs for Linux x64
-      shell: bash
-      run: zip -r output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip output/maven/releases/com/mku/salmon
-    - if: runner.os == 'macOS'
-      name: Package Java Native Libs for MacOS x64
-      shell: bash
-      run: zip -r output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip output/maven/releases/com/mku/salmon
-    
-    # Upload Java Common Artifacts
-    - if: ${{ matrix.os == 'windows-latest' }}
-      name: Upload Java Common Packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: salmon-java
-        path: ./output/salmon-java.${{ github.ref_name }}.zip
-        
+            
     # Upload Java Native Artifacts
     - if: ${{ matrix.os == 'windows-latest' }}
       name: Upload Java Windows x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-win-x86_64
-        path: ./output/salmon-java-win-x86_64.${{ github.ref_name }}.zip
+        path: output/maven/releases/com/mku/salmon
     - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Upload Java MacOS x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-macos-x86_64
-        path: ./output/salmon-java-macos-x86_64.${{ github.ref_name }}.zip
+        path: output/maven/releases/com/mku/salmon
     - if: ${{ matrix.os == 'ubuntu-latest' }}
       name: Upload Java Linux x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-linux-x86_64
-        path: ./output/salmon-java-linux-x86_64.${{ github.ref_name }}.zip
+        path: output/maven/releases/com/mku/salmon
 
 
   android_build_matrix:
@@ -306,20 +294,14 @@ jobs:
       name: Build Android Libs
       shell: cmd
       run: cd ./libs/projects/salmon-libs-gradle-android && gradlew.bat publish -x test -i
-      
-    # Package Android Libs
-    - if: runner.os == 'Windows'
-      name: Package Android Libs
-      shell: cmd
-      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-android.${{ github.ref_name }}.zip -Path output\maven\releases\com\mku\salmon\*-android
     
-    # Upload Java Common Artifacts
+    # Upload Android Common Artifacts
     - if: runner.os == 'Windows'
       name: Upload Android Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-android
-        path: ./output/salmon-android.${{ github.ref_name }}.zip
+        path: output/maven/releases/com/mku/salmon
         
   # C# .NET
   dotnet_build_matrix:
@@ -392,30 +374,22 @@ jobs:
       name: Build .NET on Windows
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
-      
-    # Package .NET NuGet Packages
-    - if: runner.os == 'Windows'
-      name: Package .NET Libs
-      shell: cmd
-      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-dotnet.${{ github.ref_name }}.zip -Path output\nuget\releases
-    
-    # Package WinService
-    - if: runner.os == 'Windows'
-      name: Publish WinService
-      shell: cmd
-      run: cd .\libs\projects\SalmonLibs.VS2022 && msbuild SalmonWinService /t:publish /p:PublishProfile=Properties\PublishProfiles\FolderProfile.pubxml /p:Configuration=Release
-    - if: runner.os == 'Windows'
-      name: Package WinService
-      shell: cmd
-      run: powershell -command Compress-Archive -Force -DestinationPath output\salmon-winservice.${{ github.ref_name }}.zip -Path output\winservice
-      
+       
+    # Upload .NET Nuget Packages
+    - if: ${{ matrix.os == 'windows-latest' }}
+      name: Upload .NET Nuget Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: salmon-dotnet
+        path: output/nuget/releases
+
     # Upload WinService Artifacts
     - if: ${{ matrix.os == 'windows-latest' }}
       name: Upload WinService Package
       uses: actions/upload-artifact@v4
       with:
         name: salmon-winservice
-        path: ./output/salmon-winservice.${{ github.ref_name }}.zip
+        path: output/winservice
 
 
   # Python
@@ -453,10 +427,6 @@ jobs:
       name: Package Python Libs
       shell: bash
       run: cd ./libs/projects/salmon_libs_python && ./package.sh
-    - if: runner.os == 'Linux'
-      name: Package Python Libs Multi
-      shell: bash
-      run: zip -r output/salmon-python.${{ github.ref_name }}.zip output/python/*.tar.gz
       
     # Upload Python Artifacts
     - if: runner.os == 'Linux'
@@ -464,7 +434,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-python
-        path: ./output/salmon-python.${{ github.ref_name }}.zip
+        path: output/python
 
 
   # TypeScript/JavaScript
@@ -509,14 +479,6 @@ jobs:
       name: Package TS/JS Libs
       shell: bash
       run: cd ./libs/projects/SalmonLibs.vscode && ./package.sh
-    - if: runner.os == 'Linux'
-      name: Package TS Libs Multi
-      shell: bash
-      run: zip -r output/salmon-ts.${{ github.ref_name }}.zip output/typescript/*.zip
-    - if: runner.os == 'Linux'
-      name: Package JS Libs Multi
-      shell: bash
-      run: zip -r output/salmon-js.${{ github.ref_name }}.zip output/javascript/*.zip
       
     # Upload TS/JS Artifacts
     - if: runner.os == 'Linux'
@@ -524,13 +486,13 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-typescript
-        path: ./output/salmon-ts.${{ github.ref_name }}.zip
+        path: ./output/typescript
     - if: runner.os == 'Linux'
       name: Upload JS Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-javascript
-        path: ./output/salmon-js.${{ github.ref_name }}.zip
+        path: ./output/javascript
 
 
   # Release
