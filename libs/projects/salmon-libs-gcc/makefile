@@ -68,7 +68,7 @@ LIBS=-lm
 ifeq ($(DEBUG),1)
 CFLAGS+=-g -O0
 else
-CFLAGS+=-O3
+CFLAGS+=-O2
 endif
 
 ifeq ($(ENABLE_JNI),1)
