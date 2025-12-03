@@ -59,8 +59,7 @@ class NativeProxy(INativeProxy):
 
     @staticmethod
     def __get_char_array(v_bytes: bytearray):
-        return (ctypes.c_char * len(v_bytes)).from_buffer(bytearray(v_bytes))
-
+        return (ctypes.c_char * len(v_bytes)).from_buffer(v_bytes)
     def salmon_init(self, aes_impl: int):
         """!
         Proxy Init the native code with AES implementation, and hash length options.
