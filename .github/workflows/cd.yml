@@ -338,7 +338,7 @@ jobs:
       uses: actions/setup-dotnet@v4
     - if: runner.os == 'Windows'
       name: Install Android Workload
-      cmd: dotnet workload install android
+      run: dotnet workload install android
     - name: Setup Nuget
       uses: nuget/setup-nuget@v2
     - name: Setup Gradle
