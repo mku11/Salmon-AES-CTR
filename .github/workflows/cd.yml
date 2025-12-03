@@ -368,12 +368,12 @@ jobs:
     # MSBuild Build
     - if: runner.os == 'Windows'
       name: Restore .NET dependencies
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild -t:restore
+      shell: cmd
+      run: cd .\libs\projects\SalmonLibs.VS2022 && msbuild -t:restore /property:Configuration=ReleaseGPU /p:Platform=x64
     - if: runner.os == 'Windows'
       name: Build .NET on Windows
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
+      shell: cmd
+      run: cd .\libs\projects\SalmonLibs.VS2022 && msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
        
     # Upload .NET Nuget Packages
     - if: ${{ matrix.os == 'windows-latest' }}
@@ -383,7 +383,7 @@ jobs:
         name: salmon-dotnet
         path: output/nuget/releases
 
-    # Package WinService
+    # Publish WinService
     - if: runner.os == 'Windows'
       name: Publish WinService
       shell: cmd
@@ -395,7 +395,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-winservice
-        path: output/winservice
+        path: ./output/winservice
 
 
   # Python
