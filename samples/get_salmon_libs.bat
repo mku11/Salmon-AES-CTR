@@ -1,3 +1,6 @@
+@ECHO ON
+set CURRDIR=%CD%
+
 set DEPS_DIR=.\libs\
 set SALMON_LIB_VERSION=3.0.2-SNAPSHOT
 
@@ -10,3 +13,4 @@ curl %SALMON_URL% -LJo %DEPS_DIR%\%ZIP_FILENAME%
 cd %DEPS_DIR%
 powershell -command Expand-Archive -Force %ZIP_FILENAME%
 
+cd %CURRDIR%

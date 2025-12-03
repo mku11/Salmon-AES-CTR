@@ -203,7 +203,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java
-        path: output/maven/releases/com/mku/salmon
+        path: output/maven/releases
         
     # Clean up Java libraries before we generate the native libs
     - if: runner.os == 'Windows'
@@ -227,19 +227,19 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-win-x86_64
-        path: output/maven/releases/com/mku/salmon
+        path: output/maven/releases
     - if: ${{ matrix.os == 'macos-15-intel' }}
       name: Upload Java MacOS x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-macos-x86_64
-        path: output/maven/releases/com/mku/salmon
+        path: output/maven/releases
     - if: ${{ matrix.os == 'ubuntu-latest' }}
       name: Upload Java Linux x64 Packages
       uses: actions/upload-artifact@v4
       with:
         name: salmon-java-linux-x86_64
-        path: output/maven/releases/com/mku/salmon
+        path: output/maven/releases
 
 
   android_build_matrix:
@@ -302,7 +302,7 @@ jobs:
       with:
         name: salmon-android
         path: |
-          output/maven/releases/com/mku/salmon
+          output/maven/releases
           !output/maven/releases/com/mku/salmon/salmon-core
           !output/maven/releases/com/mku/salmon/salmon-fs
           !output/maven/releases/com/mku/salmon/salmon-win
@@ -521,6 +521,9 @@ jobs:
       uses: actions/download-artifact@v5
       with:
         path: salmon
+    - name: Merge Java Libraries
+      shell: bash
+      run: cd salmon\ && robocopy /E /MOVE salmon-java-linux-x86_64\ salmon-java\ && robocopy /E /MOVE salmon-java-mac-x86_64 salmon-java\ && robocopy /E /MOVE salmon-java-win-x86_64 salmon-java\ && robocopy /E /MOVE salmon-android salmon-java\
     - if: github.ref_type == 'tag'
       name: Package MultiArch
       shell: cmd

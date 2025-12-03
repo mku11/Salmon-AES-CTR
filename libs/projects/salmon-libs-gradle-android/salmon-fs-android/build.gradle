@@ -9,6 +9,9 @@ description = 'Salmon AES256 CTR android filesystem encryption library'
 version '3.0.2'
 
 repositories {
+	maven {
+		url uri("../../../../output/maven/releases")
+	}
     mavenCentral()
 }
 
@@ -44,8 +47,8 @@ android {
 
 dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation files(fromLocal('salmon-core', '3.0.2'))
-	implementation files(fromLocal('salmon-fs', '3.0.2'))
+    implementation("com.mku.salmon:salmon-core:${version}")
+    implementation("com.mku.salmon:salmon-fs:${version}")
 }
 
 task sourcesJar(type: Jar) {
