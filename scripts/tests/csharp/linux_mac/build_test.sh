@@ -27,10 +27,10 @@ cd ../../salmon-libs-gcc
 
 if [[ $OS == "linux"* ]]; then
 make PLATFORM=linux ARCH=$ARCH ENABLE_JNI=1 package
-cp -f ./lib/$ARCH/libsalmon.so ../SalmonLibs.VS2022/Salmon.Test/bin/Debug/net8.0-windows/SalmonNative.dll
+cp -f ./lib/$ARCH/libsalmon.so ../SalmonLibs.VS2022/Salmon.Test/bin/Debug/net9.0-windows/SalmonNative.dll
 elif [[ $OS == "darwin"* ]]; then
 make PLATFORM=macos ARCH=$ARCH ENABLE_JNI=1 package
-cp -f ./lib/$ARCH/libsalmon.dylib ../SalmonLibs.VS2022/Salmon.Test/bin/Debug/net8.0-windows/SalmonNative.dll
+cp -f ./lib/$ARCH/libsalmon.dylib ../SalmonLibs.VS2022/Salmon.Test/bin/Debug/net9.0-windows/SalmonNative.dll
 fi
 
 cd $CURRDIR

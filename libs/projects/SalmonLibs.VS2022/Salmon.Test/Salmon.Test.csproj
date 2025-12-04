@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
 	<SalmonVersion>3.0.2</SalmonVersion>
@@ -41,4 +41,9 @@
 	<!-- Uncomment to enable stepping in to native code from visual studio -->
     <!-- <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" /> -->
   </ItemGroup>
+  
+  <!-- Needed to run native test cases -->
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
+    <Exec Command="copy ..\$(Platform)\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
+  </Target>
 </Project>

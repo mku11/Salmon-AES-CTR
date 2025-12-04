@@ -10,7 +10,7 @@ if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 call msbuild /property:Configuration=Debug /p:Platform=x64
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 
-copy .\SalmonNative\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net8.0-windows\
+copy .\x64\Debug\SalmonNative.* .\Salmon.Test\bin\Debug\net9.0-windows\
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
   
 cd %CURRDIR%

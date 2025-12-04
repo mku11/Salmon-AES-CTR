@@ -6,6 +6,6 @@ cd ..\..\samples\CSharpSamples
 msbuild -t:clean & ^
 msbuild -t:restore & ^
 msbuild /property:Configuration=Debug & ^
-cd CSharpSamples\bin\Debug\net8.0
+cd CSharpSamples\bin\Debug\net9.0
 CSharpSamples.exe & ^
 cd %CURRDIR%

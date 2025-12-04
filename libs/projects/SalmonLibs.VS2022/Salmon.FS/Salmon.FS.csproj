@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <Title>Salmon AES-256 CTR encrypted virtual filesystem</Title>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>logo.png</PackageIcon>

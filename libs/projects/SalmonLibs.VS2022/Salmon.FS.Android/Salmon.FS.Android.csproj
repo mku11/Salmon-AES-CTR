@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0-android</TargetFramework>
+		<TargetFramework>net9.0-android36.0</TargetFramework>
 		<LangVersion>10</LangVersion>
 		<ImplicitUsings>false</ImplicitUsings>
 		<Title>Salmon AES256 CTR android filesystem encryption library</Title>
