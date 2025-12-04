@@ -23,6 +23,7 @@ jobs:
   xcode_build_matrix:
     strategy:
       matrix:
+        java_version: [11]
         os: [macos-15-intel]
     name: build.xcode.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -36,6 +37,13 @@ jobs:
       with:
         ref: ${{ github.ref }}
     
+    # Toolchains and Build envs
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ matrix.java_version }}
+        
     # Brew
     - name: Update Homebrew
       run: brew update
