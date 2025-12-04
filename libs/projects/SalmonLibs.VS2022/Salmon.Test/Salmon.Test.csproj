@@ -37,13 +37,19 @@
   <ItemGroup>
     <ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
     <ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
-	
-	<!-- Uncomment to enable stepping in to native code from visual studio -->
-    <!-- <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" /> -->
   </ItemGroup>
   
-  <!-- Needed to run native test cases -->
-  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
-    <Exec Command="copy ..\$(Platform)\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
+  <!-- Dependency only for windows -->
+  <Choose>
+    <When Condition=" '$(OS)' == 'Windows_NT' ">
+      <ItemGroup>
+        <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" />
+      </ItemGroup>
+    </When>
+  </Choose>
+	
+  <!-- Needed to run native test cases, for Linux/Mac copy the salmon native dyn libaries manually or see scripts/deploy.-->
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
+    <Exec Command="copy ..\x64\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
   </Target>
 </Project>
