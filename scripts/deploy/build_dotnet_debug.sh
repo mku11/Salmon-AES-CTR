@@ -1,8 +1,15 @@
 CURRDIR=$(pwd)
 
+echo make sure you run dotnet workload restore before this script
+
 cd ../../libs/projects/SalmonLibs.VS2022
-dotnet workload restore -c Debug
-dotnet restore -c Debug
+
+cd Salmon.Core
+dotnet restore
+dotnet build --no-restore -c Debug
+
+cd ../Salmon.FS
+dotnet restore
 dotnet build --no-restore -c Debug
 
 cd $CURRDIR
