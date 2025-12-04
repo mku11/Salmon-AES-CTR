@@ -1,5 +1,5 @@
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../lib/salmon-core/streams/memory_stream.js';
+import { BitConverter } from '../lib/simple-io/convert/bit_converter.js';
+import { MemoryStream } from '../lib/simple-io/streams/memory_stream.js';
 import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionMode } from '../lib/salmon-core/salmon/streams/encryption_mode.js';
 

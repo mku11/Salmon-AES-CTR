@@ -39,6 +39,10 @@ PLATFORM?=win
 ARCH?=x86_64
 CC?=gcc
 
+$(info PLATFORM: $PLATFORM)
+$(info ARCH: $PLATFORM)
+$(info )
+
 ifeq ($(ARCH),aarch64)
 ifeq ($(PLATFORM),linux)
   CC=aarch64-$(PLATFORM)-gnu-gcc

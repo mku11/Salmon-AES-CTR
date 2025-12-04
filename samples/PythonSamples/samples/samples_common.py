@@ -3,7 +3,7 @@ import random
 
 from salmon_core.salmon.password.password import Password
 from salmon_core.salmon.generator import Generator
-from salmon_core.streams.memory_stream import MemoryStream
+from simple_io.streams.memory_stream import MemoryStream
 
 
 # create an encryption key from a text password

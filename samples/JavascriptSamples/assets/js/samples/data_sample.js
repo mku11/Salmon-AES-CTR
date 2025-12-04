@@ -1,4 +1,4 @@
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
+import { BitConverter } from '../lib/simple-io/convert/bit_converter.js';
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { Encryptor } from '../lib/salmon-core/salmon/encryptor.js';
 import { Decryptor } from '../lib/salmon-core/salmon/decryptor.js';
@@ -13,8 +13,6 @@ export class DataSample {
         let nonce = Generator.getSecureRandomBytes(8);
 		
 		let encryptor = new Encryptor(threads);
-		// set the worker path when using parallel threads
-		encryptor.setWorkerPath('./assets/js/lib/salmon-core/salmon/encryptor_worker.js');
         let encData = await encryptor.encrypt(data, key, nonce, EncryptionFormat.Salmon,
 											 integrityKey?true:false, integrityKey);
         encryptor.close();
@@ -26,10 +24,7 @@ export class DataSample {
 	static async decryptData(data, key, integrityKey, threads) {
 		print("Decrypting bytes: " + BitConverter.toHex(data.slice(0,24)) + "...");
 		
-		let decryptor = new Decryptor(threads);
-		// set the worker path when using parallel threads
-		decryptor.setWorkerPath('./assets/js/lib/salmon-core/salmon/decryptor_worker.js');
-        
+		let decryptor = new Decryptor(threads);        
 		let decBytes = await decryptor.decrypt(data, key, null, EncryptionFormat.Salmon, 
 											   integrityKey?true:false, integrityKey);
         decryptor.close();

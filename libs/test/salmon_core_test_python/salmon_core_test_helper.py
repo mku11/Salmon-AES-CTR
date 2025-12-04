@@ -116,7 +116,7 @@ class SalmonCoreTestHelper:
         print("platform:", platform_os)
         print("arch:", arch)
     
-        library_path: str = "";
+        library_path: str = ""
         if "WINDOWS" in platform_os:
             if arch == "x86_64" or arch == "AMD64":
                 library_path = SalmonCoreTestHelper.prj_path \
@@ -141,7 +141,7 @@ class SalmonCoreTestHelper:
                 + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64" \
                 + "/" + SalmonCoreTestHelper.linux_path
         print("library path: " + library_path)
-        NativeProxy.set_library_path(library_path);
+        NativeProxy.set_library_path(library_path)
         
     @staticmethod
     def close():

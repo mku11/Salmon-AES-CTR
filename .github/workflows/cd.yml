@@ -392,6 +392,14 @@ jobs:
       with:
         name: salmon-dotnet
         path: output/nuget/releases
+        
+    # Upload Native Nuget Packages
+    - if: ${{ matrix.os == 'windows-latest' }}
+      name: Upload .NET Nuget Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: salmon-msvc-win-x86_64
+        path: ./output/native
 
     # Publish WinService
     - if: runner.os == 'Windows'
@@ -451,9 +459,7 @@ jobs:
       with:
         name: salmon-python
         path: |
-          output/python
-          !./output/python/*.tar.gz
-
+          ./output/python/*.tar.gz
 
   # TypeScript/JavaScript
   ts_js_build_matrix:

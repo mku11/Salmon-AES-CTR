@@ -1,11 +1,11 @@
-import { autoRenameFile as autoRenameFile } from '../lib/salmon-fs/fs/file/ifile.js';
+import { autoRenameFile as autoRenameFile } from '../lib/simple-fs/fs/file/ifile.js';
 import { Drive } from '../lib/salmon-fs/salmonfs/drive/drive.js';
 import { WSDrive } from '../lib/salmon-fs/salmonfs/drive/ws_drive.js';
 import { HttpDrive } from '../lib/salmon-fs/salmonfs/drive/http_drive.js';
-import { LocalStorageFile } from '../lib/salmon-fs/fs/file/ls_file.js';
+import { LocalStorageFile } from '../lib/simple-fs/fs/file/ls_file.js';
 import { FileSequencer } from '../lib/salmon-fs/salmonfs/sequence/file_sequencer.js';
 import { SequenceSerializer } from '../lib/salmon-core/salmon/sequence/sequence_serializer.js';
-import { BatchImportOptions, BatchExportOptions } from '../lib/salmon-fs/fs/drive/utils/file_commander.js';
+import { BatchImportOptions, BatchExportOptions } from '../lib/simple-fs/fs/drive/utils/file_commander.js';
 import { AesFileCommander } from '../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
 import { AesFileReadableStream } from '../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 
@@ -46,10 +46,6 @@ export class DriveSample {
 		let bufferSize = 256 * 1024;
         let commander = new AesFileCommander(bufferSize, bufferSize, threads);
 
-		// set the correct worker paths for multithreading
-		commander.getFileImporter().setWorkerPath( './assets/js/lib/salmon-fs/salmonfs/drive/utils/aes_file_importer_worker.js');
-		commander.getFileExporter().setWorkerPath( './assets/js/lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter_worker.js');
-		
         // import multiple files
 		let importOptions = new BatchImportOptions();
         importOptions.integrity = true;
@@ -74,10 +70,6 @@ export class DriveSample {
 	static async exportFiles(drive, dir, threads = 1) {
 		let bufferSize = 256 * 1024;
 		let commander = new AesFileCommander(bufferSize, bufferSize, threads);
-
-		// set the correct worker paths for multithreading
-		commander.getFileImporter().setWorkerPath( './assets/js/lib/salmon-fs/salmonfs/drive/utils/aes_file_importer_worker.js');
-		commander.getFileExporter().setWorkerPath( './assets/js/lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter_worker.js');
 		
         // export all files
 		let files = await drive.getRoot().then((root)=>root.listFiles());
@@ -131,7 +123,7 @@ export class DriveSample {
 		let backOffset = 256 * 1024; // optional, use for Media consumption
         let inputStream = AesFileReadableStream.createFileReadableStream(file,
                 buffers, bufferSize, bufferThreads, backOffset);
-		inputStream.setWorkerPath('../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream_worker.js');
+		
 		let reader = await inputStream.getReader();
 		let buffer;
 		let totalBytesRead = 0;
@@ -155,7 +147,7 @@ export class DriveSample {
         let seqFilename = "sample_sequencer.json";
         let privateDir;
 		if (typeof process === 'object') { // node
-			const { NodeFile } = await import('../lib/salmon-fs/fs/file/node_file.js');
+			const { NodeFile } = await import('../lib/simple-fs/fs/file/node_file.js');
 			
 			if (process.platform === "win32")
 				privateDir = new NodeFile(process.env.LOCALAPPDATA + "\\Salmon");

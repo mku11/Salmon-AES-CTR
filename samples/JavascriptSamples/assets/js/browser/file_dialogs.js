@@ -1,4 +1,4 @@
-import { File } from '../lib/salmon-fs/fs/file/file.js';
+import { File } from '../lib/simple-fs/fs/file/file.js';
 
 export class FileDialogs {
     static async openFile(filename, onFilePicked) {

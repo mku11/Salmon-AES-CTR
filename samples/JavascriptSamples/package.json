@@ -8,6 +8,7 @@
   "devDependencies": {
   },
   "dependencies": {
+	  "koffi": "^2.14.1"
   },
   "type": "module"
 }

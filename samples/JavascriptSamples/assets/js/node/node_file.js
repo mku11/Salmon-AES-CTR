@@ -1,12 +1,18 @@
-import './node_common.js';
+import { Common } from './node_common.js';
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
-import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
+import { NodeFile } from '../lib/simple-fs/fs/file/node_file.js';
 import { FileSample } from '../samples/file_sample.js';
 import { getKeyFromPassword } from '../samples/samples_common.js';
+import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
 
 let password = "test123";
 let text = "This is a plain text that will be encrypted";
 let integrity = true;
+
+// uncomment to set the native library for performance
+// await Common.setNativeLibrary()
+// set the provider (see ProviderType)
+AesStream.setAesProviderType(ProviderType.Default);
 
 // generate an encryption key from the text password
 let key = await getKeyFromPassword(password);

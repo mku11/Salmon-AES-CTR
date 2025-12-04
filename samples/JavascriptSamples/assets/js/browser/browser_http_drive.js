@@ -1,8 +1,8 @@
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
-import { HttpFile } from '../lib/salmon-fs/fs/file/http_file.js';
-import { Credentials } from '../lib/salmon-fs/fs/file/credentials.js';
-import { HttpSyncClient } from '../lib/salmon-fs/fs/file/http_sync_client.js';
+import { HttpFile } from '../lib/simple-fs/fs/file/http_file.js';
+import { Credentials } from '../lib/simple-fs/fs/file/credentials.js';
+import { HttpSyncClient } from '../lib/simple-fs/fs/file/http_sync_client.js';
 
 let serviceUser = "user";
 let servicePassword = "password";

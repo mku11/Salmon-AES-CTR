@@ -1,33 +1,26 @@
+#!/bin/bash -x
+CURRDIR=$(pwd)
+
+SIMPLE_IO_VERSION=1.0.2
+SIMPLE_FS_VERSION=1.0.2
 SALMON_VERSION=3.0.2
-rm -rf packages
-mkdir packages
+
 rm -rf assets/js/lib
 mkdir assets/js/lib
 
+SALMON_DIR=../libs/salmon/salmon-javascript
+SIMPLE_IO=simple-io
+SIMPLE_FS=simple-fs
 SALMON_CORE=salmon-core
 SALMON_FS=salmon-fs
-SALMON_CORE_LIB=$SALMON_CORE.js.$SALMON_VERSION
-SALMON_FS_LIB=$SALMON_FS.js.$SALMON_VERSION
-SALMON_CORE_LIB_FILENAME=$SALMON_CORE_LIB.zip
-SALMON_FS_LIB_FILENAME=$SALMON_FS_LIB.zip
+SIMPLE_IO_LIB=$SALMON_DIR/$SIMPLE_IO.js.$SIMPLE_IO_VERSION
+SIMPLE_FS_LIB=$SALMON_DIR/$SIMPLE_FS.js.$SIMPLE_FS_VERSION
+SALMON_CORE_LIB=$SALMON_DIR/$SALMON_CORE.js.$SALMON_VERSION
+SALMON_FS_LIB=$SALMON_DIR/$SALMON_FS.js.$SALMON_VERSION
 
-# use local repo
-# SALMON_LIBS_URL=http://localhost/repository/javascript
-# use salmon official github releases
-SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v$SALMON_VERSION
+cp -rf $SIMPLE_IO_LIB/$SIMPLE_IO assets/js/lib/
+cp -rf $SIMPLE_FS_LIB/$SIMPLE_FS assets/js/lib/
+cp -rf $SALMON_CORE_LIB/$SALMON_CORE assets/js/lib/
+cp -rf $SALMON_FS_LIB/$SALMON_FS assets/js/lib/
 
-SALMON_CORE_LIB_URL=$SALMON_LIBS_URL/$SALMON_CORE_LIB_FILENAME
-SALMON_FS_LIB_URL=$SALMON_LIBS_URL/$SALMON_FS_LIB_FILENAME
-
-cd packages
-curl $SALMON_CORE_LIB_URL -LJo $SALMON_CORE_LIB_FILENAME
-curl $SALMON_FS_LIB_URL -LJo $SALMON_FS_LIB_FILENAME
- 
-unzip -qq -o $SALMON_CORE_LIB_FILENAME 
-unzip -qq -o $SALMON_FS_LIB_FILENAME 
-
-cd ..
-cp -rf packages/$SALMON_CORE assets/js/lib/
-rm -rf packages/$SALMON_CORE
-cp -rf packages/$SALMON_FS assets/js/lib/
-rm -rf packages/$SALMON_FS
+cd $CURRDIR

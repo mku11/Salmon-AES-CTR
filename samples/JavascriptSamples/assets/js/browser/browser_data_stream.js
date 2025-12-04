@@ -1,4 +1,4 @@
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
+import { BitConverter } from '../lib/simple-io/convert/bit_converter.js';
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataStreamSample } from '../samples/data_stream_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';

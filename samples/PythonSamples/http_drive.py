@@ -5,12 +5,12 @@
 
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.streams.aes_stream import ProviderType
-from salmon_core.salmon.bridge.native_proxy import NativeProxy
-from salmon_fs.fs.file.file import File
-from salmon_fs.fs.file.http_file import HttpFile
-from salmon_fs.fs.file.http_sync_client import HttpSyncClient
-from salmon_fs.fs.file.credentials import Credentials
+from simple_fs.fs.file.file import File
+from simple_fs.fs.file.http_file import HttpFile
+from simple_fs.fs.file.http_sync_client import HttpSyncClient
+from simple_fs.fs.file.credentials import Credentials
 
+from common import Common
 from samples.drive_sample import DriveSample
 
 http_drive_url = "https://localhost/testvault"
@@ -19,12 +19,16 @@ threads = 1
 http_user = "user"
 http_password = "password"
 
-# enable only if you're testing with an HTTP server
-#  In all other cases you should be using an HTTPS server
-#  HttpSyncClient.set_allow_clear_text_traffic(True)
+print("Starting Salmon HTTP Sample")
+print("make sure your HTTP server is up and running to run this sample, see scripts/misc/start_http_server.bat")
 
-# Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
-# NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
+# enable only if you're testing with an HTTP server
+# In all other cases you should be using an HTTPS server
+# HttpSyncClient.set_allow_clear_text_traffic(True)
+
+# uncomment to set the native library for performance
+# Common.set_native_library()
+# set the provider (see ProviderType)
 AesStream.set_aes_provider_type(ProviderType.Default)
 
 if __name__ == '__main__':

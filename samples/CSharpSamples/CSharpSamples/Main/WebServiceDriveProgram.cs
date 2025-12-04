@@ -17,6 +17,9 @@ class WebServiceDriveProgram
         string drivePath = "/example_drive_" + Time.Time.CurrentTimeMillis();
         string password = "test123";
 
+		Console.WriteLine("Starting Salmon WebFS Sample");
+		Console.WriteLine("make sure your WebFS server is up and running to run this sample, see scripts/misc/start_ws_server.bat");
+		
 		// enable only if you're testing with an HTTP server
 		// In all other cases you should be using an HTTPS server
         // HttpSyncClient.AllowClearTextTraffic = true;

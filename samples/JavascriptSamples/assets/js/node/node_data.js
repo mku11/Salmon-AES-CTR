@@ -1,12 +1,18 @@
-import './node_common.js';
+import { Common } from './node_common.js';
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataSample } from '../samples/data_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
+import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
 
 let password = "test123";
 let size = 8 * 1024 * 1024;
 let threads = 1;
 let integrity = true;
+
+// uncomment to set the native library for performance
+// await Common.setNativeLibrary()
+// set the provider (see ProviderType)
+AesStream.setAesProviderType(ProviderType.Default);
 
 // generate a key
 print("generating keys and random data...");

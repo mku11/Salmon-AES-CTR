@@ -3,10 +3,10 @@ import os
 import sys
 import platform
 
-from salmon_fs.fs.file.ifile import IFile
-from salmon_fs.fs.file.file import File
-from salmon_fs.fs.file.http_file import HttpFile
-from salmon_fs.fs.file.ws_file import WSFile
+from simple_fs.fs.file.ifile import IFile
+from simple_fs.fs.file.file import File
+from simple_fs.fs.file.http_file import HttpFile
+from simple_fs.fs.file.ws_file import WSFile
 from salmon_fs.salmonfs.drive.drive import Drive
 from salmon_fs.salmonfs.drive.http_drive import HttpDrive
 from salmon_fs.salmonfs.drive.ws_drive import WSDrive

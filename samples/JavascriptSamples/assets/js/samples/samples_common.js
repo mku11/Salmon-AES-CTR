@@ -1,6 +1,6 @@
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { Password } from '../lib/salmon-core/salmon/password/password.js';
-import { MemoryStream } from '../lib/salmon-core/streams/memory_stream.js';
+import { MemoryStream } from '../lib/simple-io/streams/memory_stream.js';
 
 // create an encryption key from a text password
 export async function getKeyFromPassword(password) {

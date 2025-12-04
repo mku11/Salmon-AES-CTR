@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.generator import Generator
-from salmon_fs.fs.file.ifile import IFile
+from simple_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 

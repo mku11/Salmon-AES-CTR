@@ -12,6 +12,8 @@ ext {
 repositories {
 	maven {
 		url uri("../../libs/salmon/salmon-java")
+	}
+	maven {
 		url uri("../../libs/salmon/salmon-android")
 	}
     mavenCentral()

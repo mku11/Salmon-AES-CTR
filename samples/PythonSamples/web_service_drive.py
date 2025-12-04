@@ -7,12 +7,13 @@ import time
 
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.streams.aes_stream import ProviderType
-from salmon_core.salmon.bridge.native_proxy import NativeProxy
-from salmon_fs.fs.file.file import File
-from salmon_fs.fs.file.ws_file import WSFile
-from salmon_fs.fs.file.credentials import Credentials
-from salmon_fs.fs.file.http_sync_client import HttpSyncClient
 
+from simple_fs.fs.file.file import File
+from simple_fs.fs.file.ws_file import WSFile
+from simple_fs.fs.file.credentials import Credentials
+from simple_fs.fs.file.http_sync_client import HttpSyncClient
+
+from common import Common
 from samples.drive_sample import DriveSample
 
 ws_service_path = "https://localhost:8443"
@@ -21,12 +22,16 @@ ws_password = "password"
 drive_path = "/example_drive_" + str(round(time.time() * 1000))
 password = "test123"
 
-# enable only if you're testing with an HTTP server
-#  In all other cases you should be using an HTTPS server
-#  HttpSyncClient.set_allow_clear_text_traffic(True)
+print("Starting Salmon WebFS Sample")
+print("make sure your WebFS server is up and running to run this sample, see scripts/misc/start_ws_server.bat")
 
-# Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
-# NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
+# enable only if you're testing with an HTTP server
+# In all other cases you should be using an HTTPS server
+# HttpSyncClient.set_allow_clear_text_traffic(True)
+
+# uncomment to set the native library for performance
+# Common.set_native_library()
+# set the provider (see ProviderType)
 AesStream.set_aes_provider_type(ProviderType.Default)
 
 if __name__ == '__main__':

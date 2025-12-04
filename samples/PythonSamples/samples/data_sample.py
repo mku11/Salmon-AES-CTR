@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from salmon_core.convert.bit_converter import BitConverter
+from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.decryptor import Decryptor
 from salmon_core.salmon.encryptor import Encryptor
 from salmon_core.salmon.generator import Generator

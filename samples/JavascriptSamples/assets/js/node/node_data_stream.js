@@ -1,11 +1,18 @@
-import './node_common.js';
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
+import { Common } from './node_common.js';
+import { BitConverter } from '../lib/simple-io/convert/bit_converter.js';
 import { Generator } from '../lib/salmon-core/salmon/generator.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
+import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
 import { DataStreamSample } from '../samples/data_stream_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
 
 let password = "test123";
 let size = 1 * 1024 * 1024;
+
+// uncomment to set the native library for performance
+// await Common.setNativeLibrary()
+// set the provider (see ProviderType)
+AesStream.setAesProviderType(ProviderType.Default);
 
 // generate a key
 print("generating keys and random data...");

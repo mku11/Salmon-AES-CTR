@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-from salmon_core.convert.bit_converter import BitConverter
+from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.aes_stream import AesStream
-from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.streams.random_access_stream import RandomAccessStream
+from simple_io.streams.memory_stream import MemoryStream
+from simple_io.streams.random_access_stream import RandomAccessStream
 
 
 class DataStreamSample:
