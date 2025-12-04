@@ -48,7 +48,7 @@
     </When>
   </Choose>
 	
-  <!-- Needed to run native test cases, for Linux/Mac copy the salmon native dyn libaries manually or see scripts/deploy.-->
+  <!-- Needed to run native test cases, for Linux/Mac copy the salmon native dyn libaries manually or see scripts/tests/csharp/linux_mac.-->
   <Target Name="PostBuild" BeforeTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
     <Exec Command="copy ..\x64\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
   </Target>

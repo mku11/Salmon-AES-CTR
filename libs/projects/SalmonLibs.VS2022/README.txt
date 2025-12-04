@@ -29,11 +29,11 @@ To test the compatibility of the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
 
-To enable GPU support for the native libary edit file Salmon.Native.vcxproj and modify the paths to OpenCL directories:
+To enable GPU support for the native libary edit file Salmon.Native.vcxproj run from the root directory:
 ```
-<AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-<AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+setup.bat
 ```
+
 Then build release with GPU support:
 ```
 msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
