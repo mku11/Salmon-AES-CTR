@@ -47,9 +47,9 @@ jobs:
           
     # Build xcode native libraries
     - if: ${{ matrix.os == 'macos-15-intel' }}
-      name: Build GCC Native Libraries on MacOS x86_64
+      name: Build xcode Native Libraries on MacOS x86_64
       shell: bash
-      run: cd ../../libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
+      run: cd ./libs/projects/salmon-libs-xcode-macos/salmon && xcodebuild -verbose -scheme salmon build && ./package.sh
     
     # Upload xcode artifacts
     - if: ${{ matrix.os == 'macos-15-intel' }}

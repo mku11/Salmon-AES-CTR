@@ -151,6 +151,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
+    - if: runner.os == 'Windows'
+      name: Install Android Workload
+      run: dotnet workload install android
     - name: Setup Nuget
       uses: nuget/setup-nuget@v2
     - if: runner.os == 'Windows'
