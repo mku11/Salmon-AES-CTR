@@ -3,7 +3,7 @@ CURRDIR=$(pwd)
 
 echo Setting up Salmon for development
 cd ./scripts/misc
-./init_gitsubmodules.sh
+./init_gitmodules.sh
 
 echo If you need GPU support you need to install OpenCL:
 echo For Linux:
