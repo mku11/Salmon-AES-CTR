@@ -7,16 +7,15 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features  
-- AES-256 encryption in CTR Mode  
-- HMAC SHA-256 authentication  
-- SHA-256 PBKDF2 key derivation  
-- CPU AES-NI acceleration for Intel x86 and ARM64  
-- GPU AES acceleration with OpenCL  
-- Data and seekable stream encryption API  
-- File system API for encrypted virtual drives  
-- Protected nonce sequencers (limited)  
-- Support for network drives HTTP (readonly) and Web Service (experimental)  
-- GPU AES acceleration with WebGPU (*Experimental)
+- AES-256 encryption in CTR Mode
+- HMAC SHA-256 authentication
+- SHA-256 PBKDF2 key derivation
+- CPU AES-NI acceleration for Intel x86 and ARM64
+- GPU AES acceleration with OpenCL
+- Data and seekable stream encryption API
+- File system API for encrypted virtual drives
+- Protected nonce sequencers (limited)
+- Support for network drives HTTP (readonly) and Web Service (experimental)
  
 ## Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  

@@ -1,4 +1,15 @@
 ## Salmon API Samples
+You can find complete and working sample code for all the languages and platforms supported. To compile, build, and run the samples you need to download the salmon libraries from github releases or run the scripts under samples/ directory to download them for you.  
+For windows:  
+```
+get_salmon_libs.bat
+```
+  
+For Linux/MacOS:  
+```
+./get_salmon_libs.sh
+```
+
 API usage is consistent across languages with slight variations on naming conventions. Note that the javascript/typescript libraries are based on async IO so you will need to use 'await' most of the time.
   
 For detailed samples see: [**Samples**](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  

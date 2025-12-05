@@ -1,18 +1,27 @@
 
 ### Java Gradle  
 
-To integrate the Salmon libraries to your gradle project add the salmon repository:  
-
+To integrate the Salmon libraries to your gradle project:  
+Download the salmon multi-arch package from:
+https://github.com/mku11/Salmon-AES-CTR/releases
+Unzip the contents of the downloaded archive  
+Create a local maven repository definition in your build.gradle.  
+For more info you can see the samples provided in the source code:  
 ```
 repositories {
-    maven {
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
+    // local repos, make sure you run samples/get_salmon_libs.bat
+	maven {
+		url uri("../salmon/salmon-java")
+	}
+	// add the repository for the native library (optional)
+	maven {
+		url uri("../salmon/salmon-java-win-x86_64")
+	}
     ...
 }
 ```
 
-Add the java libraries to your project:
+Now you can add the java libraries to your project:  
 ```
 dependencies {
     implementation 'com.mku.salmon:salmon-core:2.0.0'
@@ -28,8 +37,7 @@ dependencies {
 ```
 
 ### Windows native library in Gradle
-To add the native library for windows to your gradle project add the task below:
-
+To add the native library for windows to your gradle project add the task below:  
 ```
 // unzipping the native library
 configurations {
@@ -52,35 +60,6 @@ dependencies {
 }
 ```
 
-### Java Maven
-
-To integrate the Salmon libraries to your maven project add the salmon repository:
-```
-<repositories>
-    <repository>
-        <id>mku-salmon-repo</id>
-        <url>https://github.com/mku11/Repo/raw/main/maven/releases</url>
-    </repository>     
-    ...
-</repositories>
-```
-
-Now add the dependencies:  
-```
-<dependencies>
-    <dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-core</artifactId>
-        <version>2.0.0</version>
-    </dependency>
-	<dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-fs</artifactId>
-        <version>2.0.0</version>
-    </dependency>
-    ...
-</dependencies>
-```
 
 ### C# Visual Studio Nuget
 
@@ -90,36 +69,42 @@ Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sour
 Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
 Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
 Install the salmon packages like you usually do.  
+Alternatively, you can add a nuget.config file in your .NET project:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <add key="SalmonPackages" value="..\..\libs\salmon\salmon-dotnet" />
+    </packageSources>
+</configuration>
+```
   
 ### C/C++ Visual Studio
-Same as the NuGet process. Download the native Salmon NuGet package. When installed under the packages folder the include and lib folders will contain everything you need.  
+The libraries provided are within the multi-arch packages see above. You can follow the same process as the .NET and include a nuget.config file pointing to the native library:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <add key="SalmonPackages" value="..\..\libs\salmon\salmon-msvc-win-x86_64" />
+    </packageSources>
+</configuration>
+```
   
-### C/C++ Linux
-Download the tar.gz package from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
-Extract the packages and link in your makefile.  
-See the Samples folder for an example.  
-
-### C/C++ MacOS
-Download the dmg package from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
-Extract the packages and link to your xcode project.  
-See the Samples folder for an example.  
+### C/C++ Linux/MacOS
+Extract the multi-arch package as above and add the include and lib directories in your makefile.  
+See the Samples folder for a working example.  
   
 ### Python
 To integrate the Salmon libraries to your Python project:  
-Download the python packages from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
+Install the tar.gz packages included in the salmon multi-arch package:
+```
+python -m pip install simple_io_py.tar.gz
+python -m pip install simple_fs_py.tar.gz
+python -m pip install salmon_core_py.tar.gz
+python -m pip install salmon_fs_py.tar.gz
+```
   
-Then run:  
-pip install packages/salmon_core.tar.gz  
-pip install packages/salmon_fs.tar.gz  
-
 ### Typescript/Javascript
-To integrate the Salmon libraries to your javascript/typescript project:  
-Download the packages from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
-  
-Then extract the zip files:  
-salmon-core.js.2.0.0.zip  
-salmon-fs.js.2.0.0.zip  
-  
-or typescript:  
-salmon-core.ts.2.0.0.zip  
-salmon-fs.ts.2.0.0.zip  
+For TS/JS find the typescript and javascript files in the multi-arch package and import them as ESM modules in your code.
+
+For working examples see the samples directory in the source code.
