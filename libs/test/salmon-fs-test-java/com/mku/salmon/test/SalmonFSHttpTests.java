@@ -118,7 +118,7 @@ public class SalmonFSHttpTests {
         try {
             AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("Caught: " + ex.getMessage());
             wrongPassword = true;
         }
         assertTrue(wrongPassword);

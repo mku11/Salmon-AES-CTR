@@ -107,7 +107,7 @@ public class SalmonFSHttpTests
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex);
+            Console.WriteLine("Caught: " + ex.Message);
             wrongPassword = true;
         }
         Assert.IsTrue(wrongPassword);
