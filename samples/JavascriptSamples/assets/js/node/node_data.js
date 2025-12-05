@@ -3,6 +3,7 @@ import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataSample } from '../samples/data_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
 import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 
 let password = "test123";
 let size = 8 * 1024 * 1024;

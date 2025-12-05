@@ -2,6 +2,7 @@ import { Common } from './node_common.js';
 import { getKeyFromPassword } from '../samples/samples_common.js';
 import { TextSample } from '../samples/text_sample.js';
 import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 
 let password = "test123";
 let text = "This is a plain text that will be encrypted";

@@ -4,6 +4,7 @@ import { NodeFile } from '../lib/simple-fs/fs/file/node_file.js';
 import { FileSample } from '../samples/file_sample.js';
 import { getKeyFromPassword } from '../samples/samples_common.js';
 import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 
 let password = "test123";
 let text = "This is a plain text that will be encrypted";
