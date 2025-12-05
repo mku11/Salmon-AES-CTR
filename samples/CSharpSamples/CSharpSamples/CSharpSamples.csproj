@@ -20,6 +20,14 @@
   <ItemGroup>
     <PackageReference Include="Salmon.Core" Version="$(SalmonVersion)" />
     <PackageReference Include="Salmon.FS" Version="$(SalmonVersion)" />
-    <PackageReference Include="Salmon.Native" Version="$(SalmonVersion)" />
   </ItemGroup>
+  
+  <!-- Dependency only for windows -->
+  <Choose>
+    <When Condition=" '$(OS)' == 'Windows_NT' ">
+      <ItemGroup>
+        <PackageReference Include="Salmon.Native" Version="$(SalmonVersion)" />
+      </ItemGroup>
+    </When>
+  </Choose>
 </Project>
