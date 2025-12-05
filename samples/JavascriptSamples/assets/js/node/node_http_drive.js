@@ -5,6 +5,7 @@ import { NodeFile } from '../lib/simple-fs/fs/file/node_file.js';
 import { HttpSyncClient } from '../lib/simple-fs/fs/file/http_sync_client.js';
 import { Credentials } from '../lib/simple-fs/fs/file/credentials.js';
 import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 
 let httpDriveURL = "https://localhost/testvault";
 let password = "test";
@@ -13,7 +14,7 @@ let httpPassword = "password";
 let threads = 1;
 
 console.log("Starting Salmon HTTP Sample");
-console.log("make sure your HTTP server is up and running to run this sample, see scripts/misc/start_http_server.bat");
+console.log("make sure your HTTP server is up and running to run this sample");
 
 // uncomment to set the native library for performance
 // await Common.setNativeLibrary()

@@ -15,7 +15,7 @@ public class HttpDriveProgram {
         int threads = 1;
 
 		System.out.println("Starting HTTP Sample");
-		System.out.println("make sure your HTTP server is up and running to run this sample, see scripts/misc/start_http_server.bat");
+		System.out.println("make sure your HTTP server is up and running to run this sample");
 		
         // enable only if you're testing with an HTTP server
 		// In all other cases you should be using an HTTPS server

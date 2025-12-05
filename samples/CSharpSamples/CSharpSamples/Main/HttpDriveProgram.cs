@@ -17,7 +17,7 @@ class HttpDriveProgram
         int threads = 1;
 		
 		Console.WriteLine("Starting Salmon HTTP Sample");
-		Console.WriteLine("make sure your HTTP server is up and running to run this sample, see scripts/misc/start_http_server.bat");
+		Console.WriteLine("make sure your HTTP server is up and running to run this sample");
 		
 		// enable only if you're testing with an HTTP server
 		// In all other cases you should be using an HTTPS server

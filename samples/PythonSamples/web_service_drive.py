@@ -23,7 +23,7 @@ drive_path = "/example_drive_" + str(round(time.time() * 1000))
 password = "test123"
 
 print("Starting Salmon WebFS Sample")
-print("make sure your WebFS server is up and running to run this sample, see scripts/misc/start_ws_server.bat")
+print("make sure your WebFS server is up and running to run this sample")
 
 # enable only if you're testing with an HTTP server
 # In all other cases you should be using an HTTPS server

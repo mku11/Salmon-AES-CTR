@@ -5,6 +5,7 @@ import { NodeFile } from '../lib/simple-fs/fs/file/node_file.js';
 import { HttpSyncClient } from '../lib/simple-fs/fs/file/http_sync_client.js';
 import { Credentials } from '../lib/simple-fs/fs/file/credentials.js';
 import { ProviderType } from '../lib/salmon-core/salmon/streams/provider_type.js';
+import { AesStream } from '../lib/salmon-core/salmon/streams/aes_stream.js';
 
 let wsServicePath = "https://localhost:8443";
 let wsUser = "user";
@@ -13,7 +14,7 @@ let drivePath = "/example_drive_" + Date.now();
 let password = "test123";
 
 console.log("Starting Salmon WebFS Sample");
-console.log("make sure your WebFS server is up and running to run this sample, see scripts/misc/start_ws_server.bat");
+console.log("make sure your WebFS server is up and running to run this sample");
 
 // enable only if you're testing with an HTTP server
 // In all other cases you should be using an HTTPS server
