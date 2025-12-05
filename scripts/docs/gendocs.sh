@@ -1,7 +1,7 @@
 # use Linux or WSL or cygwin to run
 
 # Java and Android
-find ../../libs/src -type f -name "*.java" | xargs javadoc --no-module-directories -d ../../output/docs/java/html --ignore-source-errors
+find ../../libs/src -type f -name "*.java" | xargs javadoc -d ../../output/docs/java/html --ignore-source-errors
 
 # JavaScript
 npx jsdoc ../../libs/projects/SalmonLibs.vscode/lib -r -d ../../output/docs/javascript/html
