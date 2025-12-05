@@ -1,7 +1,7 @@
 set CURRDIR=%CD%
 
 set NODE_OPTIONS=--experimental-vm-modules
-set HTTP_SERVER_URL=http://localhost
+set HTTP_SERVER_URL=http://localhost:8880
 set TEST_DIR="d:\tmp\salmon\test"
 set TEST_MODE=Http
 set ENC_THREADS=2

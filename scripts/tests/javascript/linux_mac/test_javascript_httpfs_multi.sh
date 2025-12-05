@@ -1,7 +1,7 @@
 CURRDIR=$(pwd)
 
 export NODE_OPTIONS=--experimental-vm-modules
-export HTTP_SERVER_URL=http://localhost:8000
+export HTTP_SERVER_URL=http://localhost:8880
 # if you use WSL set this to a windows path instead
 # export TS_TEST_DIR="/mnt/d/tmp/salmon/test"
 # for Linux and macOS

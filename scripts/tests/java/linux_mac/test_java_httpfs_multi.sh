@@ -1,7 +1,7 @@
 CURRDIR=$(pwd)
 
 export ENC_THREADS=2
-export HTTP_SERVER_URL=http://localhost:8000
+export HTTP_SERVER_URL=http://localhost:8880
 export TEST_DIR="/tmp/salmon/test"
 export TEST_MODE=Http
 

@@ -1,6 +1,6 @@
 CURRDIR=$(pwd)
 
-export HTTP_SERVER_URL=http://localhost
+export HTTP_SERVER_URL=http://localhost:8880
 export TEST_DIR=/tmp/salmon/test
 export TEST_MODE=Http
 export ENC_THREADS=1
