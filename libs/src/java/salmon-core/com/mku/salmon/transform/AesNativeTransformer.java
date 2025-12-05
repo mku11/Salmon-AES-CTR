@@ -44,14 +44,29 @@ public class AesNativeTransformer extends AesCTRTransformer {
         nativeProxy = proxy;
     }
 
+
+	/**
+     * Get the AES native proxy
+     * @return The native proxy
+     */
     public static INativeProxy getNativeProxy() {
         return nativeProxy;
     }
 
     private int implType;
+	
+	/**
+     * Get the AES native implementation type, see enum class ProviderType
+     * @return The implementation type
+     */
     public int getImplType() {
         return implType;
     }
+	
+	/**
+     * Set the AES native implementation type, see enum class ProviderType
+     * @param implType The implementation type
+     */
     public void setImplType(int implType) {
         this.implType = implType;
     }
