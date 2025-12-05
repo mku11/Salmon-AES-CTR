@@ -1,3 +1,4 @@
+![Salmon Logo](https://github.com/mku11/Salmon-AES-CTR/blob/main/common/common-res/icons/logo_48x48.png?raw=true)
 ## Salmon
 
 Salmon is an AES-256 CTR encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, byte streams, and a virtual drive API for encrypted local and remote files. Optimized for Intel x86_64, ARM64, and GPU cards.
