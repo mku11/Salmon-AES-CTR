@@ -13,7 +13,7 @@ name: CD.BuildPackageRelease
 
 on:
   push:
-    # branches: [ "wip-3.0.2" ]
+    branches: [ "main", "wip-3.0.2" ]
     tags:
       - "v*.*.*"
 
