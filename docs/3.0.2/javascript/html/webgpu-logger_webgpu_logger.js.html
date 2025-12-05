@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: webgpu-logger/webgpu_logger.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: webgpu-logger/webgpu_logger.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2025 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+// mark the start and begin of integer value sequences in the log
+// we reserve two large unsigned integers for marking purposes
+// you can modify them to your reserved values
+const INTSEQ_START_MARK = -1 >>> 0;
+const INTSEQ_END_MARK = -2 >>> 0;
+// max characters per line for the log
+const MAX_LINE_CHARS = 128;
+/**
+ * Logger for WebGPU
+ * Enable debugging for the global_id you want to debug inside your main function:
+ *    fn main() {
+ *      // make sure you debug only for a specific workitem/global_id
+   *      // if you don't the last workitem/global_id will overwrite the log
+   *      // if you have more dimensions you need to specify all of them
+ *      enable_log(global_id.x == 0); // log only the 1st workitem
+ *    }
+ *
+ * The following log function is now available anywhere inside your wsgl script:
+ *    // print scalar
+ *      var test: u32 = 10;
+ *      console.log("scalar:", test);
+ *
+ *    // print array element
+ *      var test = array&lt;u32, 4>(1,2,3,4);
+ *      console.log("arr element:", test[2]);
+ *
+ *    // print subarray from 1st to 3rd element
+ *      var test = array&lt;u32, 4>(1,2,3,4);
+ *      console.log("subarray:", test[1:3]);
+ */
+export class WebGPULogger {
+    #device = null;
+    #maxSize = 8 * 1024;
+    #shader = null;
+    #bindLayoutEntry;
+    #buffer;
+    #stgBuffer;
+    /**
+     * Initializes the logger
+     * @param device The webgpu device
+     */
+    constructor(device) {
+        this.#device = device;
+    }
+    /**
+     * Set the bind group layout entries
+     * @param bindGroupLayoutEntries The bind group layout entries
+     */
+    setBindGroupLayoutEntries(bindGroupLayoutEntries) {
+        if (this.#bindLayoutEntry)
+            throw new Error("Debug bind layout entry already added");
+        this.#bindLayoutEntry = {
+            binding: bindGroupLayoutEntries.length,
+            // @ts-ignore
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: { type: "storage" },
+        };
+        bindGroupLayoutEntries.push(this.#bindLayoutEntry);
+    }
+    /**
+     * Get the log shader
+     * @param shader The current shader to log
+     * @param bindGroupLayoutEntries The binding group layout entries
+     * @returns The debuggable shader
+     */
+    createLogShader(shader, bindGroupLayoutEntries) {
+        if (this.#shader)
+            throw new Error("Log shader already created");
+        let logShader = `
+// DEBUGGING
+@group(0) @binding(${bindGroupLayoutEntries.length - 1})
+var&lt;storage, read_write> dbgLog: array&lt;u32>;
+
+var&lt;private> enableLog: bool = false;
+fn enable_log(
+	value: bool,
+) {
+	enableLog = value;
+}
+
+// max number of chars for a line:
+const MAX_LINE_CHARS: u32 = ${MAX_LINE_CHARS};
+const INTSEQ_START_MARK: u32 = ${INTSEQ_START_MARK};
+const INTSEQ_END_MARK: u32 = ${INTSEQ_END_MARK};
+
+fn log(
+  msg: array&lt;u32,MAX_LINE_CHARS>
+) {
+	if(!enableLog) {
+	  return;
+	}
+	// first element of the log is to keep 
+	// track the position of the last byte written
+	var idx = dbgLog[0] + 1;
+	var isSequence: bool = false;
+	for(var i: u32 = 0; i &lt; MAX_LINE_CHARS; i++) {
+	  if(msg[i] == 0 &amp;&amp; !isSequence) {
+	break;
+	  }
+	  if(msg[i] == INTSEQ_START_MARK) {
+	isSequence = true;
+	  }
+	  if(msg[i] == INTSEQ_END_MARK) {
+	isSequence = false;
+	  }
+	  dbgLog[idx] = msg[i];
+	  idx+=1;  
+	}
+	dbgLog[0] = idx - 1;
+}
+`;
+        logShader = shader + "\n\n" + logShader;
+        this.#shader = this.#subst(logShader);
+        return this.#shader;
+    }
+    /**
+     * Substitute params
+     * @param shader The log shader
+     */
+    #subst(logShader) {
+        let sshader = logShader.replace(/(console.log.*?)\((.*?)\);/ig, function (m, fn, ps) {
+            let params = ps.split(",");
+            let els = [];
+            for (let param of params) {
+                param = param.trim();
+                if (param.startsWith("'") || param.startsWith('"')) {
+                    param = param.slice(1, param.length - 1);
+                    let len = param.length;
+                    if (len > MAX_LINE_CHARS - 4) {
+                        len = MAX_LINE_CHARS - 4;
+                    }
+                    for (let i = 0; i &lt; len; i++)
+                        els.push(param.charCodeAt(i));
+                }
+                else if (!param.includes(":")) { // scalar u32,i32, no floats
+                    els.push(INTSEQ_START_MARK);
+                    els.push("u32(" + param + ")");
+                    els.push(INTSEQ_END_MARK);
+                }
+                else { // array of u32,i32, no floats
+                    els.push(INTSEQ_START_MARK);
+                    let parts = param.split(/\[|\]/);
+                    let vname = parts[0];
+                    let [start, end] = parts[1].split(/:/).map(Number);
+                    if (end > MAX_LINE_CHARS - 2) {
+                        end = MAX_LINE_CHARS - 2;
+                    }
+                    for (let i = start; i &lt; end; i++)
+                        els.push(vname + "[" + i + "]");
+                    els.push(INTSEQ_END_MARK);
+                }
+            }
+            els.push('\n'.charCodeAt(0));
+            while (els.length &lt; MAX_LINE_CHARS) {
+                els.push(0);
+            }
+            let arg = "array&lt;u32,MAX_LINE_CHARS>(" + els.join(",") + ")";
+            return "log(" + arg + ");";
+        });
+        return sshader;
+    }
+    /**
+     * Set the bind group entries
+     * @param bindGroupEntries The bind group entries
+     */
+    setBindGroupEntries(bindGroupEntries) {
+        this.#buffer = this.#device.createBuffer({
+            label: 'bufferDbg',
+            size: 4 * this.#maxSize,
+            // @ts-ignore
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        });
+        this.#stgBuffer = this.#device.createBuffer({
+            label: 'stgBufferDbg',
+            size: 4 * this.#maxSize,
+            // @ts-ignore
+            usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
+        });
+        let bindEntry = {
+            binding: bindGroupEntries.length,
+            resource: {
+                buffer: this.#buffer
+            }
+        };
+        bindGroupEntries.push(bindEntry);
+    }
+    /**
+     * Set command encoder
+     * @param commandEncoder
+     */
+    setCommandEncoder(commandEncoder) {
+        commandEncoder.copyBufferToBuffer(this.#buffer, 0, this.#stgBuffer, 0, 4 * this.#maxSize);
+    }
+    /**
+     * Get the WebGPU log
+     * @returns The log
+     */
+    async getLog() {
+        await this.#stgBuffer.mapAsync(
+        // @ts-ignore
+        GPUMapMode.READ, 0, 4 * this.#maxSize);
+        const dbgArrayBuffer = this.#stgBuffer.getMappedRange(0, 4 * this.#maxSize);
+        const dbgData = dbgArrayBuffer.slice();
+        this.#stgBuffer.unmap();
+        let data = new Uint32Array(dbgData);
+        let res = "";
+        let isSequence = false;
+        for (let i = 1; i &lt; data.length; i++) {
+            if (data[i] == 0 &amp;&amp; !isSequence)
+                break;
+            if (data[i] == INTSEQ_START_MARK &amp;&amp; !isSequence) {
+                isSequence = true;
+                res += " ";
+                continue;
+            }
+            if (isSequence) {
+                if (data[i] == INTSEQ_END_MARK) {
+                    isSequence = false;
+                    continue;
+                }
+                else
+                    res += data[i] + " ";
+            }
+            else {
+                res += String.fromCodePoint(data[i]);
+            }
+        }
+        return res;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Dec 05 2025 17:50:15 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: simple-fs/fs/file/ws_file.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: simple-fs/fs/file/ws_file.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2025 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var _a;
+import { CopyOptions, MoveOptions } from './ifile.js';
+import { WSFileStream } from '../streams/ws_file_stream.js';
+import { IOException } from '../../../simple-io/streams/io_exception.js';
+import { HttpSyncClient } from './http_sync_client.js';
+import { Base64Utils } from '../../../simple-io/encode/base64_utils.js';
+/**
+ * File implementation for Web Service files.
+ */
+export class WSFile {
+    static #PATH = "path";
+    static #DEST_DIR = "destDir";
+    static #FILENAME = "filename";
+    /**
+     * The directory separator
+     */
+    static separator = "/";
+    #filePath;
+    #servicePath;
+    response;
+    getServicePath() {
+        return this.#servicePath;
+    }
+    /**
+     * Get the web service credentials
+     * @returns {Credentials | null } The credentials
+     */
+    getCredentials() {
+        return this.#credentials;
+    }
+    #credentials;
+    /**
+     * Instantiate a real file represented by the filepath provided.
+     * @param {string} path The filepath.
+     */
+    constructor(path, servicePath, credentials) {
+        if (!path.startsWith(_a.separator))
+            path = _a.separator + path;
+        this.#servicePath = servicePath;
+        this.#filePath = path;
+        this.#credentials = credentials;
+    }
+    async #getResponse() {
+        if (this.response == null) {
+            let headers = new Headers();
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
+            let httpResponse = null;
+            httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/info"
+                + "?" + _a.#PATH + "=" + encodeURIComponent(this.getPath()), { method: 'GET', headers: headers });
+            await this.#checkStatus(httpResponse, 200);
+            this.response = await httpResponse.json();
+        }
+        return this.response;
+    }
+    /**
+     * Create a directory under this directory.
+     * @param {string} dirName The name of the new directory.
+     * @returns {Promise&lt;IFile>} The newly created directory.
+     */
+    async createDirectory(dirName) {
+        let nDirPath = this.#getChildPath(dirName);
+        let headers = new Headers();
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
+        let params = new URLSearchParams();
+        params.append(_a.#PATH, nDirPath);
+        let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/mkdir", { method: 'POST', body: params, headers: headers });
+        await this.#checkStatus(httpResponse, 200);
+        let dir = new _a(nDirPath, this.#servicePath, this.#credentials);
+        return dir;
+    }
+    /**
+     * Create a file under this directory.
+     * @param {string} filename The name of the new file.
+     * @returns {Promise&lt;IFile>} The newly created file.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async createFile(filename) {
+        let nFilePath = this.#getChildPath(filename);
+        let headers = new Headers();
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
+        let params = new URLSearchParams();
+        params.append(_a.#PATH, nFilePath);
+        let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/create", { method: 'POST', body: params, headers: headers });
+        await this.#checkStatus(httpResponse, 200);
+        let nFile = new _a(nFilePath, this.#servicePath, this.#credentials);
+        return nFile;
+    }
+    /**
+     * Delete this file or directory.
+     * @returns {Promise&lt;boolean>} True if deletion is successful.
+     */
+    async delete() {
+        if (await this.isDirectory()) {
+            let files = await this.listFiles();
+            for (let file of files) {
+                let headers = new Headers();
+                this.#setDefaultHeaders(headers);
+                this.#setServiceAuth(headers);
+                let params = new URLSearchParams();
+                params.append(_a.#PATH, file.getPath());
+                let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/delete", { method: 'DELETE', body: params, headers: headers });
+                await this.#checkStatus(httpResponse, 200);
+            }
+        }
+        let headers = new Headers();
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
+        let params = new URLSearchParams();
+        params.append(_a.#PATH, this.#filePath);
+        let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/delete", { method: 'DELETE', body: params, headers: headers });
+        await this.#checkStatus(httpResponse, 200);
+        this.reset();
+        return true;
+    }
+    /**
+     * True if file or directory exists.
+     * @returns {Promise&lt;boolean>} True if exists
+     */
+    async exists() {
+        return (await this.#getResponse()).present;
+    }
+    /**
+     * Get the path of this file. For javascript this is the same as the absolute filepath.
+     * @returns {string} The path
+     */
+    getPath() {
+        return this.#filePath;
+    }
+    /**
+     * Get the display path on the physical disk. For javascript this is the same as the filepath.
+     * @returns {string} The display path.
+     */
+    getDisplayPath() {
+        return this.#filePath;
+    }
+    /**
+     * Get the name of this file or directory.
+     * @returns {string} The name of this file or directory.
+     */
+    getName() {
+        if (this.#filePath == null)
+            throw new Error("Filepath is not assigned");
+        let nFilePath = this.#filePath;
+        if (nFilePath.endsWith(_a.separator))
+            nFilePath = nFilePath.substring(0, nFilePath.length - 1);
+        let basename = nFilePath.split(_a.separator).pop();
+        if (basename === undefined)
+            throw new Error("Could not get basename");
+        if (basename.includes("%")) {
+            basename = decodeURIComponent(basename);
+        }
+        return basename;
+    }
+    /**
+     * Get a stream for reading the file.
+     * @returns {Promise&lt;RandomAccessStream>} The stream to read from.
+     * @throws FileNotFoundException
+     */
+    async getInputStream() {
+        this.reset();
+        let fileStream = new WSFileStream(this, "r");
+        return fileStream;
+    }
+    /**
+     * Get a stream for writing to this file.
+     * @returns {Promise&lt;RandomAccessStream>} The stream to write to.
+     * @throws FileNotFoundException
+     */
+    async getOutputStream() {
+        this.reset();
+        let fileStream = new WSFileStream(this, "rw");
+        return fileStream;
+    }
+    /**
+     * Get the parent directory of this file or directory.
+     * @returns {Promise&lt;IFile>} The parent directory.
+     */
+    async getParent() {
+        if (this.#filePath.length == 0 || this.#filePath == _a.separator)
+            return null;
+        let path = this.#filePath;
+        if (path.endsWith(_a.separator))
+            path = path.slice(0, -1);
+        let parentFilePath = path.substring(0, path.lastIndexOf(_a.separator));
+        return new _a(parentFilePath, this.#servicePath, this.#credentials);
+    }
+    /**
+     * Check if this is a directory.
+     * @returns {Promise&lt;boolean>} True if directory
+     */
+    async isDirectory() {
+        return (await this.#getResponse()).directory;
+    }
+    /**
+     * Check if this is a file.
+     * @returns {Promise&lt;boolean>} True if file
+     */
+    async isFile() {
+        return (await this.#getResponse()).file;
+    }
+    /**
+     * Get the last modified date on disk.
+     * @returns {Promise&lt;number>} The last date modified
+     */
+    async getLastDateModified() {
+        return (await this.#getResponse()).lastModified;
+    }
+    /**
+     * Get the size of the file on disk.
+     * @returns {Promise&lt;number>} The length
+     */
+    async getLength() {
+        return (await this.#getResponse()).length;
+    }
+    /**
+     * Get the count of files and subdirectories
+     * @returns {Promise&lt;number>} The number of files and subdirectories
+     */
+    async getChildrenCount() {
+        if (await this.isDirectory()) {
+            let headers = new Headers();
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
+            let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/list"
+                + "?" + _a.#PATH + "=" + encodeURIComponent(this.getPath()), { method: 'GET', headers: headers });
+            await this.#checkStatus(httpResponse, 200);
+            let res = (await httpResponse.json()).length;
+            return res;
+        }
+        return 0;
+    }
+    /**
+     * List all files under this directory.
+     * @returns {Promise&lt;IFile[]>} The list of files and subdirectories
+     */
+    async listFiles() {
+        if (await this.isDirectory()) {
+            let headers = new Headers();
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
+            let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/list"
+                + "?" + _a.#PATH + "=" + encodeURIComponent(this.getPath()), { method: 'GET', headers: headers });
+            await this.#checkStatus(httpResponse, 200);
+            let realFiles = [];
+            let realDirs = [];
+            for (let resFile of await httpResponse.json()) {
+                let file = new _a(resFile.path, this.#servicePath, this.#credentials);
+                if (resFile.directory)
+                    realDirs.push(file);
+                else
+                    realFiles.push(file);
+            }
+            realDirs.push(...realFiles);
+            return realDirs;
+        }
+        return [];
+    }
+    /**
+     * Move this file or directory under a new directory.
+     * @param {IFile} newDir The target directory.
+     * @param {MoveOptions} options The options
+     * @returns {Promise&lt;IFile>} The moved file. Use this file for subsequent operations instead of the original.
+     */
+    async move(newDir, options) {
+        if (!options)
+            options = new MoveOptions();
+        let newName = options.newFilename ? options.newFilename : this.getName();
+        if (newDir == null || !newDir.exists())
+            throw new IOException("Target directory does not exist");
+        let newFile = await newDir.getChild(newName);
+        if (newFile &amp;&amp; await newFile.exists())
+            throw new IOException("Another file/directory already exists");
+        if (await this.isDirectory()) {
+            throw new IOException("Could not move directory use IFile moveRecursively() instead");
+        }
+        else {
+            let headers = new Headers();
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
+            let params = new URLSearchParams();
+            params.append(_a.#PATH, this.#filePath);
+            params.append(_a.#DEST_DIR, newDir.getPath());
+            params.append(_a.#FILENAME, newName);
+            let httpResponse = null;
+            httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/move", { method: 'PUT', body: params, headers: headers });
+            await this.#checkStatus(httpResponse, 200);
+            newFile = new _a((await httpResponse.json()).path, this.#servicePath, this.#credentials);
+            this.reset();
+            return newFile;
+        }
+    }
+    /**
+     * Move this file or directory under a new directory.
+     * @param {IFile} newDir    The target directory.
+     * @param {CopyOptions} options The options
+     * @returns {Promise&lt;IFile>} The copied file. Use this file for subsequent operations instead of the original.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async copy(newDir, options) {
+        if (!options)
+            options = new CopyOptions();
+        let newName = options.newFilename ? options.newFilename : this.getName();
+        if (newDir == null || !newDir.exists())
+            throw new IOException("Target directory does not exists");
+        let newFile = await newDir.getChild(newName);
+        if (newFile &amp;&amp; await newFile.exists())
+            throw new IOException("Another file/directory already exists");
+        if (await this.isDirectory()) {
+            throw new IOException("Could not copy directory use IFile copyRecursively() instead");
+        }
+        else {
+            let headers = new Headers();
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
+            let params = new URLSearchParams();
+            params.append(_a.#PATH, this.#filePath);
+            params.append(_a.#DEST_DIR, newDir.getPath());
+            params.append(_a.#FILENAME, newName);
+            let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/copy", { method: 'POST', body: params, headers: headers });
+            await this.#checkStatus(httpResponse, 200);
+            newFile = new _a((await httpResponse.json()).path, this.#servicePath, this.#credentials);
+            this.reset();
+            return newFile;
+        }
+    }
+    /**
+     * Get the file or directory under this directory with the provided name.
+     * @param {string} filename The name of the file or directory.
+     * @returns {Promise&lt;IFile | null>} The child
+     */
+    async getChild(filename) {
+        if (await this.isFile())
+            return null;
+        let nFilepath = this.#getChildPath(filename);
+        let child = new _a(nFilepath, this.#servicePath, this.#credentials);
+        return child;
+    }
+    /**
+     * Rename the current file or directory.
+     * @param {string} newFilename The new name for the file or directory.
+     * @returns {Promise&lt;boolean>} True if successfully renamed.
+     */
+    async renameTo(newFilename) {
+        this.reset();
+        let headers = new Headers();
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
+        let params = new URLSearchParams();
+        params.append(_a.#PATH, this.#filePath);
+        params.append(_a.#FILENAME, newFilename);
+        let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/rename", { method: 'PUT', body: params, headers: headers });
+        await this.#checkStatus(httpResponse, 200);
+        return true;
+    }
+    /**
+     * Create this directory under the current filepath.
+     * @returns {Promise&lt;boolean>} True if created.
+     */
+    async mkdir() {
+        this.reset();
+        let headers = new Headers();
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
+        let params = new URLSearchParams();
+        params.append(_a.#PATH, this.#filePath);
+        let httpResponse = await HttpSyncClient.getResponse(this.#servicePath + "/api/mkdir", { method: 'POST', body: params, headers: headers });
+        await this.#checkStatus(httpResponse, 200);
+        return true;
+    }
+    /**
+     * Reset cached properties
+     */
+    reset() {
+        this.response = null;
+    }
+    #getChildPath(filename) {
+        let nFilepath = this.#filePath;
+        if (!nFilepath.endsWith(_a.separator))
+            nFilepath += _a.separator;
+        nFilepath += filename;
+        return nFilepath;
+    }
+    /**
+     * Returns a string representation of this object
+     * @returns {string} The string
+     */
+    toString() {
+        return this.#filePath;
+    }
+    #setServiceAuth(headers) {
+        if (!this.#credentials)
+            return;
+        headers.append('Authorization', 'Basic ' + Base64Utils.getBase64().encode(new TextEncoder().encode(this.#credentials.getServiceUser() + ":" + this.#credentials.getServicePassword())));
+    }
+    async #checkStatus(httpResponse, status) {
+        if (httpResponse.status != status)
+            throw new IOException(httpResponse.status
+                + " " + httpResponse.statusText + "\n"
+                + await httpResponse.text());
+    }
+    #setDefaultHeaders(headers) {
+        headers.append("Cache", "no-store");
+        headers.append("Connection", "close");
+    }
+}
+_a = WSFile;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Dec 05 2025 17:50:15 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

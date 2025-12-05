@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/salmonfs/drive/aes_drive.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/salmonfs/drive/aes_drive.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var _a;
+import { HmacSHA256Provider } from "../../../salmon-core/salmon/integrity/hmac_sha256_provider.js";
+import { Generator } from "../../../salmon-core/salmon/generator.js";
+import { DriveKey } from "./drive_key.js";
+import { DriveGenerator } from "./drive_generator.js";
+import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
+import { DriveConfig } from "./drive_config.js";
+import { MemoryStream } from "../../../simple-io/streams/memory_stream.js";
+import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
+import { EncryptionMode } from "../../../salmon-core/salmon/streams/encryption_mode.js";
+import { EncryptionFormat } from "../../../salmon-core/salmon/streams/encryption_format.js";
+import { SecurityException } from "../../../salmon-core/salmon/security_exception.js";
+import { AuthException } from "../auth/auth_exception.js";
+import { Password } from "../../../salmon-core/salmon/password/password.js";
+import { VirtualDrive } from "../../../simple-fs/fs/drive/virtual_drive.js";
+import { BitConverter } from "../../../simple-io/convert/bit_converter.js";
+/**
+ * Class provides an abstract virtual drive that can be extended for use with
+ * any filesystem ie disk, net, cloud, etc.
+ * Each drive implementation needs a corresponding implementation of {@link IFile}.
+ */
+export class AesDrive extends VirtualDrive {
+    static #configFilename = "vault.slmn";
+    static #authConfigFilename = "auth.slma";
+    static #virtualDriveDirectoryName = "fs";
+    static #shareDirectoryName = "share";
+    static #exportDirectoryName = "export";
+    #defaultFileChunkSize = Integrity.DEFAULT_CHUNK_SIZE;
+    #key = null;
+    #driveId = null;
+    #realRoot = null;
+    #virtualRoot = null;
+    #hashProvider = new HmacSHA256Provider();
+    #sequencer;
+    async initialize(realRoot, createIfNotExists) {
+        this.close();
+        if (realRoot == null)
+            return;
+        this.#realRoot = realRoot;
+        let parent = await this.#realRoot.getParent();
+        if (parent &amp;&amp; !createIfNotExists &amp;&amp; !await this.hasConfig() &amp;&amp; await this.#realRoot.getParent() &amp;&amp; await parent.exists()) {
+            // try the parent if this is the filesystem folder 
+            let originalRealRoot = this.#realRoot;
+            this.#realRoot = parent;
+            if (!await this.hasConfig()) {
+                // revert to original
+                this.#realRoot = originalRealRoot;
+            }
+        }
+        if (this.#realRoot == null)
+            throw new Error("Could not initialize root folder");
+        let virtualRootRealFile = await this.#realRoot.getChild(_a.#virtualDriveDirectoryName);
+        if (createIfNotExists &amp;&amp; (virtualRootRealFile == null || !await virtualRootRealFile.exists())) {
+            virtualRootRealFile = await this.#realRoot.createDirectory(_a.#virtualDriveDirectoryName);
+        }
+        if (virtualRootRealFile == null)
+            throw new Error("Could not create directory for the virtual file system");
+        this.#virtualRoot = this.getVirtualFile(virtualRootRealFile);
+        this.#registerOnProcessClose();
+        this.#key = new DriveKey();
+    }
+    static getConfigFilename() {
+        return this.#configFilename;
+    }
+    static setConfigFilename(configFilename) {
+        _a.#configFilename = configFilename;
+    }
+    static getAuthConfigFilename() {
+        return this.#authConfigFilename;
+    }
+    static setAuthConfigFilename(authConfigFilename) {
+        _a.#authConfigFilename = authConfigFilename;
+    }
+    static getVirtualDriveDirectoryName() {
+        return this.#virtualDriveDirectoryName;
+    }
+    static setVirtualDriveDirectoryName(virtualDriveDirectoryName) {
+        _a.#virtualDriveDirectoryName = virtualDriveDirectoryName;
+    }
+    static getExportDirectoryName() {
+        return _a.#exportDirectoryName;
+    }
+    static setExportDirectoryName(exportDirectoryName) {
+        _a.#exportDirectoryName = exportDirectoryName;
+    }
+    static getShareDirectoryName() {
+        return this.#shareDirectoryName;
+    }
+    static setShareDirectoryName(shareDirectoryName) {
+        _a.#shareDirectoryName = shareDirectoryName;
+    }
+    /**
+     * Clear sensitive information when app is close.
+     */
+    #registerOnProcessClose() {
+        // TODO: exec close() on exit
+    }
+    /**
+     * Return the default file chunk size
+     * @returns {number} The default chunk size.
+     */
+    getDefaultFileChunkSize() {
+        return this.#defaultFileChunkSize;
+    }
+    /**
+     * Set the default file chunk size to be used with hash integrity.
+     * @param {number} fileChunkSize
+     */
+    setDefaultFileChunkSize(fileChunkSize) {
+        this.#defaultFileChunkSize = fileChunkSize;
+    }
+    /**
+     * Return the encryption key that is used for encryption / decryption
+     * @returns {DriveKey | null} The drive key
+     */
+    getKey() {
+        return this.#key;
+    }
+    /**
+     * Return the virtual root directory of the drive.
+     * @returns {Promise&lt;IVirtualFile | null>} The virtual file
+     * @throws SalmonAuthException Thrown when error during authorization
+     */
+    async getRoot() {
+        if (this.#realRoot == null || !await this.#realRoot.exists())
+            return null;
+        if (this.#virtualRoot == null)
+            throw new SecurityException("No virtual root, make sure you init the drive first");
+        return this.#virtualRoot;
+    }
+    getRealRoot() {
+        return this.#realRoot;
+    }
+    /**
+     * Verify if the user password is correct otherwise it throws a SalmonAuthException
+     *
+     * @param {string} password The password.
+     */
+    async #unlock(password) {
+        let stream = null;
+        try {
+            if (password == null || password.trim().length == 0) {
+                throw new SecurityException("Password is missing or empty");
+            }
+            let salmonConfig = await this.getDriveConfig();
+            if (salmonConfig == null)
+                throw new SecurityException("Could not get drive config");
+            let iterations = salmonConfig.getIterations();
+            let salt = salmonConfig.getSalt();
+            // derive the master key from the text password
+            let masterKey = await Password.getMasterKey(password, salt, iterations, DriveGenerator.MASTER_KEY_LENGTH);
+            // get the master Key Iv
+            let masterKeyIv = salmonConfig.getIv();
+            // get the encrypted combined key and drive id
+            let encData = salmonConfig.getEncryptedData();
+            // decrypt the combined key (drive key + hash key) using the master key
+            let ms = new MemoryStream(encData);
+            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms, EncryptionFormat.Generic);
+            let driveKey = new Uint8Array(Generator.KEY_LENGTH);
+            await stream.read(driveKey, 0, driveKey.length);
+            let hashKey = new Uint8Array(Generator.HASH_KEY_LENGTH);
+            await stream.read(hashKey, 0, hashKey.length);
+            let driveId = new Uint8Array(DriveGenerator.DRIVE_ID_LENGTH);
+            await stream.read(driveId, 0, driveId.length);
+            // to make sure we have the right key we get the hash portion
+            // and try to verify the drive nonce
+            await this.#verifyHash(salmonConfig, encData, hashKey);
+            // set the combined key (drive key + hash key) and the drive nonce
+            this.setKey(masterKey, driveKey, hashKey, iterations);
+            this.#driveId = driveId;
+            await this.initFS();
+            this.onUnlockSuccess();
+        }
+        catch (ex) {
+            this.onUnlockError();
+            throw ex;
+        }
+        finally {
+            if (stream)
+                await stream.close();
+        }
+    }
+    /**
+     * Sets the key properties.
+     * @param {Uint8Array} masterKey The master key.
+     * @param {Uint8Array} driveKey The drive key used for enc/dec of files and filenames.
+     * @param {Uint8Array} hashKey The hash key used for data integrity.
+     * @param {number} iterations The iterations
+     */
+    setKey(masterKey, driveKey, hashKey, iterations) {
+        if (this.#key == null)
+            throw new Error("You need to init the drive first");
+        this.#key.setMasterKey(masterKey);
+        this.#key.setDriveKey(driveKey);
+        this.#key.setHashKey(hashKey);
+        this.#key.setIterations(iterations);
+    }
+    /**
+     * Verify that the hash signature is correct
+     *
+     * @param {DriveConfig} salmonConfig The drive configuration
+     * @param {Uint8Array} data The data
+     * @param {Uint8Array} hashKey The hash key
+     */
+    async #verifyHash(salmonConfig, data, hashKey) {
+        let hashSignature = salmonConfig.getHashSignature();
+        let hash = await Integrity.calculateHash(this.#hashProvider, data, 0, data.length, hashKey, null);
+        for (let i = 0; i &lt; hashKey.length; i++)
+            if (hashSignature[i] != hash[i])
+                throw new AuthException("Wrong password");
+    }
+    /**
+     * Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
+     * @returns {Promise&lt;Uint8Array | null>} The next nonce.
+     * @throws Exception
+     */
+    async getNextNonce() {
+        if (!this.#sequencer)
+            throw new AuthException("No sequencer found");
+        let driveId = this.getDriveId();
+        if (driveId == null)
+            throw new SecurityException("Could not get drive Id");
+        return await this.#sequencer.nextNonce(BitConverter.toHex(driveId));
+    }
+    /**
+     * Get the byte contents of a file from the real filesystem.
+     *
+     * @param {IFile} file The file
+     * @param {Uint8Array} bufferSize The buffer to be used when reading
+     */
+    async getBytesFromRealFile(file, bufferSize) {
+        let stream = await file.getInputStream();
+        let ms = new MemoryStream();
+        await stream.copyTo(ms, bufferSize);
+        await ms.flush();
+        await ms.setPosition(0);
+        let byteContents = ms.toArray();
+        await ms.close();
+        await stream.close();
+        return byteContents;
+    }
+    /**
+     * Return the drive configuration file.
+     * @returns {Promise&lt;IFile | null>} The file
+     */
+    async #getDriveConfigFile() {
+        if (this.#realRoot == null || !await this.#realRoot.exists())
+            return null;
+        let file = await this.#realRoot.getChild(_a.#configFilename);
+        return file;
+    }
+    /**
+     * Return the default external export dir that all file can be exported to.
+     * @returns {Promise&lt;IFile>} The file on the real filesystem.
+     */
+    async getExportDir() {
+        if (this.#realRoot == null)
+            throw new SecurityException("Cannot export, make sure you init the drive first");
+        let exportDir = await this.#realRoot.getChild(_a.#exportDirectoryName);
+        if (exportDir == null || !await exportDir.exists())
+            exportDir = await this.#realRoot.createDirectory(_a.#exportDirectoryName);
+        return exportDir;
+    }
+    /**
+     * Return the configuration properties of this drive.
+     * @returns {Promise&lt;DriveConfig | null>} The configuration
+     */
+    async getDriveConfig() {
+        let configFile = await this.#getDriveConfigFile();
+        if (configFile == null || !await configFile.exists())
+            return null;
+        let bytes = await this.getBytesFromRealFile(configFile, 0);
+        let driveConfig = new DriveConfig();
+        await driveConfig.init(bytes);
+        return driveConfig;
+    }
+    /**
+     * Return true if the drive is already created and has a configuration file.
+     * @returns {Promise&lt;boolean>} True if configuration file was found
+     */
+    async hasConfig() {
+        let salmonConfig = null;
+        try {
+            salmonConfig = await this.getDriveConfig();
+        }
+        catch (ex) {
+            console.error(ex);
+            return false;
+        }
+        return salmonConfig != null;
+    }
+    /**
+     * Get the drive id.
+     * @returns {Uint8Array | null} The drive id.
+     */
+    getDriveId() {
+        return this.#driveId;
+    }
+    /**
+     * Close the drive and associated resources.
+     */
+    close() {
+        this.#realRoot = null;
+        this.#virtualRoot = null;
+        this.#driveId = null;
+        if (this.#key)
+            this.#key.clear();
+        this.#key = null;
+    }
+    /**
+     * Initialize the drive virtual filesystem.
+     */
+    async initFS() {
+        if (this.#realRoot == null)
+            throw new SecurityException("Could not initialize virtual file system, make sure you run init first");
+        let virtualRootRealFile = await this.#realRoot.getChild(_a.#virtualDriveDirectoryName);
+        if (virtualRootRealFile == null || !await virtualRootRealFile.exists()) {
+            try {
+                virtualRootRealFile = await this.#realRoot.createDirectory(_a.#virtualDriveDirectoryName);
+            }
+            catch (ex) {
+                console.error(ex);
+            }
+        }
+        if (virtualRootRealFile)
+            this.#virtualRoot = this.getVirtualFile(virtualRootRealFile);
+    }
+    /**
+     * Get the has provider for this drive.
+     * @returns {IHashProvider} The hash provider
+     */
+    getHashProvider() {
+        return this.#hashProvider;
+    }
+    /**
+     * Set the drive location to an external directory.
+     * This requires you previously use SetDriveClass() to provide a class for the drive
+     *
+     * @param {IFile} dir The directory path that will be used for storing the contents of the drive
+     * @param {any} driveClassType The driver class type (ie Drive).
+     * @param {string} password Text password to encrypt the drive configuration.
+     * @param {INonceSequencer} [sequencer] The sequencer to use.
+     * @returns {Promise&lt;AesDrive>} The drive
+     */
+    static async openDrive(dir, driveClassType, password, sequencer) {
+        let drive = await _a.#createDriveInstance(dir, false, driveClassType, sequencer);
+        if (!await drive.hasConfig()) {
+            throw new Error("Drive does not exist");
+        }
+        await drive.#unlock(password);
+        return drive;
+    }
+    /**
+     * Create a new drive in the provided location.
+     *
+     * @param {IFile} dir  Directory to store the drive configuration and virtual filesystem.
+     * @param {any} driveClassType The driver class type (ie Drive).
+     * @param {string} password Text password to encrypt the drive configuration.
+     * @param {INonceSequencer} sequencer The sequencer to use.
+     * @returns {Promise&lt;AesDrive>} The newly created drive.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    static async createDrive(dir, driveClassType, password, sequencer) {
+        let drive = await _a.#createDriveInstance(dir, true, driveClassType, sequencer);
+        if (await drive.hasConfig())
+            throw new SecurityException("Drive already exists");
+        await drive.setPassword(password);
+        return drive;
+    }
+    /**
+     * Create a drive instance.
+     *
+     * @param {IFile} dir The target directory where the drive is located.
+     * @param {boolean} createIfNotExists Create the drive if it does not exist
+     * @returns {Promise&lt;AesDrive>} The drive
+     * @throws SalmonSecurityException Thrown when error with security
+     */
+    static async #createDriveInstance(dir, createIfNotExists, driveClassType, sequencer) {
+        try {
+            let drive = new driveClassType;
+            await drive.initialize(dir, createIfNotExists);
+            drive.#sequencer = sequencer;
+            if (drive.#sequencer)
+                await drive.#sequencer.initialize();
+            return drive;
+        }
+        catch (e) {
+            console.error(e);
+            throw new SecurityException("Could not initialize the drive: " + e.message, e);
+        }
+    }
+    /**
+     * Get the device authorization byte array for the current drive.
+     *
+     * @returns {Promise&lt;Uint8Array>} The byte array with the auth id
+     * @throws Exception If error occurs during retrieval
+     */
+    async getAuthIdBytes() {
+        if (!this.#sequencer)
+            throw new Error("No sequencer defined");
+        let driveId = this.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get drive id, make sure you init the drive first");
+        let drvStr = BitConverter.toHex(driveId);
+        let sequence = await this.#sequencer.getSequence(drvStr);
+        if (sequence == null) {
+            let authId = DriveGenerator.generateAuthId();
+            await this.createSequence(driveId, authId);
+        }
+        sequence = await this.#sequencer.getSequence(drvStr);
+        if (sequence == null)
+            throw new Error("Could not get sequence");
+        let authId = sequence.getAuthId();
+        if (authId == null)
+            throw new Error("Could not get auth id");
+        return BitConverter.hexToBytes(authId);
+    }
+    /**
+     * Get the default auth config filename.
+     *
+     * @returns {string} The authorization configuration file name.
+     */
+    static getDefaultAuthConfigFilename() {
+        return _a.getAuthConfigFilename();
+    }
+    /**
+     * Create a nonce sequence for the drive id and the authorization id provided. Should be called
+     * once per driveId/authId combination.
+     *
+     * @param {Uint8Array} driveId The driveId
+     * @param {Uint8Array} authId  The authId
+     * @throws Exception If error occurs during creation
+     */
+    async createSequence(driveId, authId) {
+        if (!this.#sequencer)
+            throw new Error("No sequencer defined");
+        let drvStr = BitConverter.toHex(driveId);
+        let authStr = BitConverter.toHex(authId);
+        await this.#sequencer.createSequence(drvStr, authStr);
+    }
+    /**
+     * Initialize the nonce sequencer with the current drive nonce range. Should be called
+     * once per driveId/authId combination.
+     *
+     * @param {Uint8Array} driveId Drive ID.
+     * @param {Uint8Array} authId  Authorization ID.
+     * @throws Exception If error occurs during initialization
+     */
+    async initializeSequence(driveId, authId) {
+        if (!this.#sequencer)
+            throw new Error("No sequencer defined");
+        let startingNonce = DriveGenerator.getStartingNonce();
+        let maxNonce = DriveGenerator.getMaxNonce();
+        let drvStr = BitConverter.toHex(driveId);
+        let authStr = BitConverter.toHex(authId);
+        await this.#sequencer.initializeSequence(drvStr, authStr, startingNonce, maxNonce);
+    }
+    /**
+     * Revoke authorization for this device. This will effectively terminate write operations on the current disk
+     * by the current device. Warning: If you need to authorize write operations to the device again you will need
+     * to have another device to export an authorization config file and reimport it.
+     *
+     * @throws Exception If error occurs during revoke.
+     * @see &lt;a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md&lt;/a>
+     */
+    async revokeAuthorization() {
+        if (!this.#sequencer)
+            throw new Error("No sequencer defined");
+        let driveId = this.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get revoke, make sure you initialize the drive first");
+        await this.#sequencer.revokeSequence(BitConverter.toHex(driveId));
+    }
+    /**
+     * Get the authorization ID for the current device.
+     *
+     * @returns {Promise&lt;string>} The auth id
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws SalmonAuthException Thrown when error during authorization
+     */
+    async getAuthId() {
+        return BitConverter.toHex(await this.getAuthIdBytes());
+    }
+    /**
+     * Create a configuration file for the drive.
+     *
+     * @param {string} password The new password to be saved in the configuration
+     *                 This password will be used to derive the master key that will be used to
+     *                 encrypt the combined key (encryption key + hash key)
+     */
+    //TODO: partial refactor to SalmonDriveConfig
+    async #createConfig(password) {
+        let key = this.getKey();
+        if (key == null)
+            throw new Error("Cannot create config, no key found, make sure you init the drive first");
+        let driveKey = key.getDriveKey();
+        let hashKey = key.getHashKey();
+        let realRoot = this.getRealRoot();
+        if (realRoot == null)
+            throw new Error("Cannot create config, no root found, make sure you init the drive first");
+        let configFile = await this.getConfigFile(realRoot);
+        if (driveKey == null &amp;&amp; configFile &amp;&amp; await configFile.exists())
+            throw new AuthException("Not authenticated");
+        // delete the old config file and create a new one
+        if (configFile &amp;&amp; await configFile.exists())
+            await configFile.delete();
+        configFile = await this.createConfigFile(realRoot);
+        if (configFile == null)
+            throw new AuthException("Could not crete config file");
+        let magicBytes = Generator.getMagicBytes();
+        let version = Generator.getVersion();
+        // if this is a new config file derive a 512-bit key that will be split to:
+        // a) drive encryption key (for encrypting filenames and files)
+        // b) hash key for file integrity
+        let newDrive = false;
+        if (driveKey == null) {
+            newDrive = true;
+            driveKey = new Uint8Array(Generator.KEY_LENGTH);
+            hashKey = new Uint8Array(Generator.HASH_KEY_LENGTH);
+            let combKey = DriveGenerator.generateCombinedKey();
+            for (let i = 0; i &lt; Generator.KEY_LENGTH; i++)
+                driveKey[i] = combKey[i];
+            for (let i = 0; i &lt; Generator.HASH_KEY_LENGTH; i++)
+                driveKey[i] = combKey[Generator.KEY_LENGTH + i];
+            this.#driveId = DriveGenerator.generateDriveID();
+        }
+        // Get the salt that we will use to encrypt the combined key (drive key + hash key)
+        let salt = DriveGenerator.generateSalt();
+        let iterations = DriveGenerator.getIterations();
+        // generate a 128 bit IV that will be used with the master key to encrypt the combined 64-bit key (drive key + hash key)
+        let masterKeyIv = DriveGenerator.generateMasterKeyIV();
+        // create a key that will encrypt both the (drive key and the hash key)
+        let masterKey = await Password.getMasterKey(password, salt, iterations, DriveGenerator.MASTER_KEY_LENGTH);
+        let driveId = this.getDriveId();
+        if (driveKey == null || hashKey == null || driveId == null)
+            throw new Error("Make sure you init the drive first");
+        // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
+        let ms = new MemoryStream();
+        let stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms, EncryptionFormat.Generic);
+        await stream.write(driveKey, 0, driveKey.length);
+        await stream.write(hashKey, 0, hashKey.length);
+        await stream.write(driveId, 0, driveId.length);
+        await stream.flush();
+        await stream.close();
+        let encData = ms.toArray();
+        // generate the hash signature
+        let hashSignature = await Integrity.calculateHash(this.getHashProvider(), encData, 0, encData.length, hashKey, null);
+        await DriveConfig.writeDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv, encData, hashSignature);
+        this.setKey(masterKey, driveKey, hashKey, iterations);
+        if (newDrive) {
+            // create a full sequence for nonces
+            let authId = DriveGenerator.generateAuthId();
+            await this.createSequence(driveId, authId);
+            await this.initializeSequence(driveId, authId);
+        }
+        await this.initFS();
+    }
+    /**
+     * Change the user password.
+     * @param {string} pass The new password.
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonAuthException Thrown when error during authorization
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException Thrown if error with the nonce sequence
+     */
+    async setPassword(pass) {
+        await this.#createConfig(pass);
+    }
+    /**
+     * Get the nonce sequencer used for the current drive.
+     *
+     * @returns {INonceSequencer | undefined} The nonce sequencer
+     */
+    getSequencer() {
+        if (!this.#sequencer)
+            throw new Error("Could not find a sequencer");
+        return this.#sequencer;
+    }
+    /**
+     * Set the nonce sequencer used for the current drive.
+     *
+     * @param {INonceSequencer | undefined} sequencer The nonce sequencer
+     */
+    setSequencer(sequencer) {
+        this.#sequencer = sequencer;
+    }
+    /**
+     * Create the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location, make sure you also override getConfigFile().
+     * @param {IFile} realRoot The real root directory of the vault
+     * @returns {Promise&lt;IFile>} The config file that was created
+     */
+    async createConfigFile(realRoot) {
+        let configFile = await realRoot.createFile(_a.getConfigFilename());
+        return configFile;
+    }
+    /**
+     * Get the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location.
+     * @param {IFile} realRoot The real root directory of the vault
+     * @returns {Promise&lt;IFile | null>} The config file that will be used for this drive.
+     */
+    async getConfigFile(realRoot) {
+        let configFile = await realRoot.getChild(_a.getConfigFilename());
+        return configFile;
+    }
+}
+_a = AesDrive;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Dec 05 2025 17:50:15 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

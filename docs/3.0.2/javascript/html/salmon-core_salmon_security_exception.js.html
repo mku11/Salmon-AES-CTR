@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-core/salmon/security_exception.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-core/salmon/security_exception.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+/**
+ * Salmon generic security exception.
+ */
+export class SecurityException extends Error {
+    #cause = null;
+    /**
+     * Construct an exception with a specific message and inner exception.
+     * @param {string | null} msg The provided message.
+     * @param {Error | unknown | null} ex The inner exception.
+     */
+    constructor(msg = null, ex = null) {
+        super(msg ?? "");
+        if (ex) {
+            this.#cause = ex;
+        }
+    }
+    /**
+     * Get the cause (inner exception) of this exception.
+     * @returns {Error | unknown | null} The inner exception.
+     */
+    getCause() {
+        return this.#cause;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Dec 05 2025 17:50:15 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

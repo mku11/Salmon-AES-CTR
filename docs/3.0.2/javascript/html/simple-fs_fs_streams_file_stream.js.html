@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: simple-fs/fs/streams/file_stream.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: simple-fs/fs/streams/file_stream.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { RandomAccessStream, SeekOrigin } from "../../../simple-io/streams/random_access_stream.js";
+// File operations on the local file system may be slow due to
+// web browser specificallly Chrome malware scans
+// see: https://issues.chromium.org/issues/40743502
+/**
+ * An advanced file stream implementation for FileSystemFileHandle.
+ * This class can be used for random file access of local files using the browser.
+ */
+export class FileStream extends RandomAccessStream {
+    /**
+     * The FileSystemFileHandle file associated with this stream.
+     */
+    #file;
+    #fileBlob = null;
+    #writablefileStream = null;
+    #_position = 0;
+    #canWrite = false;
+    /**
+     * Construct a file stream from an File.
+     * This will create a wrapper stream that will route read() and write() to the FileChannel
+     *
+     * @param {IFile} file The File that will be used to get the read/write stream
+     * @param {string} mode The mode "r" for read "rw" for write
+     */
+    constructor(file, mode) {
+        super();
+        this.#file = file;
+        if (mode == "rw") {
+            this.#canWrite = true;
+        }
+    }
+    async #getBlob() {
+        if (this.#fileBlob == null) {
+            let fileHandle = await this.#file.getPath();
+            this.#fileBlob = await fileHandle.getFile();
+        }
+        return this.#fileBlob;
+    }
+    async #getStream() {
+        if (this.#writablefileStream == null) {
+            let fileHandle = await this.#file.getPath();
+            let exists = await this.#file.exists();
+            if (exists) {
+                this.#writablefileStream = await fileHandle.createWritable({ keepExistingData: true });
+            }
+            else {
+                let parent = await this.#file.getParent();
+                if (parent == null)
+                    throw new Error("Could not get parent");
+                await parent.createFile(this.#file.getName());
+                this.#writablefileStream = await fileHandle.createWritable();
+            }
+        }
+        return this.#writablefileStream;
+    }
+    /**
+     * True if stream can read from file.
+     * @returns {Promise&lt;boolean>} True if it can read
+     */
+    async canRead() {
+        return !this.#canWrite;
+    }
+    /**
+     * True if stream can write to file.
+     * @returns {Promise&lt;boolean>} True if it can write
+     */
+    async canWrite() {
+        return this.#canWrite;
+    }
+    /**
+     * True if stream can seek.
+     * @returns {Promise&lt;boolean>} True if it can seek
+     */
+    async canSeek() {
+        return true;
+    }
+    /**
+     * Get the length of the stream. This is the same as the file size.
+     * @returns {Promise&lt;number>} The length
+     */
+    async getLength() {
+        return await this.#file.getLength();
+    }
+    /**
+     * Get the current position of the stream.
+     * @returns {Promise&lt;number>} The position
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async getPosition() {
+        return this.#_position;
+    }
+    /**
+     * Set the current position of the stream.
+     * @param {number} value The new position.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async setPosition(value) {
+        this.#_position = value;
+        if (await this.canWrite()) {
+            let stream = (await this.#getStream());
+            try {
+                if (await this.#file.getLength() &lt; value)
+                    await stream.truncate(value);
+                await stream.seek(this.#_position);
+            }
+            catch (ex) {
+                console.error(ex);
+                throw ex;
+            }
+        }
+    }
+    /**
+     * Set the length of the stream. This is applicable for write streams only.
+     * @param {number} value The new length.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async setLength(value) {
+        if (await this.canWrite()) {
+            let stream = await this.#getStream();
+            await stream.truncate(0);
+        }
+        else {
+            throw new Error("Stream is not writable");
+        }
+    }
+    /**
+     * Read data from the file stream into the buffer provided.
+     * @param {Uint8Array} buffer The buffer to write the data.
+     * @param {number} offset The offset of the buffer to start writing the data.
+     * @param {number} count The maximum number of bytes to read from.
+     * @returns {Promise&lt;number>} The number of bytes read
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async read(buffer, offset, count) {
+        let len = Math.min(count, buffer.length - offset);
+        let blob = await this.#getBlob();
+        len = Math.min(len, blob.size - this.#_position);
+        let arr = blob.slice(this.#_position, this.#_position + len);
+        let buff = new Uint8Array(await arr.arrayBuffer());
+        for (let i = 0; i &lt; buff.length; i++) {
+            buffer[offset + i] = buff[i];
+        }
+        this.#_position += buff.length;
+        return buff.length;
+    }
+    /**
+     * Write the data from the buffer provided into the stream.
+     * @param {Uint8Array} buffer The buffer to read the data from.
+     * @param {number} offset The offset of the buffer to start reading the data.
+     * @param {number} count The maximum number of bytes to read from the buffer.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async write(buffer, offset, count) {
+        let stream = await this.#getStream();
+        await stream.write(buffer.slice(offset, offset + count));
+        this.#_position += count;
+    }
+    /**
+     * Seek to the offset provided.
+     * @param {number} offset The position to seek to.
+     * @param {SeekOrigin} origin The type of origin {@link SeekOrigin}
+     * @returns {number} The new position after seeking.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async seek(offset, origin) {
+        let pos = this.#_position;
+        if (origin == SeekOrigin.Begin)
+            pos = offset;
+        else if (origin == SeekOrigin.Current)
+            pos += offset;
+        else if (origin == SeekOrigin.End)
+            pos = await this.#file.getLength() - offset;
+        await this.setPosition(pos);
+        return this.#_position;
+    }
+    /**
+     * Flush the buffers to the associated file.
+     */
+    async flush() {
+    }
+    /**
+     * Close this stream and associated resources.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async close() {
+        if (this.#writablefileStream)
+            await this.#writablefileStream.close();
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Dec 05 2025 17:50:15 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
