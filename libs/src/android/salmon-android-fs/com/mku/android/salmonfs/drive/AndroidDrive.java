@@ -91,7 +91,7 @@ public class AndroidDrive extends AesDrive {
      *
      * @param aesFile The file
      * @return The shared file
-     * @throws Exception Thrown when error occured
+     * @throws Exception Thrown when error occurred
      */
     public java.io.File copyToSharedFolder(AesFile aesFile) throws Exception {
         java.io.File privateDir = new java.io.File(getPrivateDir().getDisplayPath());

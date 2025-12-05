@@ -106,6 +106,10 @@ public class Header {
         return magicBytes;
     }
 
+    /**
+     * Initialize the header with data
+     * @param headerData The header data
+     */
 	public Header(byte[] headerData) {
 		this.headerData = headerData;
 	}
@@ -144,6 +148,14 @@ public class Header {
         return header;
     }
 
+    /**
+     * Write header data to the stream
+     * @param stream The stream to write to
+     * @param nonce The nonce
+     * @param chunkSize The chunk size
+     * @return The header
+     * @throws IOException If an error occurs
+     */
     public static Header writeHeader(RandomAccessStream stream, byte[] nonce, int chunkSize) throws IOException {
         byte[] magicBytes = Generator.getMagicBytes();
         byte version = Generator.getVersion();

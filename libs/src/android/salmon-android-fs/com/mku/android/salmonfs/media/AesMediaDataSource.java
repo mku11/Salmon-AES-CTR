@@ -52,8 +52,8 @@ public class AesMediaDataSource extends MediaDataSource {
 
     /**
      * Construct a seekable source for the android media player from an encrypted file.
-     *
      * @param aesFile    AesFile that will be used as a source
+	 * @throws Exception Thrown if error occurred
      */
     public AesMediaDataSource(AesFile aesFile) throws Exception {
         this.aesFile = aesFile;
@@ -69,7 +69,7 @@ public class AesMediaDataSource extends MediaDataSource {
      * @param bufferSize Buffer size
      * @param threads    Threads for parallel processing
      * @param backOffset The backwards offset to use when reading buffers
-     * @throws Exception Thrown if error occured
+     * @throws Exception Thrown if error occurred
      */
     public AesMediaDataSource(AesFile aesFile,
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
@@ -83,7 +83,7 @@ public class AesMediaDataSource extends MediaDataSource {
      * Construct a seekable source for the android media player from an encrypted stream.
      *
      * @param aesStream    AesStream that will be used as a source
-     * @throws Exception Thrown if error occured
+     * @throws Exception Thrown if error occurred
      */
     public AesMediaDataSource(AesStream aesStream) throws Exception {
         this.size = aesStream.getLength();

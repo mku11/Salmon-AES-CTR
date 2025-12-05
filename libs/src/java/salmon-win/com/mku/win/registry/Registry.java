@@ -36,6 +36,9 @@ public class Registry
     private static String SETTINGS_KEY = "Settings";
 	private static String SETTINGS_PATH = CATEGORY + "\\" + APP_NAME + "\\" + SETTINGS_KEY;
 
+    /**
+     * Initialize a registry helper
+     */
     public Registry()
     {
         Advapi32Util.registryCreateKey(WinReg.HKEY_CURRENT_USER, CATEGORY + "\\" + APP_NAME);

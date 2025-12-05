@@ -61,7 +61,30 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
      * Request type.
      */
     public enum RequestType {
-        CreateSequence, InitSequence, SetMaxNonce, NextNonce, RevokeSequence, GetSequence
+        /**
+         * Create a sequence
+         */
+        CreateSequence,
+        /**
+         * Initialize a sequence
+         */
+        InitSequence,
+        /**
+         * Set the maximum nonce of this sequence
+         */
+        SetMaxNonce,
+        /**
+         * Get the next nonce
+         */
+        NextNonce,
+        /**
+         * Revoke this sequence, any subsequent operation will fail
+         */
+        RevokeSequence,
+        /**
+         * Get a sequence
+         */
+        GetSequence
     }
 
     /**
@@ -324,7 +347,18 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         String error;
 
         public enum ResponseStatus {
-            Ok, NotFound, Error
+            /**
+             * Success
+             */
+            Ok,
+            /**
+             * Not found
+             */
+            NotFound,
+            /**
+             * Error
+             */
+            Error
         }
 
         private static Response Parse(String contents) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
