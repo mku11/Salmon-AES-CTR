@@ -1,8 +1,19 @@
 - Requirements:
 Salmon Libraries
-To get the salmon libraries run in the command line:
-getDeps.sh
-You should have this file structure:
+
+To get the salmon libraries go to the samples directory and run:
+get_salmon_libs.sh
+If you use windows:
+get_salmon_libs.bat
+
+Then from the samples/JavascriptSamples directory run:
+getdeps.sh 
+If you use windows:
+getdeps.bat
+
+You should now have these directories populated:
+assets/js/lib/simple-io
+assets/js/lib/simple-fs
 assets/js/lib/salmon-core
 assets/js/lib/salmon-fs
 
