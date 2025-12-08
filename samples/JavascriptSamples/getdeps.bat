@@ -2,7 +2,7 @@ set CURRDIR=%CD%
 
 set SIMPLE_IO_VERSION=1.0.2
 set SIMPLE_FS_VERSION=1.0.2
-set SALMON_VERSION=3.0.2
+set SALMON_VERSION=3.0.3
 
 rmdir assets\js\lib /S /Q
 mkdir assets\js\lib

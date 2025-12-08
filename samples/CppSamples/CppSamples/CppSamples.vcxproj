@@ -24,7 +24,7 @@
     <ProjectGuid>{1edf7ea9-85a6-4bd3-a650-dcc2e77a0796}</ProjectGuid>
     <RootNamespace>CppSamples</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <SalmonVersion>3.0.2</SalmonVersion>
+    <SalmonVersion>3.0.3</SalmonVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

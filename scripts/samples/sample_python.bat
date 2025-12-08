@@ -1,7 +1,7 @@
 set CURRDIR=%CD%
 set SIMPLE_IO_VERSION=1.0.2
 set SIMPLE_FS_VERSION=1.0.2
-set SALMON_VERSION=3.0.2
+set SALMON_VERSION=3.0.3
 
 cd ..\..\samples
 python -m pip install .\libs\salmon\salmon-python\simple_io_py.%SIMPLE_IO_VERSION%.tar.gz & ^

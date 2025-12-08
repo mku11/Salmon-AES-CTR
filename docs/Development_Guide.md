@@ -57,7 +57,7 @@ find . -name "gradlew" -not -path "*/node_modules/*" -exec dos2unix {} \;
 
 To refresh a branch from the remote repo:
 ```
-git pull origin wip-3.0.2
+git pull origin branchname
 ```
 
 To upgrade one of the git submodules go under submodule under project libs/deps  

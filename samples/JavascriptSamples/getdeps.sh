@@ -3,7 +3,7 @@ CURRDIR=$(pwd)
 
 SIMPLE_IO_VERSION=1.0.2
 SIMPLE_FS_VERSION=1.0.2
-SALMON_VERSION=3.0.2
+SALMON_VERSION=3.0.3
 
 rm -rf assets/js/lib
 mkdir assets/js/lib

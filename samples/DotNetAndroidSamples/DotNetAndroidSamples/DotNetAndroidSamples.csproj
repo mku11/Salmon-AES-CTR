@@ -4,8 +4,8 @@
 		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
 		<OutputType>Exe</OutputType>
 		<ApplicationId>com.mku.salmon.samples</ApplicationId>
-		<SalmonVersion>3.0.2</SalmonVersion>
-		<SalmonAppVersion>302</SalmonAppVersion>
+		<SalmonVersion>3.0.3</SalmonVersion>
+		<SalmonAppVersion>303</SalmonAppVersion>
 		<Version>$(SalmonVersion)</Version>
 		<ApplicationVersion>$(SalmonAppVersion)</ApplicationVersion>
 		<ApplicationDisplayVersion>$(SalmonVersion)</ApplicationDisplayVersion>

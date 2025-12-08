@@ -1,7 +1,7 @@
 # salmon makefile
 # For building use scripts in scripts/misc/deploy/ from the project root dir
 
-SALMON_VERSION=3.0.2
+SALMON_VERSION=3.0.3
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni

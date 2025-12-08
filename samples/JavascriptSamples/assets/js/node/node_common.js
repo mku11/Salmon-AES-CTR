@@ -1,9 +1,11 @@
 import { Platform, PlatformType, OSType } from '../lib/simple-io/platform/platform.js';
 import { NativeProxy } from '../lib/salmon-core/salmon/bridge/native_proxy.js';
 
-export class Common {
+const SALMON_VERSION="3.0.3";
+
+export class Common {	
     static async setNativeLibrary() {
-		// set native library path
+		const // se"t native library pat2";
 		let platformOS = Platform.getOS();
 		let arch = "";
         let currDir = "";
@@ -27,19 +29,19 @@ export class Common {
 		switch(platformOS) {
 			case OSType.Linux:
 				if(arch == 'x64')
-					libraryPath += "salmon-gcc-linux-x86_64/salmon-gcc-linux-x86_64.3.0.2/lib/libsalmon.so";
+					libraryPath += "salmon-gcc-linux-x86_64/salmon-gcc-linux-x86_64." + SALMON_VERSION + "/lib/libsalmon.so";
 				else if(arch == 'arm64')
-					libraryPath += "salmon-gcc-linux-x86_64/salmon-gcc-linux-aarch64.3.0.2/lib/libsalmon.so";
+					libraryPath += "salmon-gcc-linux-x86_64/salmon-gcc-linux-aarch64." + SALMON_VERSION + "/lib/libsalmon.so";
 				break;
 			case OSType.Windows:
 				if(arch == 'x64')
-					libraryPath += "salmon-msvc-win-x86_64/Salmon.Native.3.0.2/runtimes/win-x64/native/SalmonNative.dll";
+					libraryPath += "salmon-msvc-win-x86_64/Salmon.Native." + SALMON_VERSION + "/runtimes/win-x64/native/SalmonNative.dll";
 				break;
 			case OSType.Darwin:
 				if(arch == 'x64')
-					libraryPath += "salmon-gcc-macos-x86_64/salmon-gcc-macos-x86_64.3.0.2/lib/libsalmon.so";
+					libraryPath += "salmon-gcc-macos-x86_64/salmon-gcc-macos-x86_64." + SALMON_VERSION + "/lib/libsalmon.so";
 				else if(arch == 'arm64')
-					libraryPath += "salmon-gcc-macos-aarch64/salmon-gcc-macos-aarch64.3.0.2/lib/libsalmon.dylib";
+					libraryPath += "salmon-gcc-macos-aarch64/salmon-gcc-macos-aarch64." + SALMON_VERSION + "/lib/libsalmon.dylib";
 				break;
 		}
 		libraryPath = await Platform.getAbsolutePath(libraryPath, import.meta.url);
