@@ -26,9 +26,9 @@ name: CI.BuildTest
 
 on:
   push:
-    branches: [ "main", "wip-3.0.2" ]
+    branches: [ "main", "wip-3.0.3" ]
   pull_request:
-    branches: [ "main", "wip-3.0.2" ]
+    branches: [ "main", "wip-3.0.3" ]
 
 env:
   WIN_TEST_DIR: C:\tmp\salmon\test
