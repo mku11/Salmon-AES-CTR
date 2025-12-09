@@ -25,37 +25,17 @@ if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch
     project.ext.set('arch', 'aarch64')
 }
 
+project.ext.set('salmonLibsPath', '../libs/salmon/')
+
 repositories {
     // local repos, make sure you run samples/get_salmon_libs.bat
-	maven {
-		url uri("../libs/salmon/salmon-java")
-	}
-	if(project.os == 'win' && project.arch == 'x86_64') {
-		maven {
-			url uri("../libs/salmon/salmon-java-win-x86_64")
-		}
-	}
-	if(project.os == 'linux' && project.arch == 'x86_64') {
-		maven {
-			url uri("../libs/salmon/salmon-java-linux-x86_64")
-		}
-	}
-	if(project.os == 'linux' && project.arch == 'aarch64') {
-		maven {
-			url uri("../libs/salmon/salmon-java-linux-x86_64")
-		}
-	}
-	if(project.os == 'macos' && project.arch == 'x86_64') {
-		maven {
-			url uri("../libs/salmon/salmon-java-macos-x86_64")
-		}
-	}
-	if(project.os == 'macos' && project.arch == 'aarch64') {
-		maven {
-			url uri("../libs/salmon/salmon-java-macos-aarch64")
-		}
-	}
-	mavenCentral()
+    maven {
+        url uri(salmonLibsPath + "salmon-java")
+    }
+    maven {
+        url uri(salmonLibsPath + "salmon-java-${project.os}-${project.arch}")
+    }
+    mavenCentral()
 }
 
 // path to download the native libraries
