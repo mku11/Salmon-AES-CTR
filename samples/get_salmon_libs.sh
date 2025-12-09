@@ -2,9 +2,10 @@ CURRDIR=$(pwd)
 
 DEPS_DIR=./libs/
 SALMON_VERSION=3.0.3
+SALMON_BINARY_VERSION=$SALMON_VERSION-SNAPSHOT
 
-SALMON_BINARY=salmon-multi-arch.v$SALMON_VERSION.zip
-SALMON_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v$SALMON_VERSION/$SALMON_BINARY
+SALMON_BINARY=salmon-multi-arch.v$SALMON_BINARY_VERSION.zip
+SALMON_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v$SALMON_BINARY_VERSION/$SALMON_BINARY
 ZIP_FILENAME=salmon
 
 mkdir -p $DEPS_DIR

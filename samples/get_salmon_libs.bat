@@ -3,9 +3,10 @@ set CURRDIR=%CD%
 
 set DEPS_DIR=.\libs\
 set SALMON_VERSION=3.0.3
+set SALMON_BINARY_VERSION=%SALMON_VERSION%-SNAPSHOT
 
-set SALMON_BINARY=salmon-multi-arch.v%SALMON_VERSION%.zip
-set SALMON_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v%SALMON_VERSION%/%SALMON_BINARY%
+set SALMON_BINARY=salmon-multi-arch.v%SALMON_BINARY_VERSION%.zip
+set SALMON_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v%SALMON_BINARY_VERSION%/%SALMON_BINARY%
 set ZIP_FILENAME=salmon
 
 powershell mkdir -ErrorAction SilentlyContinue %DEPS_DIR%
