@@ -49,7 +49,8 @@
 	<ItemGroup>
 		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\SalmonFS\Drive\AndroidDrive.cs" Link="Android\SalmonFS\Drive\AndroidDrive.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\SalmonFS\Media\AesMediaDataSource.cs" Link="Android\SalmonFS\Media\AesMediaDataSource.cs" />
-
+		
+		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidHttpSyncClient.cs" Link="Android\FS\File\AndroidHttpSyncClient.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidFile.cs" Link="Android\FS\File\AndroidFile.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidFileSystem.cs" Link="Android\FS\File\AndroidFileSystem.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidSharedFileObserver.cs" Link="Android\FS\File\AndroidSharedFileObserver.cs" />
