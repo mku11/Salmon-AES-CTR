@@ -509,7 +509,7 @@ export class AesFile implements IVirtualFile {
      */
     public async getPath(): Promise<string> {
         let realPath: string = this.#realFile.getDisplayPath();
-        return this.#getPath(realPath);
+        return await this.#getPath(realPath);
     }
 
     /**
