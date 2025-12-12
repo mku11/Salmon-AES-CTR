@@ -30,6 +30,7 @@ import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type
 import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
+import { Platform, PlatformType } from '../../lib/simple-io/platform/platform.js';
 
 describe('salmon-httpfs', () => {
     let oldTestMode = null;
@@ -44,8 +45,8 @@ describe('salmon-httpfs', () => {
                 parseInt(PARAMS["ENC_THREADS"]) : 1;
 
         await SalmonFSTestHelper.setTestParams(testDir, testMode);
-
-        console.log("testDir: " + testDir);
+		let testDirDisplay = Platform.getPlatform() == PlatformType.Browser ? testDir.name : testDir;
+        console.log("testDir: " + testDirDisplay);
         console.log("testMode: " + testMode.name);
         console.log("threads: " + threads);
         console.log("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
