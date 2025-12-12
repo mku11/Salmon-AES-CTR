@@ -526,7 +526,7 @@ jobs:
   salmon_build_release:
     needs: [gcc_macos_build_matrix, gcc_linux_build_matrix, java_build_matrix, dotnet_build_matrix, python_build_matrix, ts_js_build_matrix, android_build_matrix]
     name: Salmon Release
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Download Artifacts
       uses: actions/download-artifact@v5
@@ -534,8 +534,8 @@ jobs:
         path: salmon
     - if: github.ref_type == 'tag'
       name: Package MultiArch
-      shell: cmd
-      run: cd salmon && powershell -command Compress-Archive -Force -DestinationPath salmon-multi-arch.${{ github.ref_name }}.zip -Path *
+      shell: bash
+      run: cd salmon && zip -r salmon-multi-arch.${{ github.ref_name }}.zip *
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
