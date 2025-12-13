@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-core/salmon/encryptor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-core/salmon/encryptor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { Integrity } from "./integrity/integrity.js";
+import { AesStream } from "./streams/aes_stream.js";
+import { EncryptionMode } from "./streams/encryption_mode.js";
+import { SecurityException } from "./security_exception.js";
+import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
+import { encryptData } from "./encryptor_helper.js";
+import { EncryptionFormat } from "./streams/encryption_format.js";
+import { Platform, PlatformType } from "../../simple-io/platform/platform.js";
+/**
+ * Encrypts byte arrays.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
+export class Encryptor {
+    #workerPath = "";
+    /**
+     * The number of parallel threads to use.
+     */
+    #threads;
+    /**
+     * The buffer size to use.
+     */
+    #bufferSize;
+    #promises = [];
+    #workers = [];
+    /**
+     * Instantiate an encryptor with parallel tasks and buffer size.
+     *
+     * @param {number} threads The number of threads to use.
+     * @param {number} bufferSize The buffer size to use. It is recommended for performance  to use
+     *                   a multiple of the chunk size if you enabled integrity
+     *                   otherwise a multiple of the AES block size (16 bytes).
+     */
+    constructor(threads = 1, bufferSize = 0) {
+        if (threads &lt;= 0) {
+            this.#threads = 1;
+        }
+        else {
+            this.#threads = threads;
+        }
+        if (bufferSize &lt;= 0) {
+            // we use the chunks size as default this keeps buffers aligned in case
+            // integrity is enabled.
+            this.#bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
+        }
+        else {
+            this.#bufferSize = bufferSize;
+        }
+    }
+    /**
+     * Encrypts a byte array using the provided key and nonce.
+     *
+     * @param {Uint8Array} data            The byte array to be encrypted.
+     * @param {Uint8Array} key             The AES key to be used.
+     * @param {Uint8Array} nonce           The nonce to be used.
+     * @param {EncryptionFormat} format    The format to use, see {@link EncryptionFormat}
+     * @param {boolean} integrity       True if you want to calculate and store hash signatures for each chunkSize.
+     * @param {Uint8Array} hashKey         Hash key to be used for all chunks.
+     * @param {number} chunkSize       The chunk size.
+     * @returns {Promise&lt;Uint8Array>} The byte array with the encrypted data.
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IOException Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     */
+    async encrypt(data, key, nonce, format = EncryptionFormat.Salmon, integrity = false, hashKey = null, chunkSize = 0) {
+        if (key == null)
+            throw new SecurityException("Key is missing");
+        if (nonce == null)
+            throw new SecurityException("Nonce is missing");
+        if (integrity)
+            chunkSize = chunkSize &lt;= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+        else
+            chunkSize = 0;
+        let realSize = await AesStream.getOutputSize(EncryptionMode.Encrypt, data.length, format, chunkSize);
+        let outData = new Uint8Array(realSize);
+        if (this.#threads == 1) {
+            await encryptData(data, 0, data.length, outData, key, nonce, format, integrity, hashKey, chunkSize, this.#bufferSize);
+        }
+        else {
+            await this.#encryptDataParallel(data, outData, key, hashKey, nonce, format, chunkSize, integrity);
+        }
+        return outData;
+    }
+    /**
+     * Encrypt stream using parallel threads.
+     *
+     * @param {Uint8Array} data       The input data to be encrypted
+     * @param {Uint8Array} outData    The output buffer with the encrypted data.
+     * @param {Uint8Array} key        The AES key.
+     * @param {Uint8Array | null} hashKey    The hash key.
+     * @param {Uint8Array} nonce      The nonce to be used for encryption.
+     * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
+     * @param {number} chunkSize  The chunk size.
+     * @param {boolean} integrity  True to apply integrity.
+     */
+    async #encryptDataParallel(data, outData, key, hashKey, nonce, format, chunkSize, integrity) {
+        let runningThreads = 1;
+        let partSize = data.length;
+        // if we want to check integrity we align to the chunk size otherwise to the AES Block
+        let minPartSize = AESCTRTransformer.BLOCK_SIZE;
+        if (integrity &amp;&amp; chunkSize > 0)
+            minPartSize = chunkSize;
+        else if (integrity)
+            minPartSize = Integrity.DEFAULT_CHUNK_SIZE;
+        if (partSize > minPartSize) {
+            partSize = Math.ceil(data.length / this.#threads);
+            if (partSize > minPartSize)
+                partSize -= partSize % minPartSize;
+            else
+                partSize = minPartSize;
+            runningThreads = Math.floor(data.length / partSize);
+            if (runningThreads > this.#threads)
+                runningThreads = this.#threads;
+        }
+        await this.#submitEncryptJobs(runningThreads, partSize, data, outData, key, hashKey, nonce, format, integrity, chunkSize);
+    }
+    /**
+     * Submit encryption parallel jobs.
+     *
+     * @param {number} runningThreads The number of threads to submit.
+     * @param {number} partSize       The data length of each part that belongs to each thread.
+     * @param {Uint8Array} data           The buffer of data you want to decrypt. This is a shared byte array across all threads where each
+     *                       thread will read each own part.
+     * @param {Uint8Array} outData        The buffer of data containing the encrypted data.
+     * @param {Uint8Array} key            The AES key.
+     * @param {Uint8Array} hashKey        The hash key for integrity.
+     * @param {Uint8Array} nonce          The nonce for the data.
+     * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
+     * @param {boolean} integrity      True to apply the data integrity.
+     * @param {number} chunkSize      The chunk size.
+     */
+    async #submitEncryptJobs(runningThreads, partSize, data, outData, key, hashKey, nonce, format, integrity, chunkSize) {
+        this.#promises = [];
+        if (!this.#workerPath)
+            this.#workerPath = await Platform.getAbsolutePath("encryptor_worker.js", import.meta.url);
+        for (let i = 0; i &lt; runningThreads; i++) {
+            this.#promises.push(new Promise(async (resolve, reject) => {
+                if (Platform.getPlatform() == PlatformType.Browser) {
+                    if (this.#workers[i] == null)
+                        this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+                    this.#workers[i].removeEventListener('error', null);
+                    this.#workers[i].removeEventListener('message', null);
+                    this.#workers[i].addEventListener('message', (event) => {
+                        if (event.data instanceof Error)
+                            reject(event.data);
+                        else
+                            resolve(event.data);
+                    });
+                    this.#workers[i].addEventListener('error', (event) => {
+                        reject(event);
+                    });
+                }
+                else {
+                    const { Worker } = await import("worker_threads");
+                    if (this.#workers[i] == null)
+                        this.#workers[i] = new Worker(this.#workerPath);
+                    this.#workers[i].removeAllListeners();
+                    this.#workers[i].on('message', (event) => {
+                        if (event.data instanceof Error)
+                            reject(event);
+                        else
+                            resolve(event);
+                    });
+                    this.#workers[i].on('error', (event) => {
+                        reject(event);
+                    });
+                }
+                let start = partSize * i;
+                let length;
+                if (i == runningThreads - 1)
+                    length = data.length - start;
+                else
+                    length = partSize;
+                this.#workers[i].postMessage({
+                    index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
+                    format: format, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.#bufferSize
+                });
+            }));
+        }
+        await Promise.all(this.#promises).then((results) => {
+            for (let i = 0; i &lt; results.length; i++) {
+                let startPos = i == 0 ? 0 : results[i].startPos;
+                for (let j = startPos; j &lt; results[i].endPos; j++) {
+                    outData[j] = results[i].outData[j];
+                }
+            }
+        }).catch((event) => {
+            console.log("Encryptor Error:", event);
+            if (event instanceof Error) {
+                throw event;
+            }
+            else {
+                throw new Error("Could not run Worker, make sure you set the correct workerPath");
+            }
+        });
+    }
+    close() {
+        for (let i = 0; i &lt; this.#workers.length; i++) {
+            this.#workers[i].terminate();
+            this.#workers[i] = null;
+        }
+        this.#promises = [];
+    }
+    /**
+     * Set the path where the decryptor worker. This needs to be a relative path starting from
+     * the root of your main javascript app.
+     * @param {string} path The path to the worker javascript.
+     */
+    setWorkerPath(path) {
+        this.#workerPath = path;
+    }
+    /**
+     * Get the current path for the worker javascript.
+     * @returns {string} The path to the worker javascript.
+     */
+    getWorkerPath() {
+        return this.#workerPath;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Sat Dec 13 2025 15:06:55 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

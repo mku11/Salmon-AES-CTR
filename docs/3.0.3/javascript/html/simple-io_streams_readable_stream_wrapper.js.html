@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: simple-io/streams/readable_stream_wrapper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: simple-io/streams/readable_stream_wrapper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { SeekOrigin } from "./random_access_stream.js";
+import { Buffer } from "./buffer.js";
+/**
+ * Fills a cache buffer with the data from a part of a stream.
+ * Do not use directly, use ReadableStreamWrapper.create() instead.
+ *
+ * @param {Buffer} cacheBuffer  The cache buffer that will store the contents
+ * @param {Uint8Array} length   The length of the data requested
+ * @param {RandomAccessStream} stream The stream that will be used to read from
+ */
+export async function fillBufferPart(cacheBuffer, start, offset, length, stream) {
+    await stream.seek(start, SeekOrigin.Begin);
+    let bytesRead = 0;
+    let totalBytesRead = 0;
+    while ((bytesRead = await stream.read(cacheBuffer.getData(), offset + totalBytesRead, length - totalBytesRead)) > 0) {
+        totalBytesRead += bytesRead;
+    }
+    return totalBytesRead;
+}
+/**
+ * ReadableStream wrapper for RandomAccessStream.
+ * Use this class to wrap any RandomAccessStream to a JavaScript ReadableStream to use with 3rd party libraries.
+ */
+export class ReadableStreamWrapper {
+    /**
+     * Default cache buffer should be high enough for some mpeg videos to work
+     * the cache buffers should be aligned to the stream for efficiency
+     */
+    static DEFAULT_BUFFER_SIZE = 524288;
+    /**
+     * The default buffer count
+     */
+    static DEFAULT_BUFFERS = 1;
+    /**
+     * The default backwards buffer offset
+     */
+    static DEFAULT_BACK_OFFSET = 32768;
+    /**
+     * The maximum allowed buffer count
+     */
+    static MAX_BUFFERS = 6;
+    #buffers = null;
+    #stream = null;
+    #readableStream = null;
+    #streamPosition = 0;
+    #totalSize = 0;
+    #buffersCount = 0;
+    #bufferSize = 0;
+    #backOffset = 0;
+    #alignSize = 0;
+    /**
+     * We reuse the least recently used buffer. Since the buffer count is relative
+     * small there is no need for a fast-access lru queue
+     * so a simple linked list of keeping the indexes is adequately fast.
+     */
+    lruBuffersIndex = [];
+    /**
+     * Set the source stream
+     * @param {RandomAccessStream} stream The stream
+     */
+    setStream(stream) {
+        this.#stream = stream;
+    }
+    /**
+     * Get the source stream
+     * @returns {RandomAccessStream} The source stream
+     */
+    getStream() {
+        return this.#stream;
+    }
+    /**
+     * Get the back offset
+     * @returns {number} The back offset
+     */
+    getBackOffset() {
+        return this.#backOffset;
+    }
+    /**
+     * Set the back offset
+     * @param backOffset The back offset
+     */
+    setBackOffset(backOffset) {
+        this.#backOffset = backOffset;
+    }
+    /**
+     * Get the total size of the stream
+     * @returns The total size
+     */
+    getTotalSize() {
+        return this.#totalSize;
+    }
+    /**
+     * Set the total size of the stream
+     * @param {number} totalSize The total size of the stream
+     */
+    setTotalSize(totalSize) {
+        this.#totalSize = totalSize;
+    }
+    /**
+     * Set the align size
+     * @param {number} alignSize The align size
+     */
+    setAlignSize(alignSize) {
+        this.#alignSize = alignSize;
+    }
+    /**
+     * Get the buffer size
+     * @returns {number} The buffer size
+     */
+    getBufferSize() {
+        return this.#bufferSize;
+    }
+    /**
+     * Set the buffer size
+     * @param {number} bufferSize The buffer size
+     */
+    setBufferSize(bufferSize) {
+        this.#bufferSize = bufferSize;
+    }
+    /**
+     * Get the buffer count
+     * @returns {number} The buffer count
+     */
+    getBufferCount() {
+        return this.#buffersCount;
+    }
+    /**
+     * Set the buffer count
+     * @param {number} buffersCount The buffer count
+     */
+    setBufferCount(buffersCount) {
+        this.#buffersCount = buffersCount;
+    }
+    /**
+     * Construct a wrapper do not use directly, use createReadableStream() instead.
+     */
+    constructor() {
+    }
+    /**
+     * Creates a native ReadableStream from a RandomAccessStream
+     *
+     * @param {RandomAccessStream} stream   The source stream.
+     * @param {number} buffersCount Number of buffers to use.
+     * @param {Uint8Array} bufferSize   The length of each buffer.
+     * @param {number} backOffset   The backwards offset. Some media libraries might
+     * request data rewinding the stream just a few bytes backwards. This ensures those bytes
+     * are included so we don't reset the stream.
+     * @param {number} alignSize      The align size. Set to a positive number to override the stream aligned size.
+     */
+    static createReadableStream(stream, buffersCount = 1, bufferSize = 524288, backOffset = 32768, alignSize = 0) {
+        let readableStreamWrapper = new ReadableStreamWrapper();
+        readableStreamWrapper.#stream = stream;
+        readableStreamWrapper.#buffersCount = buffersCount;
+        readableStreamWrapper.#bufferSize = bufferSize;
+        readableStreamWrapper.#backOffset = backOffset;
+        readableStreamWrapper.#alignSize = alignSize;
+        let readableStream = ReadableStreamWrapper.createReadableStreamReader(readableStreamWrapper);
+        return readableStream;
+    }
+    static createReadableStreamReader(streamWrapper) {
+        let resetting = false;
+        let readableStream = new ReadableStream({
+            type: 'bytes',
+            async pull(controller) {
+                if (resetting) {
+                    controller.enqueue(new Uint8Array([0]));
+                    return;
+                }
+                if (streamWrapper.#buffers == null)
+                    await streamWrapper.initialize();
+                let size = streamWrapper.getBufferSize();
+                let buffer = new Uint8Array(size);
+                let bytesRead = await streamWrapper.read(buffer, 0, buffer.length);
+                if (bytesRead > 0)
+                    controller.enqueue(buffer.slice(0, bytesRead));
+                if (bytesRead &lt;= 0) {
+                    controller.close();
+                }
+            }
+        });
+        let streamGetReader = readableStream.getReader;
+        let reader;
+        readableStream.getReader = function (options) {
+            reader = streamGetReader.apply(readableStream, options);
+            return reader;
+        };
+        readableStream.reset = async function () {
+            // make sure the queue is emptied
+            if (reader) {
+                resetting = true;
+                while (true) {
+                    let chunk = await reader.read();
+                    if (!chunk || !chunk.value
+                        || (chunk.value.length == 1 &amp;&amp; chunk.value[0] == 0))
+                        break;
+                }
+                resetting = false;
+            }
+            await streamWrapper.reset();
+        };
+        readableStream.cancel = async function (reason) {
+            await streamWrapper.cancel(reason);
+        };
+        readableStream.skip = async function (position) {
+            return await streamWrapper.skip(position);
+        };
+        readableStream.getPositionStart = function () {
+            return streamWrapper.getPositionStart();
+        };
+        readableStream.setPositionStart = async function (position) {
+            await streamWrapper.setPositionStart(position);
+        };
+        readableStream.setPositionEnd = async function (position) {
+            await streamWrapper.setPositionEnd(position);
+        };
+        streamWrapper.#readableStream = readableStream;
+        readableStream.getStreamWrapper = function () {
+            return streamWrapper;
+        };
+        return readableStream;
+    }
+    async initialize() {
+        if (this.#stream != null) {
+            this.#totalSize = await this.#stream.getLength();
+            try {
+                this.#streamPosition = await this.#stream.getPosition();
+            }
+            catch (ex) {
+                throw new Error("Could not get stream current position: " + ex);
+            }
+        }
+        if (this.#buffersCount &lt;= 0)
+            this.#buffersCount = ReadableStreamWrapper.DEFAULT_BUFFERS;
+        if (this.#buffersCount > ReadableStreamWrapper.MAX_BUFFERS)
+            this.#buffersCount = ReadableStreamWrapper.MAX_BUFFERS;
+        if (this.#bufferSize &lt;= 0)
+            this.#bufferSize = ReadableStreamWrapper.DEFAULT_BUFFER_SIZE;
+        if (this.#backOffset &lt; 0)
+            this.#backOffset = ReadableStreamWrapper.DEFAULT_BACK_OFFSET;
+        if (this.#alignSize &lt;= 0 &amp;&amp; this.#stream != null)
+            this.#alignSize = this.#stream.getAlignSize();
+        // align the buffers for performance
+        if (this.#alignSize > 0) {
+            if (this.#backOffset > 0) {
+                let nBackOffset = Math.floor(this.#backOffset / this.#alignSize) * this.#alignSize;
+                if (nBackOffset &lt; this.#backOffset)
+                    nBackOffset += this.#alignSize;
+                this.#backOffset = nBackOffset;
+            }
+            let nBufferSize = Math.floor(this.#bufferSize / this.#alignSize) * this.#alignSize;
+            if (nBufferSize &lt; this.#alignSize) {
+                nBufferSize = this.#alignSize;
+            }
+            if (nBufferSize &lt; this.#bufferSize) {
+                nBufferSize += this.#alignSize;
+            }
+            this.#bufferSize = nBufferSize;
+        }
+        if (this.#backOffset > 0) {
+            this.#bufferSize += this.#backOffset;
+            // we use a minimum 2 buffers since it is very likely
+            // that the previous buffer in use will have the backoffset
+            // data of the new one
+            if (this.#buffersCount == 1)
+                this.#buffersCount = 2;
+        }
+        this.#positionStart = 0;
+        this.#positionEnd = this.#totalSize - 1;
+        this.#createBuffers();
+    }
+    /**
+     * Create cache buffers that will be used for sourcing the stream.
+     * These will help reducing multiple short reads from the source.
+     * The first buffer will be sourcing at the start of the stream where the header and indexing are
+     * The rest of the buffers can be placed to whatever position the user slides to
+     */
+    #createBuffers() {
+        this.#buffers = new Array(this.#buffersCount);
+        for (let i = 0; i &lt; this.#buffers.length; i++)
+            this.#buffers[i] = new Buffer(this.#bufferSize);
+    }
+    /**
+     * Skip a number of bytes.
+     *
+     * @param {number} bytes the number of bytes to be skipped.
+     * @returns {Promise&lt;number>} The new position
+     */
+    async skip(bytes) {
+        if (this.#buffers == null)
+            await this.initialize();
+        bytes += this.#positionStart;
+        let currPos = this.#streamPosition;
+        if (this.#streamPosition + bytes > this.#totalSize)
+            this.#streamPosition = this.#totalSize;
+        else
+            this.#streamPosition += bytes;
+        return this.#streamPosition - currPos;
+    }
+    /**
+     * Reset the stream
+     */
+    reset() {
+        this.#streamPosition = 0;
+    }
+    /**
+     * Reads the contents of a stream
+     * @param {Uint8Array} buffer The buffer
+     * @param {number} offset The offset
+     * @param {number} count The count
+     * @returns {Promise&lt;number>} The bytes read
+     */
+    async read(buffer, offset, count) {
+        if (this.#buffers == null)
+            await this.initialize();
+        if (this.#streamPosition >= this.#positionEnd + 1)
+            return -1;
+        let minCount;
+        let bytesRead;
+        // truncate the count so getCacheBuffer() reports the correct buffer
+        count = Math.floor(Math.min(count, this.#totalSize - this.#streamPosition));
+        let cacheBuffer = this.#getCacheBuffer(this.#streamPosition, count);
+        if (cacheBuffer == null) {
+            cacheBuffer = this.#getAvailCacheBuffer();
+            // the stream is closed
+            if (cacheBuffer == null)
+                return 0;
+            // for some applications like media players they make a second immediate request
+            // in a position a few bytes before the first request. To make
+            // sure we don't make 2 overlapping requests we start the buffer
+            // a position ahead of the first request.
+            let startPosition = this.#streamPosition;
+            if (this.#alignSize > 0) {
+                startPosition = Math.floor(startPosition / this.#alignSize) * this.#alignSize;
+            }
+            let length = this.#bufferSize;
+            // if we have the backoffset data in an existing buffer we don't include the backoffset
+            // in the new request because we want to prevent network streams resetting.
+            if (startPosition > 0 &amp;&amp; !this.#hasBackoffset(startPosition)) {
+                startPosition -= this.#backOffset;
+            }
+            else {
+                length -= this.#backOffset;
+            }
+            bytesRead = await this.fillBuffer(cacheBuffer, startPosition, length);
+            if (bytesRead &lt;= 0)
+                return bytesRead;
+            cacheBuffer.setStartPos(startPosition);
+            cacheBuffer.setCount(bytesRead);
+        }
+        minCount = Math.min(count, Math.floor(cacheBuffer.getCount() - this.#streamPosition + cacheBuffer.getStartPos()));
+        let cOffset = Math.floor(this.#streamPosition - cacheBuffer.getStartPos());
+        for (let i = 0; i &lt; minCount; i++)
+            buffer[offset + i] = cacheBuffer.getData()[cOffset + i];
+        this.#streamPosition += minCount;
+        return minCount;
+    }
+    #hasBackoffset(startPosition) {
+        let pos = startPosition - this.#backOffset;
+        if (this.#buffers == null)
+            throw new Error("Buffers are not initialized");
+        for (let i = 0; i &lt; this.#buffers.length; i++) {
+            let buffer = this.#buffers[i];
+            if (buffer != null &amp;&amp; buffer.getCount() > 0
+                &amp;&amp; buffer.getStartPos() &lt;= pos
+                &amp;&amp; startPosition &lt;= buffer.getStartPos() + buffer.getCount()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * Fills a cache buffer with the data from the source stream.
+     * @param { Buffer } cacheBuffer The cache buffer that will store the contents
+     * @param { number } startPosition The start position
+     * @param { number } length      The length of the data requested
+     * @returns {Promise&lt;number>} The bytes read
+     */
+    async fillBuffer(cacheBuffer, startPosition, length) {
+        let bytesRead;
+        if (this.#stream == null)
+            return 0;
+        bytesRead = await fillBufferPart(cacheBuffer, startPosition, 0, length, this.#stream);
+        return bytesRead;
+    }
+    /**
+     * Returns an available cache buffer if there is none then reuse the least recently used one.
+     */
+    #getAvailCacheBuffer() {
+        if (this.#buffers == null)
+            throw new Error("No buffers found");
+        let index = -1;
+        if (this.lruBuffersIndex.length == this.#buffersCount) {
+            index = this.lruBuffersIndex[this.lruBuffersIndex.length - 1];
+            this.lruBuffersIndex.pop();
+        }
+        else {
+            for (let i = 0; i &lt; this.#buffers.length; i++) {
+                let buff = this.#buffers[i];
+                if (buff &amp;&amp; buff.getCount() == 0) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        if (index &lt; 0)
+            index = this.#buffers.length - 1;
+        this.lruBuffersIndex.unshift(index);
+        return this.#buffers[index];
+    }
+    /**
+     * Returns the buffer that contains the data requested.
+     *
+     * @param {number} position The source position of the data to be read
+     * @param {number} count The number of bytes to read
+     */
+    #getCacheBuffer(position, count) {
+        if (this.#buffers == null)
+            return null;
+        for (let i = 0; i &lt; this.#buffers.length; i++) {
+            let buffer = this.#buffers[i];
+            if (buffer &amp;&amp; position >= buffer.getStartPos() &amp;&amp; position + count &lt;= buffer.getStartPos() + buffer.getCount()) {
+                // promote buffer to the front
+                let index = -1;
+                for (let k = 0; k &lt; this.lruBuffersIndex.length; k++) {
+                    if (this.lruBuffersIndex[k] == i) {
+                        index = k;
+                        break;
+                    }
+                }
+                if (index >= 0)
+                    this.lruBuffersIndex.splice(index, 1);
+                this.lruBuffersIndex.unshift(i);
+                return buffer;
+            }
+        }
+        return null;
+    }
+    #positionStart = 0;
+    /**
+     * Get the start position of the stream
+     * @returns {number} The start position of the stream
+     */
+    getPositionStart() {
+        return this.#positionStart;
+    }
+    /**
+     * Set the start position of the stream.
+     * @param {number} pos The start position
+     */
+    async setPositionStart(pos) {
+        if (this.#buffers == null)
+            await this.initialize();
+        this.#positionStart = pos;
+    }
+    #positionEnd = 0;
+    /**
+     * Set the end position of the stream
+     * @param {number} pos The end position of the stream
+     */
+    async setPositionEnd(pos) {
+        if (this.#buffers == null)
+            await this.initialize();
+        this.#positionEnd = pos;
+    }
+    /**
+     * Clear all buffers.
+     */
+    #clearBuffers() {
+        if (this.#buffers == null)
+            return;
+        for (let i = 0; i &lt; this.#buffers.length; i++) {
+            let buffer = this.#buffers[i];
+            if (buffer)
+                buffer.clear();
+            this.#buffers[i] = null;
+        }
+    }
+    /**
+     * Close all back streams.
+     *
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async #closeStream() {
+        if (this.#stream)
+            await this.#stream.close();
+        this.#stream = null;
+    }
+    /**
+     * Cancel the stream
+     * @param {any} [reason] The reason
+     */
+    async cancel(reason) {
+        await this.#closeStream();
+        this.#clearBuffers();
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Sat Dec 13 2025 15:06:55 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

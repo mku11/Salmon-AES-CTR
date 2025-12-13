@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: simple-fs/fs/drive/utils/file_importer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: simple-fs/fs/drive/utils/file_importer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { importFilePart } from "./file_importer_helper.js";
+import { IOException } from "../../../../simple-io/streams/io_exception.js";
+import { Platform, PlatformType } from "../../../../simple-io/platform/platform.js";
+/**
+ * Abstract class for importing files to a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
+export class FileImporter {
+    #workerPath = "";
+    static #DEFAULT_BUFFER_SIZE = 512 * 1024;
+    static #DEFAULT_THREADS = 1;
+    static #enableMultiThread = true;
+    /**
+     * Current buffer size.
+     */
+    #bufferSize = 0;
+    /**
+     * Current threads.
+     */
+    #threads = 1;
+    /**
+     * True if last job was stopped by the user.
+     */
+    #stopped = [true];
+    /**
+     * Failed if last job was failed.
+     */
+    #failed = false;
+    /**
+     * Last exception occurred.
+     */
+    #lastException = null;
+    #promises = [];
+    #workers = [];
+    /**
+     * Initiliazes a file importer that can be used to import files to the drive
+     *
+     * @param {Uint8Array} bufferSize Buffer size to be used when encrypting files.
+     *                   If using integrity this value has to be a multiple of the Chunk size.
+     *                   If not using integrity it should be a multiple of the AES block size for better performance
+     * @param {number} threads The threads
+     */
+    initialize(bufferSize = 0, threads = 1) {
+        this.#bufferSize = bufferSize;
+        if (this.#bufferSize &lt;= 0)
+            this.#bufferSize = FileImporter.#DEFAULT_BUFFER_SIZE;
+        this.#threads = threads;
+        if (this.#threads &lt;= 0)
+            this.#threads = FileImporter.#DEFAULT_THREADS;
+    }
+    /**
+     * Stops all current importing tasks
+     */
+    stop() {
+        this.#stopped[0] = true;
+        let msg = { message: 'stop' };
+        for (let i = 0; i &lt; this.#workers.length; i++) {
+            this.#workers[i].postMessage(msg);
+            // workaround for node since it doesn't remove previous pending close events
+            this.#workers[i].terminate();
+            this.#workers[i] = null;
+        }
+    }
+    /**
+     * True if importer is currently running a job.
+     *
+     * @returns {boolean} True if running
+     */
+    isRunning() {
+        return !this.#stopped[0];
+    }
+    /**
+     * Imports a real file into the drive.
+     *
+     * @param {IFile} fileToImport The source file that will be imported in to the drive.
+     * @param {IFile} dir          The target directory in the drive that the file will be imported
+     * @param {FileImportOptions} [options] Options
+     * @returns {Promise&lt;IVirtualFile | null>} A promise which resolves to a virtual file or null
+     */
+    async importFile(fileToImport, dir, options) {
+        if (!options)
+            options = new FileImportOptions();
+        if (this.isRunning())
+            throw new Error("Another import is running");
+        if (await fileToImport.isDirectory())
+            throw new Error("Cannot import directory, use FileCommander instead");
+        let filename = options.filename ? options.filename : fileToImport.getName();
+        let totalBytesRead = [0];
+        let importedFile = null;
+        try {
+            if (!FileImporter.#enableMultiThread &amp;&amp; this.#threads != 1)
+                throw new Error("Multithreading is not supported");
+            this.#stopped[0] = false;
+            this.#lastException = null;
+            this.#failed = false;
+            this.#lastException = null;
+            importedFile = await dir.createFile(filename);
+            await this.onPrepare(importedFile, options.integrity);
+            let fileSize = await fileToImport.getLength();
+            let runningThreads = 1;
+            let partSize = fileSize;
+            // for js we make sure to allocate enough space for the file 
+            // this will also create the header
+            let targetStream = await importedFile.getOutputStream();
+            await targetStream.setLength(fileSize);
+            await targetStream.close();
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            let minPartSize = await this.getMinimumPartSize(fileToImport, importedFile);
+            if (partSize > minPartSize &amp;&amp; this.#threads > 1) {
+                partSize = Math.ceil(fileSize / this.#threads);
+                if (partSize > minPartSize)
+                    partSize -= partSize % minPartSize;
+                else
+                    partSize = minPartSize;
+                runningThreads = Math.floor(fileSize / partSize);
+            }
+            if (runningThreads == 1) {
+                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, options.onProgressChanged, this.#bufferSize, this.#stopped);
+            }
+            else {
+                await this.#submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, options.integrity, options.onProgressChanged);
+            }
+            if (this.#stopped[0])
+                await importedFile.getRealFile().delete();
+            else if (options.deleteSource)
+                await fileToImport.delete();
+            if (this.#lastException)
+                throw this.#lastException;
+        }
+        catch (ex) {
+            this.#failed = true;
+            this.#stopped[0] = true;
+            this.#lastException = ex;
+            throw ex;
+        }
+        if (this.#stopped[0] || this.#failed) {
+            this.#stopped[0] = true;
+            return null;
+        }
+        this.#stopped[0] = true;
+        return importedFile;
+    }
+    async #submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgressChanged) {
+        let fileSize = await fileToImport.getLength();
+        let bytesRead = new Array(runningThreads);
+        bytesRead.fill(0);
+        this.#promises = [];
+        if (!this.#workerPath)
+            this.#workerPath = await Platform.getAbsolutePath("file_importer_worker.js", import.meta.url);
+        for (let i = 0; i &lt; runningThreads; i++) {
+            this.#promises.push(new Promise(async (resolve, reject) => {
+                if (Platform.getPlatform() == PlatformType.Browser) {
+                    if (this.#workers[i] == null) {
+                        this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+                    }
+                    this.#workers[i].removeEventListener('error', null);
+                    this.#workers[i].removeEventListener('message', null);
+                    this.#workers[i].addEventListener('message', (event) => {
+                        if (event.data.message == 'progress' &amp;&amp; onProgressChanged) {
+                            bytesRead[event.data.index] = event.data.position;
+                            totalBytesRead[0] = 0;
+                            for (let i = 0; i &lt; bytesRead.length; i++) {
+                                totalBytesRead[0] += bytesRead[i];
+                            }
+                            onProgressChanged(totalBytesRead[0], fileSize);
+                        }
+                        else if (event.data.message == 'complete') {
+                            resolve(event.data);
+                        }
+                        else if (event.data.message == 'error') {
+                            reject(event.data);
+                        }
+                    });
+                    this.#workers[i].addEventListener('error', (event) => {
+                        reject(event);
+                    });
+                }
+                else {
+                    const { Worker } = await import("worker_threads");
+                    if (this.#workers[i] == null)
+                        this.#workers[i] = new Worker(this.#workerPath);
+                    this.#workers[i].removeAllListeners();
+                    this.#workers[i].on('message', (event) => {
+                        if (event.message == 'progress' &amp;&amp; onProgressChanged) {
+                            bytesRead[event.index] = event.position;
+                            totalBytesRead[0] = 0;
+                            for (let i = 0; i &lt; bytesRead.length; i++) {
+                                totalBytesRead[0] += bytesRead[i];
+                            }
+                            onProgressChanged(totalBytesRead[0], fileSize);
+                        }
+                        else if (event.message == 'complete') {
+                            resolve(event);
+                        }
+                        else if (event.message == 'error') {
+                            reject(event);
+                        }
+                    });
+                    this.#workers[i].on('error', (event) => {
+                        reject(event);
+                    });
+                }
+                try {
+                    let msg = await this.getWorkerMessage(i, fileToImport, importedFile, runningThreads, partSize, fileSize, this.#bufferSize, integrity);
+                    this.#workers[i].postMessage(msg);
+                }
+                catch (ex) {
+                    reject(ex);
+                }
+            }));
+        }
+        await Promise.all(this.#promises).then((results) => {
+            totalBytesRead[0] = 0;
+            for (let i = 0; i &lt; results.length; i++) {
+                totalBytesRead[0] += results[i].totalBytesRead;
+            }
+        }).catch((err) => {
+            err = this.#getError(err);
+            this.#failed = true;
+            this.#lastException = err;
+            this.stop();
+            throw new IOException("Error during import", err);
+        });
+    }
+    #getError(err) {
+        return err;
+    }
+    /**
+     * Close the importer and associated resources
+     */
+    close() {
+        for (let i = 0; i &lt; this.#workers.length; i++) {
+            this.#workers[i].terminate();
+            this.#workers[i] = null;
+        }
+        this.#promises = [];
+    }
+    /**
+     * Set the path to the worker script to use
+     * @param {string} path The path
+     */
+    setWorkerPath(path) {
+        this.#workerPath = path;
+    }
+    /**
+     * Get the current worker script path
+     * @returns {string} The path
+     */
+    getWorkerPath() {
+        return this.#workerPath;
+    }
+}
+/**
+ * File importer options
+ */
+export class FileImportOptions {
+    /**
+     * Override the filename
+     */
+    filename = undefined;
+    /**
+     * Delete the source file after completion.
+     */
+    deleteSource = false;
+    /**
+     * True to enable integrity.
+     */
+    integrity = false;
+    /**
+     * Callback when progress changes
+     * (position: number, length: number) => void
+     */
+    onProgressChanged = undefined;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="Buffer.html">Buffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="HttpSyncClient.html">HttpSyncClient</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="Platform.html">Platform</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamWrapper.html">ReadableStreamWrapper</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li><li><a href="WebGPU.html">WebGPU</a></li><li><a href="WebGPULogger.html">WebGPULogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AES_IMPL_AES">AES_IMPL_AES</a></li><li><a href="global.html#AES_IMPL_AES_GPU">AES_IMPL_AES_GPU</a></li><li><a href="global.html#AES_IMPL_AES_INTR">AES_IMPL_AES_INTR</a></li><li><a href="global.html#AesDrive.">AesDrive.</a></li><li><a href="global.html#AuthConfig.">AuthConfig.</a></li><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#FileSequencer.">FileSequencer.</a></li><li><a href="global.html#OSType">OSType</a></li><li><a href="global.html#OSType%255Bundefined%255D">OSType[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#PlatformType">PlatformType</a></li><li><a href="global.html#PlatformType%255Bundefined%255D">PlatformType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#WebGPU.">WebGPU.</a></li><li><a href="global.html#aes_key_expand">aes_key_expand</a></li><li><a href="global.html#aes_transform">aes_transform</a></li><li><a href="global.html#aes_transform_ctr">aes_transform_ctr</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#getSalmonAESShader">getSalmonAESShader</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li><li><a href="global.html#salmon_expandKey">salmon_expandKey</a></li><li><a href="global.html#salmon_init">salmon_init</a></li><li><a href="global.html#salmon_transform">salmon_transform</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Sat Dec 13 2025 15:06:55 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
