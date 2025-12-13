@@ -20,7 +20,7 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
  
 ## Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
-Access to the demo: [**Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
+Access to the demo: [**Demo**](https://mku11.github.io/Salmon-Vault/salmon-vault-js)  
 Demo Vault files are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 
 \* Access to the demo vault is remote and read-only so you won't be able to import new files.  
