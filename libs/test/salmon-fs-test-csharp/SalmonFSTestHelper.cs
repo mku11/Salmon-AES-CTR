@@ -86,7 +86,6 @@ public class SalmonFSTestHelper
     internal static Credentials credentials = new Credentials("user", "password");
 
     // HTTP server (Read-only)
-    //static string HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
     static string HTTP_SERVER_DEFAULT_URL = "http://localhost";
     internal static string HTTP_SERVER_URL = System.Environment.GetEnvironmentVariable("HTTP_SERVER_URL") != null
         && !System.Environment.GetEnvironmentVariable("HTTP_SERVER_URL").Equals("") ?
