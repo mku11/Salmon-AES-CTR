@@ -1,4 +1,4 @@
-set SALMON_VERSION=3.0.3
+set SALMON_VERSION=3.0.4
 set CURRDIR=%CD%
 
 set OUTPUT_ROOT=%CURRDIR%\..\..\..\output

@@ -1,5 +1,5 @@
 Salmon.Core  
-version: 3.0.3
+version: 3.0.4
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   
