@@ -4,9 +4,9 @@ plugins {
 
 group 'com.mku.salmon.samples'
 description = 'Salmon Android Samples'
-version '3.0.4'
+version '3.0.5'
 ext {
-	appVersion = '304'
+	appVersion = '305'
 }
 
 repositories {
@@ -27,8 +27,8 @@ android {
         applicationId "com.mku.salmon.samples"
         minSdk 23
         targetSdk 34
-		versionCode 304
-		versionName '3.0.4'
+		versionCode 305
+		versionName '3.0.5'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

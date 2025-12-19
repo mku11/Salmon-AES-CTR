@@ -4,7 +4,7 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
-	<SalmonVersion>3.0.4</SalmonVersion>
+	<SalmonVersion>3.0.5</SalmonVersion>
   </PropertyGroup>
 
   <ItemGroup>

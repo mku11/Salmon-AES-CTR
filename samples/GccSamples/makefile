@@ -16,7 +16,7 @@ $(info PLATFORM: $(PLATFORM))
 $(info ARCH: $(ARCH))
 $(info )
 
-SALMON_VERSION=3.0.4
+SALMON_VERSION=3.0.5
 SALMON_ROOT=../libs/salmon/salmon-gcc-$(PLATFORM)-$(ARCH)
 SALMON_DIR=$(SALMON_ROOT)/salmon-gcc-$(PLATFORM)-$(ARCH).$(SALMON_VERSION)
 SALMON_INCLUDE=$(SALMON_DIR)/salmon/include

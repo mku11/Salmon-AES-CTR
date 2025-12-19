@@ -1,5 +1,5 @@
 #!/bin/bash
-SALMON_VERSION=3.0.4
+SALMON_VERSION=3.0.5
 SRC_ROOT=../../../src/c
 SALMON_ROOT=$SRC_ROOT/salmon
 SALMON_JNI_ROOT=$SRC_ROOT/salmon-jni

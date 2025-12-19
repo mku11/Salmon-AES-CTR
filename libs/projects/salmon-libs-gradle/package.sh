@@ -1,5 +1,5 @@
 #!/bin/bash
-SALMON_VERSION=3.0.4
+SALMON_VERSION=3.0.5
 CURRDIR=$(pwd)
 
 OUTPUT_ROOT=$CURRDIR/../../../output
