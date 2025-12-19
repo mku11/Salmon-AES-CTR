@@ -26,9 +26,9 @@ name: CI.BuildTest
 
 on:
   push:
-    branches: [ "main", "wip-3.0.4" ]
+    branches: [ "main", "wip-3.0.5" ]
   pull_request:
-    branches: [ "main", "wip-3.0.4" ]
+    branches: [ "main", "wip-3.0.5" ]
 
 env:
   WIN_TEST_DIR: C:\tmp\salmon\test
@@ -41,7 +41,7 @@ jobs:
       matrix:
         java_version: [11]
         os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
-    name: build.java${{ matrix.java_version }}. ${{ matrix.os }}
+    name: buildTest.java${{ matrix.java_version }}. ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -122,7 +122,7 @@ jobs:
       matrix:
         dotnet_version: [9.0.x]
         os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
-    name: build.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
+    name: buildTest.dotnet${{ matrix.dotnet_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -278,7 +278,7 @@ jobs:
       matrix:
         python_version: [3.11]
         os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
-    name: build.python${{ matrix.python_version }}.${{ matrix.os }}
+    name: buildTest.python${{ matrix.python_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
@@ -370,7 +370,7 @@ jobs:
       matrix:
         node_version: [21.x]
         os: [windows-latest,ubuntu-latest,ubuntu-24.04-arm,macos-15-intel,macos-latest]
-    name: build.js${{ matrix.node_version }}.${{ matrix.os }}
+    name: buildTest.js${{ matrix.node_version }}.${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read 
