@@ -1,3 +1,4 @@
+#!/bin/bash -x
 CURRDIR=$(pwd)
 
 cd ../../libs/projects/SalmonLibs.vscode
