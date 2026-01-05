@@ -53,7 +53,6 @@
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidHttpSyncClient.cs" Link="Android\FS\File\AndroidHttpSyncClient.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidFile.cs" Link="Android\FS\File\AndroidFile.cs" />
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidFileSystem.cs" Link="Android\FS\File\AndroidFileSystem.cs" />
-		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\File\AndroidSharedFileObserver.cs" Link="Android\FS\File\AndroidSharedFileObserver.cs" />
 
 		<Compile Include="..\..\..\src\dotnetandroid\simple-fs\Android\FS\Streams\AndroidFileStream.cs" Link="Android\FS\Streams\AndroidFileStream.cs" />
 
