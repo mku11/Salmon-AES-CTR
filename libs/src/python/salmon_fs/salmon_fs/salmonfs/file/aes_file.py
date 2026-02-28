@@ -455,6 +455,8 @@ class AesFile(IVirtualFile):
         Return the path of the real file stored
         """
         real_path: str = self.__real_file.get_display_path()
+        drive_real_path: str = self.get_drive().get_root().get_real_path()
+        real_path = realPath.replace(drive_real_path, "")
         return self.__get_path(real_path)
 
     def __get_path(self, real_path: str) -> str:

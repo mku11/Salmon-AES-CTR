@@ -573,6 +573,8 @@ public class AesFile implements IVirtualFile {
      */
     public String getPath() throws IOException {
         String realPath = realFile.getDisplayPath();
+		String driveRealPath = this.getDrive().getRoot().getRealPath();
+		realPath = realPath.replaceAll(driveRealPath, "");
         return getPath(realPath);
     }
 
