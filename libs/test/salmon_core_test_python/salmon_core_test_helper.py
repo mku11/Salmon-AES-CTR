@@ -127,7 +127,7 @@ class SalmonCoreTestHelper:
                 library_path = SalmonCoreTestHelper.prj_path \
                 + "/" + SalmonCoreTestHelper.gcc_path + "/x86_64" \
                 + "/" + SalmonCoreTestHelper.mac_path
-            elif arch == "aarch64":
+            elif arch == "aarch64" or arch == "arm64":
                 library_path = SalmonCoreTestHelper.prj_path \
                 + "/" + SalmonCoreTestHelper.gcc_path + "/aarch64" \
                 + "/" + SalmonCoreTestHelper.mac_path
