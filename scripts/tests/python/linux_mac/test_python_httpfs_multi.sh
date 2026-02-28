@@ -10,5 +10,6 @@ export ENC_THREADS=2
 cd ../../../../libs/test/salmon_fs_test_python
 
 python3 -m unittest -v salmon_fs_http_tests.SalmonFSHttpTests
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

@@ -8,5 +8,6 @@ cd ../../../../libs/projects/SalmonLibs.vscode
 npm run test -- salmon-native -t="salmon-native" AES_PROVIDER_TYPE=Aes ENC_THREADS=$ENC_THREADS
 
 npm run test -- salmon-native -t="salmon-native" AES_PROVIDER_TYPE=AesIntrinsics ENC_THREADS=$ENC_THREADS
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

@@ -6,5 +6,6 @@ export TEST_MODE=Local
 cd ../../../../libs/projects/salmon-libs-gradle
 
 ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests" -DTEST_DIR=$TEST_DIR -DTEST_MODE=$TEST_MODE  -i --rerun-tasks
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

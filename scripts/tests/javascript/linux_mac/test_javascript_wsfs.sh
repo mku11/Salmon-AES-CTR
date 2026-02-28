@@ -13,5 +13,6 @@ export ENC_THREADS=1
 cd ../../../../libs/projects/SalmonLibs.vscode
 
 npm run test -- salmon-fs -t="salmon-fs" TEST_DIR=$TS_TEST_DIR TEST_MODE=$TEST_MODE WS_SERVER_URL=$WS_SERVER_URL ENC_THREADS=$ENC_THREADS
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

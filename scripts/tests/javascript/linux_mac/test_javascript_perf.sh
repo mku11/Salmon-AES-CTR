@@ -7,5 +7,6 @@ export ENABLE_GPU=false
 cd ../../../../libs/projects/SalmonLibs.vscode
 
 npm run test -- salmon-core -t="salmon-core-perf" ENABLE_GPU=$ENABLE_GPU ENC_THREADS=$ENC_THREADS
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

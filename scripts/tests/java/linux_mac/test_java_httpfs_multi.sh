@@ -8,5 +8,6 @@ export TEST_MODE=Http
 cd ../../../../libs/projects/salmon-libs-gradle
 
 ./gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSHttpTests" -DTEST_DIR=$TEST_DIR -DTEST_MODE=$TEST_MODE -DHTTP_SERVER_URL=$HTTP_SERVER_URL -DENC_THREADS=$ENC_THREADS -i --rerun-tasks
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR

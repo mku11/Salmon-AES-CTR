@@ -6,5 +6,6 @@ export ENABLE_GPU=false
 export ENC_THREADS=1
 
 python -m unittest -v salmon_core_perf_tests.SalmonCorePerfTests
+if [ $? -ne 0 ]; then exit 1; fi
 
 cd $CURRDIR
