@@ -3,7 +3,7 @@ import platform
 
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 
-SALMON_VERSION="3.0.5"
+SALMON_VERSION="3.0.6"
 
 class Common:
     @staticmethod

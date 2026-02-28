@@ -1,7 +1,7 @@
 import { Platform, PlatformType, OSType } from '../lib/simple-io/platform/platform.js';
 import { NativeProxy } from '../lib/salmon-core/salmon/bridge/native_proxy.js';
 
-const SALMON_VERSION="3.0.5";
+const SALMON_VERSION="3.0.6";
 
 export class Common {	
     static async setNativeLibrary() {

@@ -6,7 +6,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR core encryption library'
-version '3.0.5'
+version '3.0.6'
 
 import org.gradle.internal.os.OperatingSystem
 OperatingSystem os = OperatingSystem.current();

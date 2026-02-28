@@ -1,5 +1,5 @@
 Salmon.Native.Android  
-version: 3.0.5
+version: 3.0.6
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   
