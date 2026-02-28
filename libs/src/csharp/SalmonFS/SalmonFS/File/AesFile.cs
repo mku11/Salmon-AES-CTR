@@ -78,7 +78,7 @@ public class AesFile : IVirtualFile
         {
             string realPath = RealFile.DisplayPath;
 			String driveRealPath = this.Drive.Root.RealPath;
-			realPath = realPath.ReplaceAll(driveRealPath, "");
+			realPath = realPath.Replace(driveRealPath, "");
             return GetPath(realPath);
         }
     }
