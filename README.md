@@ -123,12 +123,12 @@ For a showcase of the Salmon API for multiple platforms (JavaFx, WPF, Android, W
 
 #### Salmon API Reference Documentation ####
 The API ref documentation is now almost complete:  
-[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/java/html/)
- | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/csharp/html/namespaces.html)
- | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/javascript/html)
- | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/typescript/html)
- | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.3/python/html/namespaces.html)
+[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/java/html/)
+ | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/csharp/html/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/c/html/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/javascript/html)
+ | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/typescript/html)
+ | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.5/python/html/namespaces.html)
 
 
 ### Why another encryption library?  
