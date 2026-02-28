@@ -509,8 +509,6 @@ export class AesFile implements IVirtualFile {
      */
     public async getPath(): Promise<string> {
         let realPath: string = this.#realFile.getDisplayPath();
-		let driveRealPath: string = this.getDrive().getRoot().getRealPath();
-		realPath = realPath.replace(driveRealPath, "");
         return await this.#getPath(realPath);
     }
 
