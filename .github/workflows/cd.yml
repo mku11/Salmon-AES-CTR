@@ -443,7 +443,7 @@ jobs:
       with:
         python-version: ${{ matrix.python_version }}
         cache: 'pip'
-    - run: python -m pip install typeguard pycryptodome wrapt
+    - run: python -m pip install typeguard==4.4.4 pycryptodome wrapt
     
     # Package Python Libs 
     - if: runner.os == 'Linux'

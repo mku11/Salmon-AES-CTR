@@ -306,7 +306,7 @@ jobs:
       with:
         python-version: ${{ matrix.python_version }}
         cache: 'pip'
-    - run: python -m pip install typeguard pycryptodome wrapt
+    - run: python -m pip install typeguard==4.4.4 pycryptodome wrapt
     
     # Caches
     - name: Cache Gradle packages
