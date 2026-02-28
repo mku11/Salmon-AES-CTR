@@ -34,6 +34,8 @@ if(project.arch == 'aarch64') {
 	project.ext.set('libPath', '../../salmon-libs-gcc/lib/aarch64');
 }
 
+println "library path: ${project.libPath}"
+
 repositories {
     mavenCentral()
 }
