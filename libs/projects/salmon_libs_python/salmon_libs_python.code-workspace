@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../test/salmon_core_test_python"
+		},
+		{
+			"path": "../../test/salmon_fs_test_python"
+		},
+		{
+			"path": "../../test/salmon_native_test_python"
+		},
+		{
+			"path": "../../../scripts/tests/python"
+		}
+	],
+	"settings": {}
+}
