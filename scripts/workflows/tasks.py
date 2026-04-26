@@ -108,6 +108,7 @@ def run_test(cls: str, directory: str, env: dict):
 
     log("\n\n")
     log("cmd: " + str.join(" ", test_cmd))
+    log("env: " + str(env))
 
     if not directory.startswith("/"):
         directory = (Path(__file__).parent / directory).resolve()
