@@ -41,16 +41,22 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 @beartype
 class SalmonCorePerfTests(TestCase):
     TEST_PERF_SIZE = 32 * 1024 * 1024
-
     # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
     # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
-    SalmonCoreTestHelper.TEST_ENC_THREADS = 1
-    SalmonCoreTestHelper.TEST_DEC_THREADS = 1
+    threads = 1
+    enable_gpu = False
 
     @classmethod
     def setUpClass(cls) -> None:
         SalmonCoreTestHelper.initialize()
+        SalmonCorePerfTests.threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
+        SalmonCorePerfTests.enable_gpu: bool = bool(os.getenv("ENABLE_GPU")) if (os.getenv("ENABLE_GPU") == "1" or os.getenv("ENABLE_GPU") == "true") else False
+        SalmonCoreTestHelper.TEST_ENC_THREADS = SalmonCorePerfTests.threads
+        SalmonCoreTestHelper.TEST_DEC_THREADS = SalmonCorePerfTests.threads
+        
         print("Data Size: ", SalmonCorePerfTests.TEST_PERF_SIZE)
+        print("Threads:", SalmonCorePerfTests.threads)
+        print("Enable GPU:", SalmonCorePerfTests.enable_gpu)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -80,6 +86,9 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_perf_salmon_gpu(self):
+        if not SalmonCorePerfTests.enable_gpu:
+            print("Skipping GPU test\n")
+            return
         AesStream.set_aes_provider_type(ProviderType.AesGPU)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array_native(SalmonCorePerfTests.TEST_PERF_SIZE, False)
@@ -113,6 +122,9 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_stream_perf_salmon_aes_gpu(self):
+        if not SalmonCorePerfTests.enable_gpu:
+            print("Skipping GPU test\n")
+            return
         AesStream.set_aes_provider_type(ProviderType.AesGPU)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, False)
