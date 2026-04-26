@@ -189,7 +189,7 @@ public class SalmonFSHttpTests
 				filenames.Add(filename);
 			} catch (Exception ex) {}
         }
-        Assert.AreEqual(filenames.Length, 4);
+        Assert.AreEqual(filenames.Count, 4);
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME));
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME));
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME));

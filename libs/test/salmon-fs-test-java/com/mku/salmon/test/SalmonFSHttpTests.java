@@ -189,7 +189,7 @@ public class SalmonFSHttpTests {
 				filenames.add(filename);
 			} catch (Exception ex) {}
         }
-        assertEquals(filenames.length, 4);
+        assertEquals(filenames.size(), 4);
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME));
