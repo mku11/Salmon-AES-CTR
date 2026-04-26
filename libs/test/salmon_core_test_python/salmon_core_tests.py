@@ -24,7 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from beartype import beartype, TypeCheckError
+from beartype import beartype
+from beartype.roar import BeartypeCallHintParamViolation
 import time
 import traceback
 from unittest import TestCase
@@ -96,7 +97,7 @@ class SalmonCoreTests(TestCase):
 
         try:
             TextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES)
-        except (TypeCheckError, SecurityException) as ex:
+        except (BeartypeCallHintParamViolation, SecurityException) as ex:
             print("Caught:", ex)
             caught = True
 
@@ -108,7 +109,7 @@ class SalmonCoreTests(TestCase):
 
         try:
             TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None)
-        except (TypeCheckError, SecurityException) as ex:
+        except (BeartypeCallHintParamViolation, SecurityException) as ex:
             print("Caught:", ex)
             caught = True
         except Exception as e:
