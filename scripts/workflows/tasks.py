@@ -103,11 +103,10 @@ def start_ws_server(directory: str, env: dict):
     if result.returncode:
         exit(1)
 
-def run_test(cls: str, directory: str, env: dict):
-    test_cmd = ["python", "-m", "unittest", "-v", cls]
-
+def run_test(cmd: str, directory: str, env: dict):
     log("\n\n")
-    log("cmd: " + str.join(" ", test_cmd))
+    log("cmd: " + str.join(" ", cmd))
+    log("dir: " + directory)
     log("env: " + str(env))
 
     if not directory.startswith("/"):
@@ -117,7 +116,7 @@ def run_test(cls: str, directory: str, env: dict):
     my_env.update(env)
 
     result: subprocess.CompletedProcess[str] = subprocess.run(
-        test_cmd, capture_output=True, text=True, cwd=directory, env=my_env
+        cmd, capture_output=True, text=True, cwd=directory, env=my_env
     )
     log_result(result)
     if result.returncode:
