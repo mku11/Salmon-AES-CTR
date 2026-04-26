@@ -58,6 +58,9 @@ test {
 	afterTest { desc, result -> 
         logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
     }
+	reports {
+        html.required = false
+    }
 }
 
 tasks.withType(Test) {
