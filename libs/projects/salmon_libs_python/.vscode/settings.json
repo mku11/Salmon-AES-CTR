@@ -12,5 +12,7 @@
         ".",
         "-p",
         "*tests*.py"
-    ]
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }
