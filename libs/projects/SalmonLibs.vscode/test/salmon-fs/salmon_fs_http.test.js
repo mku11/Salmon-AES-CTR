@@ -52,7 +52,7 @@ describe('salmon-httpfs', () => {
         console.log("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         console.log("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_SMALL_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
