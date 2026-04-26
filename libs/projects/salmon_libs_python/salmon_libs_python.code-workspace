@@ -14,7 +14,36 @@
 		},
 		{
 			"path": "../../../scripts/tests/python"
+		},
+		{
+			"path": "../../src/python/salmon_core"
+		},
+		{
+			"path": "../../src/python/salmon_fs"
+		},
+		{
+			"path": "../../src/python/simple_fs"
+		},
+		{
+			"path": "../../src/python/simple_io"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.testing.pytestEnabled": false,
+		"python.testing.unittestEnabled": true,
+		"python-envs.pythonProjects": [
+			{
+				"path": ".",
+				"envManager": "ms-python.python:venv",
+				"packageManager": "ms-python.python:pip"
+			}
+		],
+		"python.testing.unittestArgs": [
+			"-v",
+			"-s",
+			".",
+			"-p",
+			"*tests*.py"
+		]
+	}
 }
