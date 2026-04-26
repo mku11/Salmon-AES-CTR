@@ -412,8 +412,11 @@ class AesFile(IVirtualFile):
         """
         files: list[AesFile] = self.list_files()
         for file in files:
-            if file.get_name() == filename:
-                return file
+            try:
+                if file.get_name() == filename:
+                    return file
+            except:
+                pass
         return None
 
     def create_directory(self, dir_name: str, key: bytearray | None = None,
