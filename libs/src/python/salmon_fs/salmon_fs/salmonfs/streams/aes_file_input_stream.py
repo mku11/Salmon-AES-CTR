@@ -32,7 +32,7 @@ import math
 import threading
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from typeguard import typechecked
+from beartype import beartype
 from wrapt import synchronized
 
 from simple_io.streams.random_access_stream import RandomAccessStream
@@ -45,7 +45,7 @@ from salmon_core.salmon.security_exception import SecurityException
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
-@typechecked
+@beartype
 class AesFileInputStream(BufferedIOWrapper):
     """!
     Implementation of a Python InputStream for seeking and reading a AesFile.

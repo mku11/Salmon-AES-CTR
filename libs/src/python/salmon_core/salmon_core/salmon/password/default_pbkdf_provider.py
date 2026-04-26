@@ -32,10 +32,10 @@ import hashlib
 
 from salmon_core.salmon.security_exception import SecurityException
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class DefaultPbkdfProvider(ISalmonPbkdfProvider):
     """!
     Provider for Pbkdf via Python default algorithm.

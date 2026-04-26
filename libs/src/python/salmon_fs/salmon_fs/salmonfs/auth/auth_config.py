@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 import sys
 
 from simple_fs.fs.file.ifile import IFile
@@ -43,12 +43,12 @@ from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from simple_io.convert.bit_converter import BitConverter
-from salmon.sequence.nonce_sequence import NonceSequence
+from salmon_core.salmon.sequence.nonce_sequence import NonceSequence
 from salmon_core.salmon.nonce import Nonce
-from salmon.sequence.sequence_exception import SequenceException
+from salmon_core.salmon.sequence.sequence_exception import SequenceException
 
 
-@typechecked
+@beartype
 class AuthConfig:
     """!
     Device authorization configuration. This represents the authorization that will be provided to the target device to allow writing operations for a virtual drive.

@@ -28,13 +28,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.generator import Generator
 
 
-@typechecked
+@beartype
 class DriveGenerator:
     """!
     Utility class generates internal secure properties for the drive.

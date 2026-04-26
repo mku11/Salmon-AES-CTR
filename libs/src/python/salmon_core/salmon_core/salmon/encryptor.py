@@ -32,7 +32,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 import sys
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.streams.memory_stream import MemoryStream
 from simple_io.streams.random_access_stream import RandomAccessStream
@@ -45,7 +45,7 @@ from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.security_exception import SecurityException
 
 
-@typechecked
+@beartype
 def _encrypt_shm(index: int, part_size: int, running_threads: int,
                  data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                  nonce: bytearray,
@@ -73,12 +73,11 @@ def _encrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
-@typechecked
+@beartype
 def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
                   key: bytearray, nonce: bytearray, enc_format: EncryptionFormat,
                   integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int,
-                  shm_cancel_name: str | None = None) -> (
-        int, int):
+                  shm_cancel_name: str | None = None) -> tuple[int, int]:
     """
     Do not use directly use Encryptor class instead.
     """
@@ -101,7 +100,6 @@ def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: 
         buff_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
         buff_size = buff_size // stream.get_align_size() * stream.get_align_size()
         buff: bytearray = bytearray(buff_size)
-        bytes_read: int
         while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
                 and total_chunk_bytes_read < count:
             if shm_cancel_data and shm_cancel_data[0]:
@@ -122,7 +120,7 @@ def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: 
     return start_pos, end_pos
 
 
-@typechecked
+@beartype
 class Encryptor:
     """!
     Utility class that encrypts byte arrays. 

@@ -27,13 +27,13 @@ SOFTWARE.
 """
 import ctypes
 
-from salmon.bridge.inative_proxy import INativeProxy
+from salmon_core.salmon.bridge.inative_proxy import INativeProxy
 
-from typeguard import typechecked
+from beartype import beartype
 import sys
 
 
-@typechecked
+@beartype
 class NativeProxy(INativeProxy):
     """!
     Proxy class for use with windows native library.

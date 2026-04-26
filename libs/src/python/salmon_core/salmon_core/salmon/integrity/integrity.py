@@ -29,16 +29,16 @@ SOFTWARE.
 import math
 from builtins import int
 
-from salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.security_exception import SecurityException
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class Integrity:
     """!
     Provide operations for calculating, storing, and verifying data integrity.

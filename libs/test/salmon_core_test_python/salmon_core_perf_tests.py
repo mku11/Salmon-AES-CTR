@@ -28,7 +28,7 @@ SOFTWARE.
 import os
 import sys
 from unittest import TestCase
-from typeguard import typechecked
+from beartype import beartype
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
@@ -38,7 +38,7 @@ from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
-@typechecked
+@beartype
 class SalmonCorePerfTests(TestCase):
     TEST_PERF_SIZE = 32 * 1024 * 1024
 

@@ -26,7 +26,7 @@ SOFTWARE.
 """
 
 from unittest import TestCase
-from typeguard import typechecked
+from beartype import beartype
 import os
 import sys
 
@@ -49,7 +49,7 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 
 
-@typechecked
+@beartype
 class SalmonFSHttpTests(TestCase):
     old_test_mode = None
 

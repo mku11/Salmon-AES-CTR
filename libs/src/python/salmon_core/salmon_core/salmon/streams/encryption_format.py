@@ -28,10 +28,10 @@ SOFTWARE.
 
 from enum import Enum
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class EncryptionFormat(Enum):
     """!
     Encryption Format

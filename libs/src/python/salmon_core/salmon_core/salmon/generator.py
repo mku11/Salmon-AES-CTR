@@ -27,10 +27,10 @@ SOFTWARE.
 
 import secrets
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class Generator:
     """!
     Utility class generates internal secure properties.

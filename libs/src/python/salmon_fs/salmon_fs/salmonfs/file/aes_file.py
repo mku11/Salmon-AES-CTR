@@ -30,7 +30,7 @@ SOFTWARE.
 
 from typing import Callable, Any
 import sys
-from typeguard import typechecked
+from beartype import beartype
 from wrapt import synchronized
 
 from simple_io.convert.bit_converter import BitConverter
@@ -50,7 +50,7 @@ from salmon_core.salmon.text.text_encryptor import TextEncryptor
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 
 
-@typechecked
+@beartype
 class AesFile(IVirtualFile):
     """!
     A virtual file backed by an encrypted file.

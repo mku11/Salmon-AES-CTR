@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from simple_io.streams.random_access_stream import RandomAccessStream
@@ -36,7 +36,7 @@ from simple_io.streams.memory_stream import MemoryStream
 from salmon_core.salmon.generator import Generator
 
 
-@typechecked
+@beartype
 class Header:
     """!
     Header embedded in the AesStream. Header contains nonce and other information for

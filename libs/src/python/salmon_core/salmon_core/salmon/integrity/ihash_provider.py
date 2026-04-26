@@ -27,10 +27,10 @@ SOFTWARE.
 """
 
 from abc import ABC, abstractmethod
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class IHashProvider(ABC):
     """!
     Interface for hashing calculators

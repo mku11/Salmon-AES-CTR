@@ -28,10 +28,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.streams.random_access_stream import RandomAccessStream
-from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
@@ -45,7 +45,7 @@ from salmon_core.salmon.transform.ictr_transformer import ICTRTransformer
 from salmon_core.salmon.transform.salmon_transformer_factory import TransformerFactory
 
 
-@typechecked
+@beartype
 class AesStream(RandomAccessStream):
     """!
     Stream wrapper provides AES256 encryption and decryption of stream.

@@ -44,10 +44,10 @@ from salmon_core.salmon.header import Header
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.security_exception import SecurityException
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 def _decrypt_shm(index: int, part_size: int, running_threads: int,
                  data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                  nonce: bytearray | None,
@@ -71,11 +71,11 @@ def _decrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
-@typechecked
+@beartype
 def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                   key: bytearray, nonce: bytearray | None,
                   enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
-                  chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
+                  chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> tuple[int, int]:
     """!
     Do not use directly use Decryptor class instead.
     """
@@ -98,7 +98,6 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
         buff_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
         buff_size = buff_size // stream.get_align_size() * stream.get_align_size()
         buff: bytearray = bytearray(buff_size)
-        bytes_read: int
         while (bytes_read := stream.read(buff, 0, min(len(buff), (
                 count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
             if shm_cancel_data and shm_cancel_data[0]:
@@ -120,7 +119,7 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
     return start_pos, end_pos
 
 
-@typechecked
+@beartype
 class Decryptor:
     """!
     Utility class that decrypts byte arrays.

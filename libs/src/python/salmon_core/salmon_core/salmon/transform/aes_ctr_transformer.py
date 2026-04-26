@@ -33,10 +33,10 @@ from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.transform.ictr_transformer import ICTRTransformer
 from salmon_core.salmon.security_exception import SecurityException
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class AESCTRTransformer(ICTRTransformer, ABC):
     """!
     Abstract class for AES256 transformer implementations.

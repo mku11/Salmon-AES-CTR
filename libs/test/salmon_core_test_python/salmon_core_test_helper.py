@@ -37,7 +37,7 @@ from unittest import TestCase
 
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
-from typeguard import typechecked
+from beartype import beartype
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
@@ -58,7 +58,7 @@ from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.transform.salmon_transformer_factory import TransformerFactory
 
 
-@typechecked
+@beartype
 class SalmonCoreTestHelper:
     TEST_ENC_BUFFER_SIZE = 512 * 1024
     TEST_ENC_THREADS = 1
@@ -224,7 +224,6 @@ class SalmonCoreTestHelper:
         if buffer_size == 0:  # use the internal buffer size of the to copy
             ins.copy_to(writer)
         else:  # use our manual buffer to test
-            bytes_read: int = 0
             buffer = bytearray(buffer_size)
             while (bytes_read := ins.read(buffer, 0, len(buffer))) > 0:
                 writer.write(buffer, 0, bytes_read)
@@ -246,7 +245,6 @@ class SalmonCoreTestHelper:
         if buffer_size == 0:  # use the internal buffersize of the to copy
             reader.copy_to(outs)
         else:  # use our manual buffer to test
-            bytes_read: int = 0
             buffer = bytearray(buffer_size)
             while (bytes_read := reader.read(buffer, 0, len(buffer))) > 0:
                 outs.write(buffer, 0, bytes_read)

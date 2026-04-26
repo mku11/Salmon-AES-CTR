@@ -13,7 +13,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  'typeguard >= 4.1.5',
+  'beartype >= 0.22.9',
   'pycryptodome >= 3.19.0',
   'wrapt >= 1.16.0',
 ]

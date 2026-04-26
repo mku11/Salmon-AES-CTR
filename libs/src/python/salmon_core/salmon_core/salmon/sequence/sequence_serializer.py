@@ -31,15 +31,15 @@ SOFTWARE.
 import xml.etree.ElementTree as Et
 from xml.dom import minidom
 import sys
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.encode.base64_utils import Base64Utils
-from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
-from salmon.sequence.nonce_sequence import NonceSequence
-from salmon.sequence.sequence_exception import SequenceException
+from salmon_core.salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
+from salmon_core.salmon.sequence.nonce_sequence import NonceSequence
+from salmon_core.salmon.sequence.sequence_exception import SequenceException
 
 
-@typechecked
+@beartype
 class SequenceSerializer(INonceSequenceSerializer):
     """!
     Serializes sequences for all the drives the device is authorized.

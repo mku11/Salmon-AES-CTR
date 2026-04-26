@@ -27,10 +27,9 @@ SOFTWARE.
 """
 
 import os
-import platform
 import sys
 from unittest import TestCase
-from typeguard import typechecked
+from beartype import beartype
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
@@ -43,7 +42,7 @@ from salmon_core.salmon.encryptor import Encryptor
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
-@typechecked
+@beartype
 class SalmonNativeTests(TestCase):
     ENC_THREADS = 1
     DEC_THREADS = 1

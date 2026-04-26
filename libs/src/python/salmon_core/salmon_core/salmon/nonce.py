@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.generator import Generator
@@ -34,7 +34,7 @@ from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.security_exception import SecurityException
 
 
-@typechecked
+@beartype
 class Nonce:
     """!
     Utility provides nonce operations.

@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from salmon_core.salmon.password.ipbkdf_provider import ISalmonPbkdfProvider
 from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
@@ -37,7 +37,7 @@ from salmon_core.salmon.password.default_pbkdf_provider import DefaultPbkdfProvi
 from salmon_core.salmon.password.pbkdf_factory import PbkdfFactory
 
 
-@typechecked
+@beartype
 class Password:
     """!
     Generates security keys based on text passwords.

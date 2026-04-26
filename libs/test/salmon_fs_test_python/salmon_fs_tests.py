@@ -27,7 +27,6 @@ SOFTWARE.
 
 import hashlib
 from unittest import TestCase
-from typeguard import typechecked
 import os
 import sys
 
@@ -52,8 +51,9 @@ from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 
+from beartype import beartype
 
-@typechecked
+@beartype
 class SalmonFSTests(TestCase):
     @classmethod
     def setUpClass(cls):

@@ -32,12 +32,12 @@ from enum import Enum
 from typing import Callable, Any
 from collections import OrderedDict
 import sys
-from typeguard import typechecked
+from beartype import beartype
 
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
-@typechecked
+@beartype
 class AesFileSearcher:
     """!
     Searches for files in a AesDrive by filename.

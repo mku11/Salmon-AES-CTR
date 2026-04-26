@@ -29,7 +29,7 @@ SOFTWARE.
 
 import os
 import platform
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_fs.fs.file.file import File
 from simple_fs.fs.file.ifile import IFile
@@ -38,7 +38,7 @@ from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
-@typechecked
+@beartype
 class HttpDrive(AesDrive):
     """!
     Encrypted virtual drive implementation for HTTP files.

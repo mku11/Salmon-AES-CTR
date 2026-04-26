@@ -29,17 +29,17 @@ SOFTWARE.
 
 import os
 import platform
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_fs.fs.file.file import File
 from simple_fs.fs.file.ifile import IFile
 from simple_fs.fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from salmon_fs.salmonfs.file.aes_file import AesFile
-from salmon.sequence.inonce_sequencer import INonceSequencer
+from salmon_core.salmon.sequence.inonce_sequencer import INonceSequencer
 
 
-@typechecked
+@beartype
 class WSDrive(AesDrive):
     """!
     Encrypted virtual drive implementation for web service files.

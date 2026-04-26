@@ -33,10 +33,10 @@ from simple_io.convert.bit_converter import BitConverter
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_core.salmon.transform.aes_ctr_transformer import AESCTRTransformer
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class AesDefaultTransformer(AESCTRTransformer):
     """!
     Salmon AES transformer based on the cryptodome routines.

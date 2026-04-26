@@ -30,7 +30,7 @@ SOFTWARE.
 
 from abc import ABC
 import sys
-from typeguard import typechecked
+from beartype import beartype
 from typing import Type
 
 from simple_io.convert.bit_converter import BitConverter
@@ -39,8 +39,8 @@ from simple_fs.fs.drive.virtual_drive import VirtualDrive
 from simple_fs.fs.file.ivirtual_file import IVirtualFile
 from simple_io.streams.memory_stream import MemoryStream
 from simple_io.streams.random_access_stream import RandomAccessStream
-from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
-from salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
@@ -52,11 +52,11 @@ from salmon_fs.salmonfs.auth.auth_exception import AuthException
 from salmon_fs.salmonfs.drive.drive_config import DriveConfig
 from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 from salmon_fs.salmonfs.drive.drive_key import DriveKey
-from salmon.sequence.inonce_sequencer import INonceSequencer
-from salmon.sequence.nonce_sequence import NonceSequence
+from salmon_core.salmon.sequence.inonce_sequencer import INonceSequencer
+from salmon_core.salmon.sequence.nonce_sequence import NonceSequence
 
 
-@typechecked
+@beartype
 class AesDrive(VirtualDrive, ABC):
     """!
     Abstract virtual drive that can be extended for use with

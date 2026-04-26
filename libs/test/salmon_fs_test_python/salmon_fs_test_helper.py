@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+from typing import Type
 
 __license__ = """
 MIT License
@@ -25,7 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import hashlib
 import time
 import sys
 import os
@@ -33,8 +33,6 @@ from enum import Enum
 from unittest import TestCase
 import random
 from io import BufferedIOBase
-
-from typeguard import typechecked
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_io')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/simple_fs')
@@ -62,25 +60,24 @@ from simple_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon_fs.salmonfs.streams.aes_file_input_stream import AesFileInputStream
-from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
+from salmon_core.salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmonfs.sequence.file_sequencer import FileSequencer
-from salmon.sequence.sequence_serializer import SequenceSerializer
+from salmon_core.salmon.sequence.sequence_serializer import SequenceSerializer
 from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
 from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
 from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher
 from salmon_fs.salmonfs.auth.auth_config import AuthConfig
 
 from salmon_core_test_helper import SalmonCoreTestHelper
+from beartype import beartype
 
-
-@typechecked
+@beartype
 class TestMode(Enum):
     Local = 0
     Http = 2
     WebService = 3
 
-
-@typechecked
+@beartype
 class SalmonFSTestHelper:
     curr_test_mode = None
     drive_class_type = None
@@ -420,7 +417,7 @@ class SalmonFSTestHelper:
             SalmonFSTestHelper.testCase.assertEqual(hash_pre_import, hash_post_export)
 
     @staticmethod
-    def open_drive(vault_dir: IFile, drive_class_type: type, password: str,
+    def open_drive(vault_dir: IFile, drive_class_type: Type, password: str,
                    sequencer: FileSequencer | None = None):
         if drive_class_type == WSDrive:
             # use the remote service instead
@@ -429,7 +426,7 @@ class SalmonFSTestHelper:
             return AesDrive.open_drive(vault_dir, drive_class_type, password, sequencer)
 
     @staticmethod
-    def create_drive(vault_dir: IFile, drive_class_type: type, password: str,
+    def create_drive(vault_dir: IFile, drive_class_type: Type, password: str,
                      sequencer: FileSequencer | None = None):
         if drive_class_type == WSDrive:
             return WSDrive.create(vault_dir, password, sequencer)
@@ -623,7 +620,7 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertNotEqual(nonce_a2, nonce_b1)
         SalmonFSTestHelper.testCase.assertEqual(nonce_b1, nonce_b2 - 2)
 
-    @typechecked
+    @beartype
     class TestFileSequencer(FileSequencer):
         def __init__(self, sequence_file: IFile, serializer: INonceSequenceSerializer, test_max_nonce: bytearray,
                      offset: int):
@@ -644,8 +641,9 @@ class SalmonFSTestHelper:
                        should_import: bool):
         import_success: bool
         try:
+            serializer: INonceSequenceSerializer = SequenceSerializer()
             sequencer: FileSequencer = SalmonFSTestHelper.TestFileSequencer(seq_file,
-                                                                            SequenceSerializer(),
+                                                                            serializer,
                                                                             test_max_nonce, offset)
             try:
                 drive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
@@ -692,7 +690,6 @@ class SalmonFSTestHelper:
         read_file: IFile = v_dir.get_child(filename)
         rstream: RandomAccessStream = read_file.get_input_stream()
         read_buff = bytearray(buff_size)
-        bytes_read = 0
         lstream = MemoryStream()
         while (bytes_read := rstream.read(read_buff, 0, len(read_buff))) > 0:
             lstream.write(read_buff, 0, bytes_read)
@@ -840,7 +837,6 @@ class SalmonFSTestHelper:
     @staticmethod
     def copy_bufferedio_stream(src: AesFileInputStream, dest: MemoryStream):
         buffer_size: int = RandomAccessStream.DEFAULT_BUFFER_SIZE
-        bytes_read: int
         buffer: bytearray = bytearray(buffer_size)
         while (bytes_read := src.readinto(memoryview(buffer)[0: buffer_size])) > 0:
             dest.write(buffer, 0, bytes_read)
@@ -945,7 +941,7 @@ class SalmonFSTestHelper:
         for file in files:
             hash_pre_export.append(SalmonFSTestHelper.get_checksum(file))
 
-        def print_export_progress(task_progress: AesFileCommander.AesFileTaskProgress) -> any:
+        def print_export_progress(task_progress: AesFileCommander.AesFileTaskProgress) -> Any:
             if not SalmonFSTestHelper.ENABLE_FILE_PROGRESS:
                 return
             try:

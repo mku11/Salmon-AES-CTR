@@ -29,10 +29,10 @@ SOFTWARE.
 """
 
 from enum import Enum
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class NonceSequence:
     """!
     Represents a nonce sequence for a specific drive and device.
@@ -80,7 +80,7 @@ class NonceSequence:
         self.__maxNonce = max_nonce
         self.__status = status
 
-    @typechecked
+    @beartype
     class Status(Enum):
         """!
         Sequencer status.

@@ -30,10 +30,10 @@ from simple_io.encode.base64_utils import Base64Utils
 from salmon_core.salmon.decryptor import Decryptor
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class TextDecryptor:
     """!
     Utility class that decrypts text strings.

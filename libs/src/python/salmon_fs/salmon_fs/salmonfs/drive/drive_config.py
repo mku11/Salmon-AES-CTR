@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from simple_fs.fs.file.ifile import IFile
@@ -36,7 +36,7 @@ from salmon_core.salmon.generator import Generator
 from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 
 
-@typechecked
+@beartype
 class DriveConfig:
     """!
     Configuration file for a drive. The properties are encrypted in the file

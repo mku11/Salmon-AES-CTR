@@ -30,10 +30,10 @@ SOFTWARE.
 from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
 from salmon_core.salmon.security_exception import SecurityException
 from abc import ABC, abstractmethod
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class ISalmonPbkdfProvider(ABC):
     """!
     Provider interface for key derivation text passwords.

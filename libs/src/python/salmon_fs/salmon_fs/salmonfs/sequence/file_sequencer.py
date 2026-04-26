@@ -27,7 +27,7 @@ SOFTWARE.
 """
 
 from io import BufferedIOBase
-from typeguard import typechecked
+from beartype import beartype
 from wrapt import synchronized
 import sys
 
@@ -38,13 +38,13 @@ from simple_io.streams.memory_stream import MemoryStream
 from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.nonce import Nonce
-from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
-from salmon.sequence.inonce_sequencer import INonceSequencer
-from salmon.sequence.nonce_sequence import NonceSequence
-from salmon.sequence.sequence_exception import SequenceException
+from salmon_core.salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
+from salmon_core.salmon.sequence.inonce_sequencer import INonceSequencer
+from salmon_core.salmon.sequence.nonce_sequence import NonceSequence
+from salmon_core.salmon.sequence.sequence_exception import SequenceException
 
 
-@typechecked
+@beartype
 class FileSequencer(INonceSequencer):
     """!
     Nonce generator backed by a file.
@@ -172,7 +172,6 @@ class FileSequencer(INonceSequencer):
             stream = BufferedIOWrapper(self.__sequenceFile.get_input_stream())
             output_stream = MemoryStream()
             buffer: bytearray = bytearray(32768)
-            bytes_read: int
             while (bytes_read := stream.readinto(buffer)) > 0:
                 output_stream.write(buffer, 0, bytes_read)
         except IOError as ex:
@@ -257,7 +256,6 @@ class FileSequencer(INonceSequencer):
             output_stream = self.__sequenceFile.get_output_stream()
             input_stream = MemoryStream(bytearray(contents.strip().encode('utf-8')))
             buffer: bytearray = bytearray(32768)
-            bytes_read: int
             while (bytes_read := input_stream.read(buffer, 0, len(buffer))) > 0:
                 output_stream.write(buffer, 0, bytes_read)
 

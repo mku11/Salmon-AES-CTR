@@ -28,14 +28,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 import sys
 
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from simple_fs.fs.drive.utils.file_utils import FileUtils
 
 
-@typechecked
+@beartype
 class AesFileComparators:
     """!
     Useful comparators for AesFile.

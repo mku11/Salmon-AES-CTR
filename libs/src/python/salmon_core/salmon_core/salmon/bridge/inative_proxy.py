@@ -27,10 +27,10 @@ SOFTWARE.
 """
 
 from abc import ABC, abstractmethod
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class INativeProxy(ABC):
     """!
     Interface to native libraries that provide AES-256 encryption in CTR mode.

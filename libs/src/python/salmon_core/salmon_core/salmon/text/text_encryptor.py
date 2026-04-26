@@ -29,10 +29,10 @@ SOFTWARE.
 from simple_io.encode.base64_utils import Base64Utils
 from salmon_core.salmon.encryptor import Encryptor
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class TextEncryptor:
     """!
     Utility class that encrypts text strings.

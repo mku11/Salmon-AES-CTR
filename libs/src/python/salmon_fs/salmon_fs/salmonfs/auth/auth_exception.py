@@ -26,10 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class AuthException(Exception):
     """!
     Thrown when there is a failure in the nonce sequencer.

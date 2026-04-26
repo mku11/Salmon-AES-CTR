@@ -28,10 +28,10 @@ SOFTWARE.
 
 from abc import ABC, abstractmethod
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class ICTRTransformer(ABC):
     """!
     Interface for the encryption/decryption transformers.

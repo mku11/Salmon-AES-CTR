@@ -30,12 +30,12 @@ from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_core.salmon.transform.ictr_transformer import ICTRTransformer
 from salmon_core.salmon.transform.aes_default_transformer import AesDefaultTransformer
-from typeguard import typechecked
+from beartype import beartype
 
 from salmon_core.salmon.transform.aes_native_transformer import AesNativeTransformer
 
 
-@typechecked
+@beartype
 class TransformerFactory:
     """!
     Creates an AES transformer object.

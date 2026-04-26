@@ -30,7 +30,7 @@ SOFTWARE.
 
 from concurrent.futures import CancelledError
 from typing import Callable, Any
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_fs.fs.file.ifile import IFile
 from salmon_fs.salmonfs.file.aes_file import IVirtualFile
@@ -41,14 +41,14 @@ from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
 from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher
 
 
-@typechecked
+@beartype
 class AesFileCommander:
     """!
     Facade class for batch file operations.
     """
 
     def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1,
-                 multi_cpu: False = False):
+                 multi_cpu: bool = False):
         """!
         Instantiate a new file commander object.
         
@@ -424,7 +424,7 @@ class AesFileCommander:
         """
         self.__fileSearcher.stop()
 
-    def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> [AesFile]:
+    def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> list[AesFile]:
         """!
         Search
 

@@ -29,12 +29,12 @@ SOFTWARE.
 """
 
 from abc import ABC
-from typeguard import typechecked
+from beartype import beartype
 
-from salmon.sequence.nonce_sequence import NonceSequence
+from salmon_core.salmon.sequence.nonce_sequence import NonceSequence
 
 
-@typechecked
+@beartype
 class INonceSequenceSerializer(ABC):
     """!
     Serializes/Deserializes nonce sequences.

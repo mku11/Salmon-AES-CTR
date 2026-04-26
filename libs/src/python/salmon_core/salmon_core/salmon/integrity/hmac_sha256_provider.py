@@ -29,13 +29,13 @@ SOFTWARE.
 import hashlib
 import hmac
 
-from salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class HmacSHA256Provider(IHashProvider):
     """!
     Provides Python HMAC256 hashing.

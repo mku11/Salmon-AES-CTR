@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typeguard import typechecked, TypeCheckError
+from beartype import beartype, TypeCheckError
 import time
 import traceback
 from unittest import TestCase
@@ -49,7 +49,7 @@ from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.integrity.integrity import Integrity
 
 
-@typechecked
+@beartype
 class SalmonCoreTests(TestCase):
 
     @classmethod

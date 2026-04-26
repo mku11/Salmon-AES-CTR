@@ -26,16 +26,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from salmon.bridge.inative_proxy import INativeProxy
+from salmon_core.salmon.bridge.inative_proxy import INativeProxy
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core.salmon.transform.aes_ctr_transformer import AESCTRTransformer
 from salmon_core.salmon.security_exception import SecurityException
 
-from typeguard import typechecked
+from beartype import beartype
 from threading import RLock
 
 
-@typechecked
+@beartype
 class AesNativeTransformer(AESCTRTransformer):
     """!
     Generic Native AES transformer. Extend this with your specific

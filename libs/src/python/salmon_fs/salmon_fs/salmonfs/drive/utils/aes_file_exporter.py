@@ -36,7 +36,7 @@ from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 from typing import Any, Callable
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from simple_fs.fs.file.ifile import IFile
@@ -44,7 +44,7 @@ from simple_io.streams.random_access_stream import RandomAccessStream
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
-@typechecked
+@beartype
 def _export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
                  real_file_to_export: IFile,
                  real_file: IFile,
@@ -79,7 +79,7 @@ def _export_file(index: int, final_part_size: int, final_running_threads: int, f
             shm_total_bytes_read.close()
 
 
-@typechecked
+@beartype
 def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, count: int,
                       total_bytes_written: memoryview | None, buffer_size: int,
                       shm_cancel_name: str | None = None,
@@ -110,8 +110,6 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
 
         n_buffer_size = buffer_size // source_stream.get_align_size() * source_stream.get_align_size()
         v_bytes: bytearray = bytearray(n_buffer_size)
-        bytes_read: int
-
         while (bytes_read := source_stream.read(v_bytes, 0,
                                                 min(len(v_bytes), count - total_part_bytes_written))) > 0 \
                 and total_part_bytes_written < count:
@@ -137,7 +135,7 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
             shm_cancel.close()
 
 
-@typechecked
+@beartype
 class AesFileExporter:
     """!
     Exports files from drives

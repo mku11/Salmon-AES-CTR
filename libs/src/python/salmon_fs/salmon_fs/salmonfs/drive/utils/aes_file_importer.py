@@ -36,7 +36,7 @@ from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 from typing import Any, Callable
-from typeguard import typechecked
+from beartype import beartype
 
 from simple_io.convert.bit_converter import BitConverter
 from simple_fs.fs.file.ifile import IFile
@@ -45,7 +45,7 @@ from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
-@typechecked
+@beartype
 def _import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
                  file_to_import: IFile,
                  salmon_real_file: IFile,
@@ -84,7 +84,7 @@ def _import_file(index: int, final_part_size: int, final_running_threads: int, f
             shm_total_bytes_read.close()
 
 
-@typechecked
+@beartype
 def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, count: int,
                       total_bytes_read: memoryview | None, buffer_size: int,
                       shm_cancel_name: str | None = None,
@@ -114,8 +114,6 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
 
         n_buffer_size = buffer_size // target_stream.get_align_size() * target_stream.get_align_size()
         v_bytes: bytearray = bytearray(n_buffer_size)
-        bytes_read: int
-
         while (bytes_read := source_stream.read(
                 v_bytes, 0,
                 min(len(v_bytes), count - total_part_bytes_read))) > 0 and total_part_bytes_read < count:
@@ -142,7 +140,7 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
             shm_cancel.close()
 
 
-@typechecked
+@beartype
 class AesFileImporter:
     """!
     Import files into drives.

@@ -29,10 +29,10 @@ SOFTWARE.
 """
 
 from enum import Enum
-from typeguard import typechecked
+from beartype import beartype
 
 
-@typechecked
+@beartype
 class PbkdfType(Enum):
     """!
     Pbkdf implementation type.
