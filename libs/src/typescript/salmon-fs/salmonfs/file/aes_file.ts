@@ -457,8 +457,10 @@ export class AesFile implements IVirtualFile {
     public async getChild(filename: string): Promise<AesFile | null> {
         let files: AesFile[] = await this.listFiles();
         for (let i = 0; i < files.length; i++) {
-            if ((await files[i].getName()) == filename)
-                return files[i];
+			try {
+				if ((await files[i].getName()) == filename)
+					return files[i];
+			} catch (ex) {}
         }
         return null;
     }

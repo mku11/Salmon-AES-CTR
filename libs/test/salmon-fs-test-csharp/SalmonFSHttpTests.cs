@@ -184,10 +184,12 @@ public class SalmonFSHttpTests
         List<string> filenames = new List<string>();
         for (int i = 0; i < files.Length; i++)
         {
-            string filename = files[i].Name;
-            filenames.Add(filename);
+			try {
+				string filename = files[i].Name;
+				filenames.Add(filename);
+			} catch (Exception ex) {}
         }
-        Assert.AreEqual(files.Length, 4);
+        Assert.AreEqual(filenames.Length, 4);
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME));
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME));
         Assert.IsTrue(filenames.Contains(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME));

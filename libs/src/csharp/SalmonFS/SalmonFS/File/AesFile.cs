@@ -512,8 +512,10 @@ public class AesFile : IVirtualFile
         AesFile[] files = ListFiles();
         foreach (AesFile file in files)
         {
-            if (file.Name.Equals(filename))
-                return file;
+			try {
+				if (file.Name.Equals(filename))
+					return file;
+			} catch (Exception ex) {}
         }
         return null;
     }

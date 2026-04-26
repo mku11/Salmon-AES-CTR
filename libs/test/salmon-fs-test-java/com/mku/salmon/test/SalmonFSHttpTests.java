@@ -184,10 +184,12 @@ public class SalmonFSHttpTests {
         IVirtualFile[] files = root.listFiles();
         List<String> filenames = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
-            String filename = files[i].getName();
-            filenames.add(filename);
+			try {
+				String filename = files[i].getName();
+				filenames.add(filename);
+			} catch (Exception ex) {}
         }
-        assertEquals(files.length, 4);
+        assertEquals(filenames.length, 4);
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME));

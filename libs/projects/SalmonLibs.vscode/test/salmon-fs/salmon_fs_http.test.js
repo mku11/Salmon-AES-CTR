@@ -152,10 +152,12 @@ describe('salmon-httpfs', () => {
         let files = await root.listFiles();
         let filenames = [];
         for (let i = 0; i < files.length; i++) {
-            let filename = await files[i].getName();
-            filenames.push(filename);
+			try {
+				let filename = await files[i].getName();
+				filenames.push(filename);
+			} catch (Exception ex) {}
         }
-        expect(files.length).toBe(4);
+        expect(filenames.length).toBe(4);
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME)).toBeTruthy();

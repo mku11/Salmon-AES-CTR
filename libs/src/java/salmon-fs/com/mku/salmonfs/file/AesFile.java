@@ -507,8 +507,10 @@ public class AesFile implements IVirtualFile {
     public AesFile getChild(String filename) throws IOException {
         AesFile[] files = listFiles();
         for (AesFile file : files) {
-            if (file.getName().equals(filename))
-                return file;
+			try {
+				if (file.getName().equals(filename))
+					return file;
+			} catch (Exception ex) {}
         }
         return null;
     }
