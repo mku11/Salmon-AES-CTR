@@ -88,3 +88,5 @@ best
 
 libs/deps/OpenCL*
 samples/libs/*
+
+*egg-info
