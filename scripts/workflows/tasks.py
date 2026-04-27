@@ -39,14 +39,12 @@ def log_result(result: subprocess.CompletedProcess[str]):
         log("Error: '" + result.stderr.strip() + "'")
 
 
-def setup_ws_server(directory: str, env: dict):
-    ws_setup_cmd = ["/bin/bash", "./setup_webfs.sh"]
-
+def setup_ws_server(cmd: list[str], directory: str, env: dict):
     log("")
-    log("cmd: " + str.join(" ", ws_setup_cmd))
+    log("cmd: " + str.join(" ", cmd))
 
-    if process_started(ws_setup_cmd[1]):
-        log(f"process: {ws_setup_cmd} has already started")
+    if process_started(cmd[1]):
+        log(f"process: {cmd} has already started")
         return
 
     if not directory.startswith("/"):
@@ -57,7 +55,7 @@ def setup_ws_server(directory: str, env: dict):
     my_env.update(env)
 
     result = subprocess.run(
-        ws_setup_cmd,
+        cmd,
         capture_output=True,
         text=True,
         cwd=directory,
@@ -68,14 +66,14 @@ def setup_ws_server(directory: str, env: dict):
         exit(1)
 
 
-def start_ws_server(directory: str, env: dict):
-    ws_server_cmd = ["/bin/bash", "./start_ws_server.sh"]
-
-    log("")
-    log("cmd: " + str.join(" ", ws_server_cmd))
+def start_ws_server(cmd: list[str], directory: str, env: dict):
+    log("\n\n")
+    log("cmd: " + str.join(" ", cmd))
+    log("dir: " + directory)
+    log("env: " + str(env))
 
     if process_started("webfs-service.war"):
-        log(f"process: {ws_server_cmd} has already started")
+        log(f"process: {cmd} has already started")
         return
 
     if not directory.startswith("/"):
@@ -86,7 +84,7 @@ def start_ws_server(directory: str, env: dict):
     my_env.update(env)
 
     result = subprocess.run(
-        ws_server_cmd,
+        cmd,
         capture_output=True,
         text=True,
         cwd=directory,
@@ -96,14 +94,7 @@ def start_ws_server(directory: str, env: dict):
     if result.returncode:
         exit(1)
 
-    log("sleep until server settles")
-    time.sleep(10)
-
-    log("\n")
-    if result.returncode:
-        exit(1)
-
-def run_test(cmd: str, directory: str, env: dict):
+def run_test(cmd: list[str], directory: str, env: dict):
     log("\n\n")
     log("cmd: " + str.join(" ", cmd))
     log("dir: " + directory)

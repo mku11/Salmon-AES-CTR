@@ -87,6 +87,26 @@ def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
         return ["npm","run","test", "--", suite, f"-t=\"{cl}\""] + [f"{k}={v}" for k, v in env.items()]
 
 
+def sched_lvl0(lang):
+    group0 = []
+    # lvl0 web service
+    # cmd = ["/bin/bash", "./setup_webfs.sh"]
+    # group0.append(
+        # lvl0_webfsSetup := tiger.delay(
+            # tasks.setup_ws_server,
+            # args=(cmd,"../misc", env),
+        # )
+    # )
+    
+    cmd = ["/bin/bash", "./start_ws_server.sh"]
+    group0.append(
+        lvl0_webfsStart := tiger.delay(
+            tasks.start_ws_server,
+            args=(cmd,"../misc", env),
+        )
+    )
+
+
 def sched_lvl1(lang: str, gpu=False):
     global lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2
     global lvl1_aesGpu1, lvl1_aesGpu2
