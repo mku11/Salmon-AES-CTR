@@ -58,7 +58,7 @@ test_suite = {
     ("JAVA", "NATIVE"): ":salmon-native:test",
     ("JAVA", "CORE"): ":salmon-core:test",
     ("JAVA", "FS"): ":salmon-fs:test",
-    ("JAVA", "PERF"): ":salmon-core:perf",
+    ("JAVA", "PERF"): ":salmon-core:test",
 
     ("JS", "NATIVE"): "salmon-native",
     ("JS", "CORE"): "salmon-core",
