@@ -9,10 +9,12 @@ log_file = True
 log_console = True
 log_file_dir = "/tmp"
 log_file_name = "salmon-ci-log"
+err_file_name = "salmon-ci-err"
 log_file_ext = "txt"
 
-def get_log_file_path(name):
-    return f"{log_file_dir}/{log_file_name}_{name}.{log_file_ext}"
+def get_log_file_path(name, error: bool = False):
+    file_name = log_file_name if not error else err_file_name
+    return f"{log_file_dir}/{file_name}_{name}.{log_file_ext}"
 
 def process_started(name):
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
@@ -27,11 +29,17 @@ def process_started(name):
     return False
 
 
-def log(text: str, name):
+def err(text: str, name: str):
+    log(text, name, True)
+
+def log(text: str, name: str, error: bool = False):
     if log_console:
-        print(text)
+        if error:
+            print(text, file=sys.stderr)
+        else:
+            print(text)
     if log_file:
-        file_path = get_log_file_path(name)
+        file_path = get_log_file_path(name, error)
         with open(file_path, "a") as wfile:
             wfile.write(text + "\n")
             wfile.flush()
@@ -40,8 +48,8 @@ def log(text: str, name):
 def log_result(result: subprocess.CompletedProcess[str], name: str):
     log("Return code: " + str(result.returncode), name)
     log(result.stdout.strip(), name)
-    if result.stderr:
-        log("Error: '" + result.stderr.strip() + "'", name)
+    if result.returncode and result.stderr:
+        err("Error: '" + result.stderr.strip() + "'", name)
 
 
 def setup_ws_server(cmd: list[str], directory: str, env: dict):
@@ -99,7 +107,7 @@ def start_ws_server(cmd: list[str], directory: str, env: dict):
         exit(1)
 
     log("sleep until server settles", name)
-    time.sleep(20)
+    time.sleep(10)
     
     log("server started", name)
     

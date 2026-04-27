@@ -6,12 +6,19 @@ tiger = TaskTiger()
 LNG = None
 
 test_cls = {
+    # example for specific unit testing
+    # ("PYTHON", "NATIVE"): "salmon_native_tests.SalmonNativeTests.test_encrypt_and_decrypt_native_text_compatible",
+    # ("PYTHON", "CORE"): "salmon_core_tests.SalmonCoreTests.test_shouldEncryptAndDecryptText",
+    # ("PYTHON", "FS"): "salmon_fs_tests.SalmonFSTests.test_import_and_search_files",
+    # ("PYTHON", "FSHTTP"): "salmon_fs_http_tests.SalmonFSHttpTests.test_shouldReadFromFileTiny",
+    # ("PYTHON", "PERF"): "salmon_core_perf_tests.SalmonCorePerfTests",
+    
     ("PYTHON", "NATIVE"): "salmon_native_tests.SalmonNativeTests",
     ("PYTHON", "CORE"): "salmon_core_tests.SalmonCoreTests",
     ("PYTHON", "FS"): "salmon_fs_tests.SalmonFSTests",
     ("PYTHON", "FSHTTP"): "salmon_fs_http_tests.SalmonFSHttpTests",
     ("PYTHON", "PERF"): "salmon_core_perf_tests.SalmonCorePerfTests",
-    
+        
     ("JAVA", "NATIVE"): "com.mku.salmon.test.SalmonNativeTests",
     ("JAVA", "CORE"): "com.mku.salmon.test.SalmonCoreTests",
     ("JAVA", "FS"): "com.mku.salmon.test.SalmonFSTests",
