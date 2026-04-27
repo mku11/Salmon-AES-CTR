@@ -7,8 +7,12 @@ from pathlib import Path
 
 log_file = True
 log_console = True
-log_file_path = "/tmp/salmon-ci-log.txt"
+log_file_dir = "/tmp"
+log_file_name = "salmon-ci-log"
+log_file_ext = "txt"
 
+def get_log_file_path(name):
+    return f"{log_file_dir}/{log_file_name}_{name}.{log_file_ext}"
 
 def process_started(name):
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
@@ -23,25 +27,26 @@ def process_started(name):
     return False
 
 
-def log(text: str):
+def log(text: str, name):
     if log_console:
         print(text)
     if log_file:
-        with open(log_file_path, "a") as wfile:
+        file_path = get_log_file_path(name)
+        with open(file_path, "a") as wfile:
             wfile.write(text + "\n")
             wfile.flush()
 
 
-def log_result(result: subprocess.CompletedProcess[str]):
-    log("Return code: " + str(result.returncode))
-    log(result.stdout.strip())
+def log_result(result: subprocess.CompletedProcess[str], name: str):
+    log("Return code: " + str(result.returncode), name)
+    log(result.stdout.strip(), name)
     if result.stderr:
-        log("Error: '" + result.stderr.strip() + "'")
+        log("Error: '" + result.stderr.strip() + "'", name)
 
 
 def setup_ws_server(cmd: list[str], directory: str, env: dict):
-    log("")
-    log("cmd: " + str.join(" ", cmd))
+    log("", name)
+    log("cmd: " + str.join(" ", cmd), name)
 
     if process_started(cmd[1]):
         log(f"process: {cmd} has already started")
@@ -61,24 +66,25 @@ def setup_ws_server(cmd: list[str], directory: str, env: dict):
         cwd=directory,
         env=my_env,
     )
-    log_result(result)
+    log_result(result, name)
     if result.returncode:
         exit(1)
 
 
 def start_ws_server(cmd: list[str], directory: str, env: dict):
-    log("\n\n")
-    log("cmd: " + str.join(" ", cmd))
-    log("dir: " + directory)
-    log("env: " + str(env))
+    name = "start_ws_server"
+    log("\n\n", name)
+    log("cmd: " + str.join(" ", cmd), name)
+    log("dir: " + directory, name)
+    log("env: " + str(env), name)
 
     if process_started("webfs-service.war"):
-        log(f"process: {cmd} has already started")
+        log(f"process: {cmd} has already started", name)
         return
 
     if not directory.startswith("/"):
         directory = (Path(__file__).parent / directory).resolve()
-    log("directory: " + str(directory))
+    log("directory: " + str(directory), name)
 
     my_env = os.environ.copy()
     my_env.update(env)
@@ -89,23 +95,21 @@ def start_ws_server(cmd: list[str], directory: str, env: dict):
         cwd=directory,
         env=my_env,
     )
-    log_result(result)
     if result.returncode:
         exit(1)
 
-    log("sleep until server settles")
-    time.sleep(10)
+    log("sleep until server settles", name)
+    time.sleep(20)
     
-    log_result(result)
-    if result.returncode:
-        exit(1)
+    log("server started", name)
     
 
-def run_test(cmd: list[str], directory: str, env: dict):
-    log("\n\n")
-    log("cmd: " + str.join(" ", cmd))
-    log("dir: " + directory)
-    log("env: " + str(env))
+def run_test(name: str, cmd: list[str], directory: str, env: dict):
+    log("\n\n", name)
+    log("name: " + name, name)
+    log("cmd: " + str.join(" ", cmd), name)
+    log("dir: " + directory, name)
+    log("env: " + str(env), name)
 
     if not directory.startswith("/"):
         directory = (Path(__file__).parent / directory).resolve()
@@ -116,6 +120,6 @@ def run_test(cmd: list[str], directory: str, env: dict):
     result: subprocess.CompletedProcess[str] = subprocess.run(
         cmd, capture_output=True, text=True, cwd=directory, env=my_env
     )
-    log_result(result)
+    log_result(result, name)
     if result.returncode:
         exit(1)

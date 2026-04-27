@@ -1,3 +1,5 @@
+# This is config is for testing purposes only!
+
 spring.servlet.multipart.max-file-size = 4GB
 spring.servlet.multipart.max-request-size = 4GB
 spring.main.allow-bean-definition-overriding=true
@@ -10,6 +12,9 @@ app.username=user
 app.password=password
 # permission: READ, WRITE, READ_WRITE
 app.role=READ_WRITE
+
+# port for testing only
+server.port=8081
 
 # CORS
 # allow browser to use the web service from specific site:
