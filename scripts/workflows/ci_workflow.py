@@ -312,34 +312,35 @@ def sched_lvl3(lang):
 
     # # LVL 3 fs
     # lvl2 fs local
-    env = {
-        "AES_PROVIDER_TYPE": "Default",
-        "ENABLE_GPU": "false",
-        "ENC_THREADS": "1",
-        "TEST_MODE": "Local",
-        "TEST_DIR": "/tmp/salmon/test",
-    }
-    group3.append(
-        lvl3_fsDefault1 := tiger.delay(
-            tasks.run_test,
-            args=("lvl3_fsDefault1",get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl2_default1])),
-        )
-    )
-    env = {
-        "AES_PROVIDER_TYPE": "Default",
-        "ENABLE_GPU": "false",
-        "ENC_THREADS": "2",
-        "TEST_MODE": "Local",
-        "TEST_DIR": "/tmp/salmon/test",
-    }
-    group3.append(
-        lvl3_fsDefault2 := tiger.delay(
-            tasks.run_test,
-            args=("lvl3_fsDefault2",get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
-        )
-    )
+    # env = {
+        # "AES_PROVIDER_TYPE": "Default",
+        # "ENABLE_GPU": "false",
+        # "ENC_THREADS": "1",
+        # "TEST_MODE": "Local",
+        # "TEST_DIR": "/tmp/salmon/test",
+    # }
+    # group3.append(
+        # lvl3_fsDefault1 := tiger.delay(
+            # tasks.run_test,
+            # args=("lvl3_fsDefault1",get_test_cmd(lang, cl, suite, env), path, env),
+            # depends=list(map(lambda x: x.id, [lvl2_default1])),
+        # )
+    # )
+    # env = {
+        # "AES_PROVIDER_TYPE": "Default",
+        # "ENABLE_GPU": "false",
+        # "ENC_THREADS": "2",
+        # "TEST_MODE": "Local",
+        # "TEST_DIR": "/tmp/salmon/test",
+    # }
+    # group3.append(
+        # lvl3_fsDefault2 := tiger.delay(
+            # tasks.run_test,
+            # args=("lvl3_fsDefault2",get_test_cmd(lang, cl, suite, env), path, env),
+            # depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
+        # )
+    # )
+    
     # lvl3 fs http
     env = {
         "AES_PROVIDER_TYPE": "Default",
@@ -354,7 +355,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=("lvl3_httpDefault1",get_test_cmd(lang, clHttp, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl2_default1])),
+            # depends=list(map(lambda x: x.id, [lvl2_default1])),
         )
     )
     env = {
@@ -370,7 +371,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=("lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
+            # depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
         )
     )
     env = {
@@ -386,7 +387,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=("lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1])),
+            # depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1])),
         )
     )
     env = {
@@ -402,7 +403,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=("lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
+            # depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
         )
     )
 
@@ -445,7 +446,7 @@ def sched(lang: str, gpu: bool = False):
         print("Supported languages: ", langs)
         return
     sched_lvl0(lang)
-    sched_lvl1(lang, gpu)
-    sched_lvl2(lang, gpu)
+    # sched_lvl1(lang, gpu)
+    # sched_lvl2(lang, gpu)
     sched_lvl3(lang)
-    sched_lvl4(lang, gpu)
+    # sched_lvl4(lang, gpu)
