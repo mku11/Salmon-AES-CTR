@@ -198,7 +198,7 @@ public class SalmonFSHttpTests {
 
 
     @Test
-    public void ShouldExportFileFromDrive() throws Exception {
+    public void shouldExportFileFromDrive() throws Exception {
         IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         int threads = 1;
         AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
@@ -212,7 +212,7 @@ public class SalmonFSHttpTests {
     }
 
     @Test
-    public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
+    public void shouldReadRawFile() throws IOException, NoSuchAlgorithmException {
         IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
 		System.out.println("reading: " + localFile.getDisplayPath());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
