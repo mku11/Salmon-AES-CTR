@@ -83,9 +83,8 @@ def start_ws_server(cmd: list[str], directory: str, env: dict):
     my_env = os.environ.copy()
     my_env.update(env)
 
-    result = subprocess.run(
+    result = subprocess.Popen(
         cmd,
-        capture_output=True,
         text=True,
         cwd=directory,
         env=my_env,
@@ -93,6 +92,14 @@ def start_ws_server(cmd: list[str], directory: str, env: dict):
     log_result(result)
     if result.returncode:
         exit(1)
+
+    log("sleep until server settles")
+    time.sleep(10)
+    
+    log_result(result)
+    if result.returncode:
+        exit(1)
+    
 
 def run_test(cmd: list[str], directory: str, env: dict):
     log("\n\n")

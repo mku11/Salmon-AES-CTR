@@ -66,6 +66,7 @@ test_suite = {
     ("JS", "PERF"): "salmon-core",
 }
 
+lvl0_webfsStart = None
 lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2 = None, None, None, None
 lvl1_aesGpu1, lvl1_aesGpu2 = None, None
 lvl2_default1, lvl2_default2 = None, None
@@ -88,13 +89,15 @@ def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
 
 
 def sched_lvl0(lang):
+    global lvl0_webfsStart
+    
     group0 = []
     # lvl0 web service
     # cmd = ["/bin/bash", "./setup_webfs.sh"]
     # group0.append(
         # lvl0_webfsSetup := tiger.delay(
             # tasks.setup_ws_server,
-            # args=(cmd,"../misc", env),
+            # args=(cmd,"../misc", {}),
         # )
     # )
     
@@ -102,7 +105,7 @@ def sched_lvl0(lang):
     group0.append(
         lvl0_webfsStart := tiger.delay(
             tasks.start_ws_server,
-            args=(cmd,"../misc", env),
+            args=(cmd,"../misc", {}),
         )
     )
 
@@ -379,7 +382,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=(get_test_cmd(lang, cl, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl2_default1])),
+            depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1])),
         )
     )
     env = {
@@ -395,7 +398,7 @@ def sched_lvl3(lang):
             tasks.run_test,
             args=(get_test_cmd(lang, cl, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
+            depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
         )
     )
 
