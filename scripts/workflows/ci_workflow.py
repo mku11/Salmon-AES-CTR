@@ -78,8 +78,7 @@ def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
     if lang == "PYTHON":
         return ["python", "-m", "unittest", "-v", cl]
     elif lang == "JAVA":
-        return ["./gradlew", suite, "--tests", cl, "-i", 
-                "--rerun-tasks"] + [f"-D{k}={v}" for k, v in env.items()]
+        return ["./gradlew", suite, "--tests", cl, "-i"] + [f"-D{k}={v}" for k, v in env.items()]
     elif lang == "CSHARP":
         return ["dotnet", "test", "--filter", f"ClassName={cl}", "--no-build", 
                 "--logger:\"console;verbosity=detailed\"", 
