@@ -145,7 +145,7 @@ def sched_lvl1(lang: str, gpu=False):
             "ENC_THREADS": "1",
         }
         group1.append(
-            lvl1_aesGPU1 := tiger.delay(
+            lvl1_aesGpu1 := tiger.delay(
                 tasks.run_test,
                 args=(get_test_cmd(lang, cl, suite, env), path, env),
             )
@@ -156,7 +156,7 @@ def sched_lvl1(lang: str, gpu=False):
             "ENC_THREADS": "2",
         }
         group1.append(
-            lvl1_aesGPU2 := tiger.delay(
+            lvl1_aesGpu2 := tiger.delay(
                 tasks.run_test,
                 args=(get_test_cmd(lang, cl, suite, env), path, env),
             )
@@ -165,6 +165,7 @@ def sched_lvl1(lang: str, gpu=False):
 
 def sched_lvl2(lang, gpu=False):
     global lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2
+    global lvl1_aesGpu1, lvl1_aesGpu2
     global lvl2_default1, lvl2_default2
 
     cl = test_cls[(lang, "CORE")]
