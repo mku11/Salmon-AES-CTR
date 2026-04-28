@@ -5,12 +5,15 @@ import os
 import sys
 from pathlib import Path
 
-log_file = True
-log_console = True
+enable_log_file = True
+enable_log_console = True
 log_file_dir = "/tmp"
 log_file_name = "salmon-ci-log"
 err_file_name = "salmon-ci-err"
 log_file_ext = "txt"
+
+def get_unique_name(name: str):
+    return f"{name}.{int(time.time() * 1000)}"
 
 def get_log_file_path(name, error: bool = False):
     file_name = log_file_name if not error else err_file_name
@@ -29,105 +32,68 @@ def process_started(name):
     return False
 
 
-def err(text: str, name: str):
-    log(text, name, True)
+def err(text: str, file: str):
+    log(text, file, True)
 
-def log(text: str, name: str, error: bool = False):
-    if log_console:
+def log(text: str, file, error: bool = False):
+    if enable_log_console:
         if error:
-            print(text, file=sys.stderr)
+            print(text, end='', file=sys.stderr)
         else:
-            print(text)
-    if log_file:
-        file_path = get_log_file_path(name, error)
-        with open(file_path, "a") as wfile:
-            wfile.write(text + "\n")
-            wfile.flush()
+            print(text, end='')
+    if enable_log_file and file:
+        file.write(text)
+        file.flush()
 
+def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
+    # name = get_unique_name(name)
+    log_file = get_log_file_path(name,False)
+    with open(log_file, "a") as flog_file:
+        log("\n\n", flog_file)
+        log("name: " + name + "\n", flog_file)
+        log("cmd: " + str.join(" ", cmd)+ "\n", flog_file)
+        log("dir: " + directory+ "\n", flog_file)
+        log("env: " + str(env)+ "\n", flog_file)
+        log("log_file: " + log_file+ "\n", flog_file)
+        log("\n", flog_file)
+        
+        if not directory.startswith("/"):
+            directory = (Path(__file__).parent / directory).resolve()
 
-def log_result(result: subprocess.CompletedProcess[str], name: str):
-    log("Return code: " + str(result.returncode), name)
-    log(result.stdout.strip(), name)
-    if result.returncode and result.stderr:
-        err("Error: '" + result.stderr.strip() + "'", name)
+        my_env = os.environ.copy()
+        my_env.update(env)
+        
+        process = subprocess.Popen(cmd, 
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True, cwd=directory, env=my_env
+            )
+        
+        for line in process.stdout:
+            log(line, flog_file)
+        
+        return_code = process.wait()
+        log("Return code: " + str(return_code), flog_file)
+        if return_code:
+            exit(1)
+        
+        if delay:
+            log("delaying secs: " + str(delay), flog_file)
+            time.sleep(delay)
 
 
 def setup_ws_server(cmd: list[str], directory: str, env: dict):
-    log("", name)
-    log("cmd: " + str.join(" ", cmd), name)
-
+    name = "setup_ws_server"
     if process_started(cmd[1]):
-        log(f"process: {cmd} has already started")
+        log(f"process: {cmd} has already started\n")
         return
-
-    if not directory.startswith("/"):
-        directory = (Path(__file__).parent / directory).resolve()
-    log("directory: " + str(directory))
-
-    my_env = os.environ.copy()
-    my_env.update(env)
-
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=directory,
-        env=my_env,
-    )
-    log_result(result, name)
-    if result.returncode:
-        exit(1)
-
-
+        
 def start_ws_server(cmd: list[str], directory: str, env: dict):
     name = "start_ws_server"
-    log("\n\n", name)
-    log("cmd: " + str.join(" ", cmd), name)
-    log("dir: " + directory, name)
-    log("env: " + str(env), name)
-
     if process_started("webfs-service.war"):
-        log(f"process: {cmd} has already started", name)
+        log(f"process: {cmd} has already started\n")
         return
-
-    if not directory.startswith("/"):
-        directory = (Path(__file__).parent / directory).resolve()
-    log("directory: " + str(directory), name)
-
-    my_env = os.environ.copy()
-    my_env.update(env)
-
-    result = subprocess.Popen(
-        cmd,
-        text=True,
-        cwd=directory,
-        env=my_env,
-    )
-    if result.returncode:
-        exit(1)
-
-    log("sleep until server settles", name)
-    time.sleep(10)
+    submit(name, cmd, directory, env, 10)
     
-    log("server started", name)
-    
-
 def run_test(name: str, cmd: list[str], directory: str, env: dict):
-    log("\n\n", name)
-    log("name: " + name, name)
-    log("cmd: " + str.join(" ", cmd), name)
-    log("dir: " + directory, name)
-    log("env: " + str(env), name)
-
-    if not directory.startswith("/"):
-        directory = (Path(__file__).parent / directory).resolve()
-
-    my_env = os.environ.copy()
-    my_env.update(env)
-
-    result: subprocess.CompletedProcess[str] = subprocess.run(
-        cmd, capture_output=True, text=True, cwd=directory, env=my_env
-    )
-    log_result(result, name)
-    if result.returncode:
-        exit(1)
+    submit(name, cmd, directory, env)
