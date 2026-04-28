@@ -11,6 +11,7 @@ log_file_dir = "/tmp"
 log_file_name = "salmon-ci-log"
 err_file_name = "salmon-ci-err"
 log_file_ext = "txt"
+use_unique_logfiles = True
 
 def get_unique_name(name: str):
     return f"{name}.{int(time.time() * 1000)}"
@@ -46,7 +47,8 @@ def log(text: str, file = None, error: bool = False):
         file.flush()
 
 def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
-    # name = get_unique_name(name)
+    if use_unique_logfiles:
+        name = get_unique_name(name)
     log_file = get_log_file_path(name,False)
     with open(log_file, "a") as flog_file:
         log("\n\n", flog_file)
@@ -74,12 +76,12 @@ def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
                 log(line, flog_file)
             
             return_code = process.wait()
-            log("Return code: " + str(return_code), flog_file)
+            log("Return code: " + str(return_code) + "\n", flog_file)
             if return_code:
                 exit(1)
             
             if delay:
-                log("delaying secs: " + str(delay), flog_file)
+                log("delaying secs: " + str(delay) + "\n", flog_file)
                 time.sleep(delay)
         except Exception as ex:
             err(f"Error during workflow submit: {str(ex)}\n", flog_file)
