@@ -101,9 +101,9 @@ def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
         return ["python", "-m", "unittest", "-v", cl]
     elif lang == "JAVA":
         return ["./gradlew", suite, "--tests", cl, "-i", "--rerun-tasks"] + [f"-D{k}={v}" for k, v in env.items()]
-    elif lang == "CSHARP":
-        return ["dotnet", "test", "--filter", f"ClassName={cl}", "--no-build", 
-                "--logger:'console;verbosity=detailed'", 
+    elif lang == "CSHARP": # use ClassName=NameSpace.ClassName or FullyQualifiedName=NameSpace.ClassName.MethodName
+        return ["dotnet", "test", "--filter", f"ClassName={cl}", 
+                "--logger:\"console;verbosity=detailed\"", 
                 "-c","Debug"]
     elif lang == "JS":
         return ["npm","run","test", "--", suite, f"-t={cl}"] + [f"{k}={v}" for k, v in env.items()]
@@ -116,6 +116,7 @@ def sched_lvl0a(module_type, gpu: bool = False):
         lvl0_build := tiger.delay(
             tasks.run_build,
             args=(module_type + ".lvl0_build", get_build_cmd(module_type, gpu, env), "../deploy", env),
+            hard_timeout=timeout
         )
     )
 
@@ -448,6 +449,7 @@ def sched_lvl3b(lang):
             # args=(lang + ".lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
             # hard_timeout=timeout,
             # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1])),
+            # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart])),
         # )
     # )
     # env = {
