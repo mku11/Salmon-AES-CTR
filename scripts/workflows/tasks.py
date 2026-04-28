@@ -32,15 +32,15 @@ def process_started(name):
     return False
 
 
-def err(text: str, file: str):
+def err(text: str, file = None):
     log(text, file, True)
 
-def log(text: str, file, error: bool = False):
+def log(text: str, file = None, error: bool = False):
     if enable_log_console:
         if error:
-            print(text, end='', file=sys.stderr)
+            print(text, end='', file=sys.stderr,  flush=True)
         else:
-            print(text, end='')
+            print(text, end='', flush=True)
     if enable_log_file and file:
         file.write(text)
         file.flush()
@@ -57,30 +57,32 @@ def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
         log("log_file: " + log_file+ "\n", flog_file)
         log("\n", flog_file)
         
-        if not directory.startswith("/"):
-            directory = (Path(__file__).parent / directory).resolve()
+        try:
+            if not directory.startswith("/"):
+                directory = (Path(__file__).parent / directory).resolve()
 
-        my_env = os.environ.copy()
-        my_env.update(env)
-        
-        process = subprocess.Popen(cmd, 
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True, cwd=directory, env=my_env
-            )
-        
-        for line in process.stdout:
-            log(line, flog_file)
-        
-        return_code = process.wait()
-        log("Return code: " + str(return_code), flog_file)
-        if return_code:
-            exit(1)
-        
-        if delay:
-            log("delaying secs: " + str(delay), flog_file)
-            time.sleep(delay)
-
+            my_env = os.environ.copy()
+            my_env.update(env)
+            
+            process = subprocess.Popen(cmd, 
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True, cwd=directory, env=my_env
+                )
+            
+            for line in process.stdout:
+                log(line, flog_file)
+            
+            return_code = process.wait()
+            log("Return code: " + str(return_code), flog_file)
+            if return_code:
+                exit(1)
+            
+            if delay:
+                log("delaying secs: " + str(delay), flog_file)
+                time.sleep(delay)
+        except Exception as ex:
+            err(f"Error during workflow submit: {str(ex)}\n", flog_file)
 
 def setup_ws_server(cmd: list[str], directory: str, env: dict):
     name = "setup_ws_server"
@@ -96,4 +98,7 @@ def start_ws_server(cmd: list[str], directory: str, env: dict):
     submit(name, cmd, directory, env, 10)
     
 def run_test(name: str, cmd: list[str], directory: str, env: dict):
+    submit(name, cmd, directory, env)
+    
+def run_build(name: str, cmd: list[str], directory: str, env: dict):
     submit(name, cmd, directory, env)

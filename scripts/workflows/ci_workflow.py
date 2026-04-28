@@ -73,7 +73,7 @@ test_suite = {
     ("JS", "PERF"): "salmon-core",
 }
 
-lvl0_webfsStart = None
+lvl0_webfsStart,lvl0_build = None,None
 lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2 = None, None, None, None
 lvl1_aesGpu1, lvl1_aesGpu2 = None, None
 lvl2_default1, lvl2_default2 = None, None
@@ -81,39 +81,65 @@ group0, group1, group2, group3, group4 = [], [], [], [], []
 timeout = 30 * 60
 
 
+def get_build_cmd(lang: str, gpu: bool, env: dict):
+    if lang == "PYTHON":
+        return ["/bin/bash", "./build_python.sh"]
+           
+    elif lang == "JAVA":
+        if gpu:
+            return ["/bin/bash", "./build_java_nativegpu.sh"]
+        else:
+            return ["/bin/bash", "./build_java_native.sh"]
+        
+    elif lang == "CSHARP":
+        return ["/bin/bash", "./build_dotnet_debug.sh"]
+        
+    elif lang == "JS":
+        return ["/bin/bash", "./build_ts_js.sh"]
+
 def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
     if lang == "PYTHON":
         return ["python", "-m", "unittest", "-v", cl]
     elif lang == "JAVA":
-        return ["./gradlew", suite, "--tests", cl, "-i"] + [f"-D{k}={v}" for k, v in env.items()]
+        return ["./gradlew", suite, "--tests", cl, "-i", "--rerun-tasks"] + [f"-D{k}={v}" for k, v in env.items()]
     elif lang == "CSHARP":
         return ["dotnet", "test", "--filter", f"ClassName={cl}", "--no-build", 
-                "--logger:\"console;verbosity=detailed\"", 
+                "--logger:'console;verbosity=detailed'", 
                 "-c","Debug"]
     elif lang == "JS":
-        return ["npm","run","test", "--", suite, f"-t=\"{cl}\""] + [f"{k}={v}" for k, v in env.items()]
+        return ["npm","run","test", "--", suite, f"-t={cl}"] + [f"{k}={v}" for k, v in env.items()]
 
 
-def sched_lvl0(lang):
+def sched_lvl0(lang, gpu: bool = False):
     global lvl0_webfsStart
     
     group0 = []
-    # lvl0 web service
+       
+    # lvl0 build
+    group0.append(
+        lvl0_build := tiger.delay(
+            tasks.run_build,
+            args=(lang + ".lvl0_build", get_build_cmd(lang, gpu, {}), "../deploy", {}),
+        )
+    )
+    
+    # lvl0 web service build
     # cmd = ["/bin/bash", "./setup_webfs.sh"]
     # group0.append(
-        # lvl0_webfsSetup := tiger.delay(
+        # lvl0_webfsBuild := tiger.delay(
             # tasks.setup_ws_server,
             # args=(cmd,"../misc", {}),
         # )
     # )
     
-    cmd = ["/bin/bash", "./start_ws_server.sh"]
-    group0.append(
-        lvl0_webfsStart := tiger.delay(
-            tasks.start_ws_server,
-            args=(cmd,"../misc", {}),
-        )
-    )
+    # cmd = ["/bin/bash", "./start_ws_server.sh"]
+    # group0.append(
+        # lvl0_webfsStart := tiger.delay(
+            # tasks.start_ws_server,
+            # args=(cmd,"../misc", {}),
+            # depends=list(map(lambda x: x.id, [lvl0_webfsBuild])),
+        # )
+    # )
 
 
 def sched_lvl1(lang: str, gpu=False):
@@ -127,18 +153,20 @@ def sched_lvl1(lang: str, gpu=False):
     # LVL1 native
     group1 = []
 
-    env = {"AES_PROVIDER_TYPE": "Aes", "ENABLE_GPU": "false", "ENC_THREADS": "1"}
+    env = {"AES_PROVIDER_TYPE": "Aes", "ENABLE_GPU": "false", "ENC_THREADS": "1", "NODE_OPTIONS": "--experimental-vm-modules"}
     group1.append(
         lvl1_aes1 := tiger.delay(
             tasks.run_test,
-            args=("lvl1_aes1", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl1_aes1", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
-    env = {"AES_PROVIDER_TYPE": "Aes", "ENABLE_GPU": "false", "ENC_THREADS": "2"}
+    env = {"AES_PROVIDER_TYPE": "Aes", "ENABLE_GPU": "false", "ENC_THREADS": "2", "NODE_OPTIONS": "--experimental-vm-modules"}
     group1.append(
         lvl1_aes2 := tiger.delay(
             tasks.run_test,
-            args=("lvl1_aes2", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl1_aes2", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
 
@@ -151,18 +179,21 @@ def sched_lvl1(lang: str, gpu=False):
     group1.append(
         lvl1_aesIntr1 := tiger.delay(
             tasks.run_test,
-            args=("lvl1_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl1_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
     env = {
         "AES_PROVIDER_TYPE": "AesIntrinsics",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "2",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group1.append(
         lvl1_aesIntr2 := tiger.delay(
             tasks.run_test,
-            args=("lvl1_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl1_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
 
@@ -172,22 +203,26 @@ def sched_lvl1(lang: str, gpu=False):
             "AES_PROVIDER_TYPE": "AesGPU",
             "ENABLE_GPU": "true",
             "ENC_THREADS": "1",
+            "NODE_OPTIONS": "--experimental-vm-modules"
         }
         group1.append(
             lvl1_aesGpu1 := tiger.delay(
                 tasks.run_test,
-                args=("lvl1_aesGpu1", get_test_cmd(lang, cl, suite, env), path, env),
+                args=(lang + ".lvl1_aesGpu1", get_test_cmd(lang, cl, suite, env), path, env),
+                depends=list(map(lambda x: x.id, [lvl0_build])),
             )
         )
         env = {
             "AES_PROVIDER_TYPE": "AesGPU",
             "ENABLE_GPU": "true",
             "ENC_THREADS": "2",
+            "NODE_OPTIONS": "--experimental-vm-modules"
         }
         group1.append(
             lvl1_aesGpu2 := tiger.delay(
                 tasks.run_test,
-                args=("lvl1_aesGpu2", get_test_cmd(lang, cl, suite, env), path, env),
+                args=(lang + ".lvl1_aesGpu2", get_test_cmd(lang, cl, suite, env), path, env),
+                depends=list(map(lambda x: x.id, [lvl0_build])),
             )
         )
 
@@ -207,22 +242,26 @@ def sched_lvl2(lang, gpu=False):
         "AES_PROVIDER_TYPE": "Default",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "1",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_default1 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_default1", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl2_default1", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
     env = {
         "AES_PROVIDER_TYPE": "Default",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "2",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_default2 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_default2", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl2_default2", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build])),
         )
     )
     # lvl2 core aes native
@@ -230,24 +269,26 @@ def sched_lvl2(lang, gpu=False):
         "AES_PROVIDER_TYPE": "Aes",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "1",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_aes1 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_aes1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl1_aes1])),
+            args=(lang + ".lvl2_aes1", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aes1])),
         )
     )
     env = {
         "AES_PROVIDER_TYPE": "Aes",
         "ENABLE_GPU": "false",
-        "ENC_THREADS": "2",
+        "ENC_THREADS": "2", 
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_aes2 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_aes2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl1_aes1, lvl1_aes2])),
+            args=(lang + ".lvl2_aes2", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aes1, lvl1_aes2])),
         )
     )
 
@@ -256,24 +297,26 @@ def sched_lvl2(lang, gpu=False):
         "AES_PROVIDER_TYPE": "AesIntrinsics",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "1",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_aesIntr1 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl1_aesIntr1])),
+            args=(lang + ".lvl2_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesIntr1])),
         )
     )
     env = {
         "AES_PROVIDER_TYPE": "AesIntrinsics",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "2",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group2.append(
         lvl2_aesIntr2 := tiger.delay(
             tasks.run_test,
-            args=("lvl2_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl1_aesIntr1, lvl1_aesIntr2])),
+            args=(lang + ".lvl2_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesIntr1, lvl1_aesIntr2])),
         )
     )
 
@@ -283,25 +326,26 @@ def sched_lvl2(lang, gpu=False):
         group2.append(
             lvl2_aesGpu1 := tiger.delay(
                 tasks.run_test,
-                args=("lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl1_aesGpu1])),
+                args=(lang + ".lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
+                depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesGpu1])),
             )
         )
         env = {
             "AES_PROVIDER_TYPE": "AesGPU",
             "ENABLE_GPU": "true",
             "ENC_THREADS": "2",
+            "NODE_OPTIONS": "--experimental-vm-modules"
         }
         group2.append(
             lvl2_aesGpu1 := tiger.delay(
                 tasks.run_test,
-                args=("lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl1_aesGpu1, lvl1_aesGpu2])),
+                args=(lang + ".lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
+                depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesGpu1, lvl1_aesGpu2])),
             )
         )
 
 
-def sched_lvl3(lang):
+def sched_lvl3a(lang):
     global lvl2_default1, lvl2_default2
     global lvl0_webfsStart
 
@@ -312,35 +356,48 @@ def sched_lvl3(lang):
 
     # # LVL 3 fs
     # lvl2 fs local
-    # env = {
-        # "AES_PROVIDER_TYPE": "Default",
-        # "ENABLE_GPU": "false",
-        # "ENC_THREADS": "1",
-        # "TEST_MODE": "Local",
-        # "TEST_DIR": "/tmp/salmon/test",
-    # }
-    # group3.append(
-        # lvl3_fsDefault1 := tiger.delay(
-            # tasks.run_test,
-            # args=("lvl3_fsDefault1",get_test_cmd(lang, cl, suite, env), path, env),
-            # depends=list(map(lambda x: x.id, [lvl2_default1])),
-        # )
-    # )
-    # env = {
-        # "AES_PROVIDER_TYPE": "Default",
-        # "ENABLE_GPU": "false",
-        # "ENC_THREADS": "2",
-        # "TEST_MODE": "Local",
-        # "TEST_DIR": "/tmp/salmon/test",
-    # }
-    # group3.append(
-        # lvl3_fsDefault2 := tiger.delay(
-            # tasks.run_test,
-            # args=("lvl3_fsDefault2",get_test_cmd(lang, cl, suite, env), path, env),
-            # depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
-        # )
-    # )
-    
+    env = {
+        "AES_PROVIDER_TYPE": "Default",
+        "ENABLE_GPU": "false",
+        "ENC_THREADS": "1",
+        "TEST_MODE": "Local",
+        "TEST_DIR": "/tmp/salmon/test",
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+    group3.append(
+        lvl3_fsDefault1 := tiger.delay(
+            tasks.run_test,
+            args=(lang + ".lvl3_fsDefault1",get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1])),
+        )
+    )
+    env = {
+        "AES_PROVIDER_TYPE": "Default",
+        "ENABLE_GPU": "false",
+        "ENC_THREADS": "2",
+        "TEST_MODE": "Local",
+        "TEST_DIR": "/tmp/salmon/test",
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+    group3.append(
+        lvl3_fsDefault2 := tiger.delay(
+            tasks.run_test,
+            args=(lang + ".lvl3_fsDefault2",get_test_cmd(lang, cl, suite, env), path, env),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1, lvl2_default2])),
+        )
+    )
+
+
+def sched_lvl3b(lang):
+    global lvl2_default1, lvl2_default2
+    global lvl0_webfsStart
+
+    cl = test_cls[(lang, "FS")]
+    clHttp = test_cls[(lang, "FSHTTP")]
+    path = test_path[(lang, "FS")]
+    suite = test_suite.get((lang, "FS"), "")
+
+    # # LVL 3 fs    
     # lvl3 fs http
     env = {
         "AES_PROVIDER_TYPE": "Default",
@@ -349,64 +406,67 @@ def sched_lvl3(lang):
         "TEST_MODE": "Http",
         "TEST_DIR": "/var/www/salmon/test",
         "HTTP_SERVER_URL": "http://localhost",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group3.append(
         lvl3_httpDefault1 := tiger.delay(
             tasks.run_test,
-            args=("lvl3_httpDefault1",get_test_cmd(lang, clHttp, suite, env), path, env),
+            args=(lang + ".lvl3_httpDefault1",get_test_cmd(lang, clHttp, suite, env), path, env),
             hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl2_default1])),
+            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1])),
         )
     )
-    env = {
-        "AES_PROVIDER_TYPE": "Default",
-        "ENABLE_GPU": "false",
-        "ENC_THREADS": "2",
-        "TEST_MODE": "Http",
-        "TEST_DIR": "/var/www/salmon/test",
-        "HTTP_SERVER_URL": "http://localhost",
-    }
-    group3.append(
-        lvl3_httpDefault2 := tiger.delay(
-            tasks.run_test,
-            args=("lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
-            hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl2_default1, lvl2_default2])),
-        )
-    )
-    env = {
-        "AES_PROVIDER_TYPE": "Default",
-        "ENABLE_GPU": "false",
-        "ENC_THREADS": "1",
-        "TEST_MODE": "WebService",
-        "TEST_DIR": "/tmp/salmon/test",
-        "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
-    }
-    group3.append(
-        lvl3_wsDefault1 := tiger.delay(
-            tasks.run_test,
-            args=("lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
-            hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1])),
-        )
-    )
-    env = {
-        "AES_PROVIDER_TYPE": "Default",
-        "ENABLE_GPU": "false",
-        "ENC_THREADS": "2",
-        "TEST_MODE": "WebService",
-        "TEST_DIR": "/tmp/salmon/test",
-        "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
-    }
-    group3.append(
-        lvl3_wsDefault2 := tiger.delay(
-            tasks.run_test,
-            args=("lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
-            hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
-        )
-    )
-
+    # env = {
+        # "AES_PROVIDER_TYPE": "Default",
+        # "ENABLE_GPU": "false",
+        # "ENC_THREADS": "2",
+        # "TEST_MODE": "Http",
+        # "TEST_DIR": "/var/www/salmon/test",
+        # "HTTP_SERVER_URL": "http://localhost",
+        # "NODE_OPTIONS": "--experimental-vm-modules"
+    # }
+    # group3.append(
+        # lvl3_httpDefault2 := tiger.delay(
+            # tasks.run_test,
+            # args=(lang + ".lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
+            # hard_timeout=timeout,
+            # depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1, lvl2_default2])),
+        # )
+    # )
+    # env = {
+        # "AES_PROVIDER_TYPE": "Default",
+        # "ENABLE_GPU": "false",
+        # "ENC_THREADS": "1",
+        # "TEST_MODE": "WebService",
+        # "TEST_DIR": "/tmp/salmon/test",
+        # "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
+        # "NODE_OPTIONS": "--experimental-vm-modules"
+    # }
+    # group3.append(
+        # lvl3_wsDefault1 := tiger.delay(
+            # tasks.run_test,
+            # args=(lang + ".lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
+            # hard_timeout=timeout,
+            # depends=list(map(lambda x: x.id, [lvl0_build, lvl0_webfsStart, lvl2_default1])),
+        # )
+    # )
+    # env = {
+        # "AES_PROVIDER_TYPE": "Default",
+        # "ENABLE_GPU": "false",
+        # "ENC_THREADS": "2",
+        # "TEST_MODE": "WebService",
+        # "TEST_DIR": "/tmp/salmon/test",
+        # "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
+        # "NODE_OPTIONS": "--experimental-vm-modules"
+    # }
+    # group3.append(
+        # lvl3_wsDefault2 := tiger.delay(
+            # tasks.run_test,
+            # args=(lang + ".lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
+            # hard_timeout=timeout,
+            # depends=list(map(lambda x: x.id, [lvl0_build, lvl0_webfsStart, lvl2_default1, lvl2_default2])),
+        # )
+    # )
 
 def sched_lvl4(lang, gpu=False):
     
@@ -419,23 +479,25 @@ def sched_lvl4(lang, gpu=False):
         "AES_PROVIDER_TYPE": "Default",
         "ENABLE_GPU": str(gpu).lower(),
         "ENC_THREADS": "1",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group4.append(
         lvl4_perf1 := tiger.delay(
             tasks.run_test,
-            args=("lvl4_perf1", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl4_perf1", get_test_cmd(lang, cl, suite, env), path, env),
             depends=list(map(lambda x: x.id, group1 + group2 + group3)),
         )
     )
     env = {
         "AES_PROVIDER_TYPE": "Default",
         "ENABLE_GPU": str(gpu).lower(),
-        "ENC_THREADS": "2",
+        "ENC_THREADS": "2", 
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group4.append(
         lvl4_perf2 := tiger.delay(
             tasks.run_test,
-            args=("lvl4_perf2", get_test_cmd(lang, cl, suite, env), path, env),
+            args=(lang + ".lvl4_perf2", get_test_cmd(lang, cl, suite, env), path, env),
             depends=list(map(lambda x: x.id, group1 + group2 + group3 + [lvl4_perf1])),
         )
     )
@@ -445,8 +507,9 @@ def sched(lang: str, gpu: bool = False):
     if lang not in langs:
         print("Supported languages: ", langs)
         return
-    sched_lvl0(lang)
+    sched_lvl0(lang, gpu)
     # sched_lvl1(lang, gpu)
     # sched_lvl2(lang, gpu)
-    sched_lvl3(lang)
+    # sched_lvl3a(lang)
+    # sched_lvl3b(lang) # remote drives
     # sched_lvl4(lang, gpu)
