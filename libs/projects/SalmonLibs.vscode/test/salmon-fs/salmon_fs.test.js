@@ -48,8 +48,10 @@ describe('salmon-fs', () => {
                 TestMode[PARAMS["TEST_MODE"]] : TestMode.Local;
         let threads = PARAMS["ENC_THREADS"] != undefined && PARAMS["ENC_THREADS"] !== "" ?
                 parseInt(PARAMS["ENC_THREADS"]) : 1;
-        
-        await SalmonFSTestHelper.setTestParams(testDir, testMode);
+        let wsServerUrl = PARAMS["WS_SERVER_URL"];
+		let httpServerUrl = PARAMS["HTTP_SERVER_URL"];
+		
+        await SalmonFSTestHelper.setTestParams(testDir, testMode, wsServerUrl, httpServerUrl);
         let testDirDisplay = Platform.getPlatform() == PlatformType.Browser ? testDir.name : testDir;
         console.log("testDir: " + testDirDisplay);
         console.log("testMode: " + testMode.name);

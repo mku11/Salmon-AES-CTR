@@ -139,8 +139,12 @@ export class SalmonFSTestHelper {
     static sequenceSerializer = new SequenceSerializer();
     
     // testDir can be a path or a fileHandle
-	static async setTestParams(testDir, testMode) {
+	static async setTestParams(testDir, testMode, wsServerUrl, httpServerUrl) {
         currTestMode = testMode;
+		if(wsServerUrl)
+			SalmonFSTestHelper.WS_SERVER_URL = wsServerUrl;
+		if(httpServerUrl)
+			SalmonFSTestHelper.HTTP_SERVER_URL = httpServerUrl;
 
         if (testMode == TestMode.Local) {
             const { Drive } = await import('../../lib/salmon-fs/salmonfs/drive/drive.js');
