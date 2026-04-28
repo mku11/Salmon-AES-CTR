@@ -176,6 +176,7 @@ def sched_lvl1(lang: str, gpu=False):
         "AES_PROVIDER_TYPE": "AesIntrinsics",
         "ENABLE_GPU": "false",
         "ENC_THREADS": "1",
+        "NODE_OPTIONS": "--experimental-vm-modules"
     }
     group1.append(
         lvl1_aesIntr1 := tiger.delay(
