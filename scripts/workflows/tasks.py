@@ -46,7 +46,7 @@ def log(text: str, file = None, error: bool = False):
         file.write(text)
         file.flush()
 
-def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
+def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0, block = True):
     if use_unique_logfiles:
         name = get_unique_name(name)
     log_file = get_log_file_path(name,False)
@@ -72,17 +72,20 @@ def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
                 text=True, cwd=directory, env=my_env
                 )
             
-            for line in process.stdout:
-                log(line, flog_file)
-            
-            return_code = process.wait()
-            log("Return code: " + str(return_code) + "\n", flog_file)
-            if return_code:
-                exit(1)
-            
+            return_code = 0
+            if block:
+                for line in process.stdout:
+                    log(line, flog_file)            
+                return_code = process.wait()
+                
             if delay:
                 log("delaying secs: " + str(delay) + "\n", flog_file)
                 time.sleep(delay)
+                
+            log("Return code: " + str(return_code) + "\n", flog_file)
+            if return_code:
+                exit(1)
+                
         except Exception as ex:
             err(f"Error during workflow submit: {str(ex)}\n", flog_file)
 
@@ -91,13 +94,14 @@ def setup_ws_server(cmd: list[str], directory: str, env: dict):
     if process_started(cmd[1]) or process_started("webfs-service.war"):
         log(f"process: {cmd} has already started\n")
         return
+    submit(name, cmd, directory, env)
         
 def start_ws_server(cmd: list[str], directory: str, env: dict):
     name = "start_ws_server"
     if process_started("webfs-service.war"):
         log(f"process: {cmd} has already started\n")
         return
-    submit(name, cmd, directory, env, 10)
+    submit(name, cmd, directory, env, 10, block=False)
     
 def run_test(name: str, cmd: list[str], directory: str, env: dict):
     submit(name, cmd, directory, env)

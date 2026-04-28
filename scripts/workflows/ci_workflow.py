@@ -126,7 +126,7 @@ def sched_lvl0b(lang, gpu: bool = False):
 
     # lvl0 web service build
     cmd = ["/bin/bash", "./setup_webfs.sh"]
-    group0.append(
+    group0_services.append(
         lvl0_webfsBuild := tiger.delay(
             tasks.setup_ws_server,
             args=(cmd,"../misc", {}),
@@ -134,7 +134,7 @@ def sched_lvl0b(lang, gpu: bool = False):
     )
     
     cmd = ["/bin/bash", "./start_ws_server.sh"]
-    group0.append(
+    group0_services.append(
         lvl0_webfsStart := tiger.delay(
             tasks.start_ws_server,
             args=(cmd,"../misc", {}),
@@ -356,7 +356,7 @@ def sched_lvl3a(lang):
     suite = test_suite.get((lang, "FS"), "")
 
     # # LVL 3 fs
-    # lvl2 fs local
+    # lvl3 fs local
     env = {
         "AES_PROVIDER_TYPE": "Default",
         "ENABLE_GPU": "false",
