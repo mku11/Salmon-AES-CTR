@@ -324,7 +324,12 @@ def sched_lvl2(lang, gpu=False):
 
     # lvl2 core gpu - not working on vm
     if gpu:
-        env = {"AES_PROVIDER_TYPE": "AesGPU", "ENABLE_GPU": "true", "ENC_THREADS": "1"}
+        env = {
+            "AES_PROVIDER_TYPE": "AesGPU", 
+            "ENABLE_GPU": "true", 
+            "ENC_THREADS": "1",
+            "NODE_OPTIONS": "--experimental-vm-modules"
+        }
         group2.append(
             lvl2_aesGpu1 := tiger.delay(
                 tasks.run_test,
@@ -339,9 +344,9 @@ def sched_lvl2(lang, gpu=False):
             "NODE_OPTIONS": "--experimental-vm-modules"
         }
         group2.append(
-            lvl2_aesGpu1 := tiger.delay(
+            lvl2_aesGpu2 := tiger.delay(
                 tasks.run_test,
-                args=(lang + ".lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
+                args=(lang + ".lvl2_aesGpu2",get_test_cmd(lang, cl, suite, env), path, env),
                 depends=list(map(lambda x: x.id, group0_build + [lvl1_aesGpu1, lvl1_aesGpu2])),
             )
         )
