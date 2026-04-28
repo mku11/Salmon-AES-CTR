@@ -86,7 +86,7 @@ def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0):
 
 def setup_ws_server(cmd: list[str], directory: str, env: dict):
     name = "setup_ws_server"
-    if process_started(cmd[1]):
+    if process_started(cmd[1]) or process_started("webfs-service.war"):
         log(f"process: {cmd} has already started\n")
         return
         
