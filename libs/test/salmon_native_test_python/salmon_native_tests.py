@@ -52,7 +52,6 @@ class SalmonNativeTests(TestCase):
         
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
             "AES_PROVIDER_TYPE") else ProviderType.Aes
-        print("ProviderType: " + str(provider_type))
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
 
         print("ProviderType: " + str(provider_type))
