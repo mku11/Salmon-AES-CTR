@@ -414,61 +414,61 @@ def sched_lvl3b(lang):
             tasks.run_test,
             args=(lang + ".lvl3_httpDefault1",get_test_cmd(lang, clHttp, suite, env), path, env),
             hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, group0_build + [lvl2_default1])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl2_default1])),
         )
     )
-    # env = {
-        # "AES_PROVIDER_TYPE": "Default",
-        # "ENABLE_GPU": "false",
-        # "ENC_THREADS": "2",
-        # "TEST_MODE": "Http",
-        # "TEST_DIR": "/var/www/salmon/test",
-        # "HTTP_SERVER_URL": "http://localhost",
-        # "NODE_OPTIONS": "--experimental-vm-modules"
-    # }
-    # group3.append(
-        # lvl3_httpDefault2 := tiger.delay(
-            # tasks.run_test,
-            # args=(lang + ".lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
-            # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, group0_build + [lvl2_default1, lvl2_default2])),
-        # )
-    # )
-    # env = {
-        # "AES_PROVIDER_TYPE": "Default",
-        # "ENABLE_GPU": "false",
-        # "ENC_THREADS": "1",
-        # "TEST_MODE": "WebService",
-        # "TEST_DIR": "/tmp/salmon/test",
-        # "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
-        # "NODE_OPTIONS": "--experimental-vm-modules"
-    # }
-    # group3.append(
-        # lvl3_wsDefault1 := tiger.delay(
-            # tasks.run_test,
-            # args=(lang + ".lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
-            # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1])),
+    env = {
+        "AES_PROVIDER_TYPE": "Default",
+        "ENABLE_GPU": "false",
+        "ENC_THREADS": "2",
+        "TEST_MODE": "Http",
+        "TEST_DIR": "/var/www/salmon/test",
+        "HTTP_SERVER_URL": "http://localhost",
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+    group3.append(
+        lvl3_httpDefault2 := tiger.delay(
+            tasks.run_test,
+            args=(lang + ".lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
+            hard_timeout=timeout,
+            depends=list(map(lambda x: x.id, group0_build + [lvl2_default1, lvl2_default2])),
+        )
+    )
+    env = {
+        "AES_PROVIDER_TYPE": "Default",
+        "ENABLE_GPU": "false",
+        "ENC_THREADS": "1",
+        "TEST_MODE": "WebService",
+        "TEST_DIR": "/tmp/salmon/test",
+        "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+    group3.append(
+        lvl3_wsDefault1 := tiger.delay(
+            tasks.run_test,
+            args=(lang + ".lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
+            hard_timeout=timeout,
+            depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1])),
             # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart])),
-        # )
-    # )
-    # env = {
-        # "AES_PROVIDER_TYPE": "Default",
-        # "ENABLE_GPU": "false",
-        # "ENC_THREADS": "2",
-        # "TEST_MODE": "WebService",
-        # "TEST_DIR": "/tmp/salmon/test",
-        # "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
-        # "NODE_OPTIONS": "--experimental-vm-modules"
-    # }
-    # group3.append(
-        # lvl3_wsDefault2 := tiger.delay(
-            # tasks.run_test,
-            # args=(lang + ".lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
-            # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
-        # )
-    # )
+        )
+    )
+    env = {
+        "AES_PROVIDER_TYPE": "Default",
+        "ENABLE_GPU": "false",
+        "ENC_THREADS": "2",
+        "TEST_MODE": "WebService",
+        "TEST_DIR": "/tmp/salmon/test",
+        "WS_SERVER_URL": "http://localhost:8081", # avoid ports that are being used
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    }
+    group3.append(
+        lvl3_wsDefault2 := tiger.delay(
+            tasks.run_test,
+            args=(lang + ".lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
+            hard_timeout=timeout,
+            depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
+        )
+    )
 
 def sched_lvl4(lang, gpu=False):
     
@@ -512,9 +512,9 @@ def sched(lang: str, gpu: bool = False):
     
     sched_lvl0a("GCC", gpu) # native build
     sched_lvl0a(lang, gpu) # main build
-    # sched_lvl0b(lang, gpu) # services build
-    # sched_lvl1(lang, gpu) # native test
-    # sched_lvl2(lang, gpu) # core test
-    # sched_lvl3a(lang) # local fs test
+    sched_lvl0b(lang, gpu) # services build
+    sched_lvl1(lang, gpu) # native test
+    sched_lvl2(lang, gpu) # core test
+    sched_lvl3a(lang) # local fs test
     sched_lvl3b(lang) # remote fs drives (httpfs, webfs)
-    # sched_lvl4(lang, gpu) # performance
+    sched_lvl4(lang, gpu) # performance
