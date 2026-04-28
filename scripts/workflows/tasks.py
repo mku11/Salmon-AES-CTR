@@ -81,7 +81,8 @@ def submit(name: str, cmd: list[str], directory: str, env: dict, delay = 0, bloc
             if delay:
                 log("delaying secs: " + str(delay) + "\n", flog_file)
                 time.sleep(delay)
-                
+            
+            log("Completed " + str(name) + "\n");
             log("Return code: " + str(return_code) + "\n", flog_file)
             if return_code:
                 exit(1)
