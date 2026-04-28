@@ -77,25 +77,24 @@ lvl0_webfsStart,lvl0_build = None,None
 lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2 = None, None, None, None
 lvl1_aesGpu1, lvl1_aesGpu2 = None, None
 lvl2_default1, lvl2_default2 = None, None
-group0, group1, group2, group3, group4 = [], [], [], [], []
+group0_build, group0_services, group1, group2, group3, group4 = [], [], [], [], [], []
 timeout = 30 * 60
 
 
-def get_build_cmd(lang: str, gpu: bool, env: dict):
-    if lang == "PYTHON":
+def get_build_cmd(module_type: str, gpu: bool, env: dict):
+    if module_type == "PYTHON":
         return ["/bin/bash", "./build_python.sh"]
-           
-    elif lang == "JAVA":
+    elif module_type == "JAVA":
         if gpu:
             return ["/bin/bash", "./build_java_nativegpu.sh"]
         else:
             return ["/bin/bash", "./build_java_native.sh"]
-        
-    elif lang == "CSHARP":
+    elif module_type == "CSHARP":
         return ["/bin/bash", "./build_dotnet_debug.sh"]
-        
-    elif lang == "JS":
+    elif module_type == "JS":
         return ["/bin/bash", "./build_ts_js.sh"]
+    elif module_type == "GCC":
+        return ["/bin/bash", "./build_gcc_linux_x86_64.sh"]
 
 def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
     if lang == "PYTHON":
@@ -109,39 +108,40 @@ def get_test_cmd(lang: str, cl: str, suite: str, env: dict):
     elif lang == "JS":
         return ["npm","run","test", "--", suite, f"-t={cl}"] + [f"{k}={v}" for k, v in env.items()]
 
-
-def sched_lvl0(lang, gpu: bool = False):
-    global lvl0_webfsStart
-    
-    group0 = []
-       
-    # lvl0 build
-    group0.append(
+# build module
+def sched_lvl0a(module_type, gpu: bool = False):    
+    env={}
+    # lvl0 build module
+    group0_build.append(
         lvl0_build := tiger.delay(
             tasks.run_build,
-            args=(lang + ".lvl0_build", get_build_cmd(lang, gpu, {}), "../deploy", {}),
+            args=(module_type + ".lvl0_build", get_build_cmd(module_type, gpu, env), "../deploy", env),
+        )
+    )
+
+# start services
+def sched_lvl0b(lang, gpu: bool = False):
+    global lvl0_webfsStart
+
+    # lvl0 web service build
+    cmd = ["/bin/bash", "./setup_webfs.sh"]
+    group0.append(
+        lvl0_webfsBuild := tiger.delay(
+            tasks.setup_ws_server,
+            args=(cmd,"../misc", {}),
         )
     )
     
-    # lvl0 web service build
-    # cmd = ["/bin/bash", "./setup_webfs.sh"]
-    # group0.append(
-        # lvl0_webfsBuild := tiger.delay(
-            # tasks.setup_ws_server,
-            # args=(cmd,"../misc", {}),
-        # )
-    # )
+    cmd = ["/bin/bash", "./start_ws_server.sh"]
+    group0.append(
+        lvl0_webfsStart := tiger.delay(
+            tasks.start_ws_server,
+            args=(cmd,"../misc", {}),
+            depends=list(map(lambda x: x.id, [lvl0_webfsBuild])),
+        )
+    )
+
     
-    # cmd = ["/bin/bash", "./start_ws_server.sh"]
-    # group0.append(
-        # lvl0_webfsStart := tiger.delay(
-            # tasks.start_ws_server,
-            # args=(cmd,"../misc", {}),
-            # depends=list(map(lambda x: x.id, [lvl0_webfsBuild])),
-        # )
-    # )
-
-
 def sched_lvl1(lang: str, gpu=False):
     global lvl1_aes1, lvl1_aes2, lvl1_aesIntr1, lvl1_aesIntr2
     global lvl1_aesGpu1, lvl1_aesGpu2
@@ -158,7 +158,7 @@ def sched_lvl1(lang: str, gpu=False):
         lvl1_aes1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl1_aes1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
     env = {"AES_PROVIDER_TYPE": "Aes", "ENABLE_GPU": "false", "ENC_THREADS": "2", "NODE_OPTIONS": "--experimental-vm-modules"}
@@ -166,7 +166,7 @@ def sched_lvl1(lang: str, gpu=False):
         lvl1_aes2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl1_aes2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
 
@@ -180,7 +180,7 @@ def sched_lvl1(lang: str, gpu=False):
         lvl1_aesIntr1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl1_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
     env = {
@@ -193,7 +193,7 @@ def sched_lvl1(lang: str, gpu=False):
         lvl1_aesIntr2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl1_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
 
@@ -209,7 +209,7 @@ def sched_lvl1(lang: str, gpu=False):
             lvl1_aesGpu1 := tiger.delay(
                 tasks.run_test,
                 args=(lang + ".lvl1_aesGpu1", get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl0_build])),
+                depends=list(map(lambda x: x.id, group0_build)),
             )
         )
         env = {
@@ -222,7 +222,7 @@ def sched_lvl1(lang: str, gpu=False):
             lvl1_aesGpu2 := tiger.delay(
                 tasks.run_test,
                 args=(lang + ".lvl1_aesGpu2", get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl0_build])),
+                depends=list(map(lambda x: x.id, group0_build)),
             )
         )
 
@@ -248,7 +248,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_default1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_default1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
     env = {
@@ -261,7 +261,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_default2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_default2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build])),
+            depends=list(map(lambda x: x.id, group0_build)),
         )
     )
     # lvl2 core aes native
@@ -275,7 +275,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_aes1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_aes1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aes1])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl1_aes1])),
         )
     )
     env = {
@@ -288,7 +288,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_aes2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_aes2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aes1, lvl1_aes2])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl1_aes1, lvl1_aes2])),
         )
     )
 
@@ -303,7 +303,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_aesIntr1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_aesIntr1", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesIntr1])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl1_aesIntr1])),
         )
     )
     env = {
@@ -316,7 +316,7 @@ def sched_lvl2(lang, gpu=False):
         lvl2_aesIntr2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl2_aesIntr2", get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesIntr1, lvl1_aesIntr2])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl1_aesIntr1, lvl1_aesIntr2])),
         )
     )
 
@@ -327,7 +327,7 @@ def sched_lvl2(lang, gpu=False):
             lvl2_aesGpu1 := tiger.delay(
                 tasks.run_test,
                 args=(lang + ".lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesGpu1])),
+                depends=list(map(lambda x: x.id, group0_build + [lvl1_aesGpu1])),
             )
         )
         env = {
@@ -340,7 +340,7 @@ def sched_lvl2(lang, gpu=False):
             lvl2_aesGpu1 := tiger.delay(
                 tasks.run_test,
                 args=(lang + ".lvl2_aesGpu1",get_test_cmd(lang, cl, suite, env), path, env),
-                depends=list(map(lambda x: x.id, [lvl0_build, lvl1_aesGpu1, lvl1_aesGpu2])),
+                depends=list(map(lambda x: x.id, group0_build + [lvl1_aesGpu1, lvl1_aesGpu2])),
             )
         )
 
@@ -368,7 +368,7 @@ def sched_lvl3a(lang):
         lvl3_fsDefault1 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl3_fsDefault1",get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl2_default1])),
         )
     )
     env = {
@@ -383,7 +383,7 @@ def sched_lvl3a(lang):
         lvl3_fsDefault2 := tiger.delay(
             tasks.run_test,
             args=(lang + ".lvl3_fsDefault2",get_test_cmd(lang, cl, suite, env), path, env),
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1, lvl2_default2])),
+            depends=list(map(lambda x: x.id, group0_build + [lvl2_default1, lvl2_default2])),
         )
     )
 
@@ -413,7 +413,7 @@ def sched_lvl3b(lang):
             tasks.run_test,
             args=(lang + ".lvl3_httpDefault1",get_test_cmd(lang, clHttp, suite, env), path, env),
             hard_timeout=timeout,
-            depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1])),
+            # depends=list(map(lambda x: x.id, group0_build + [lvl2_default1])),
         )
     )
     # env = {
@@ -430,7 +430,7 @@ def sched_lvl3b(lang):
             # tasks.run_test,
             # args=(lang + ".lvl3_httpDefault2", get_test_cmd(lang, clHttp, suite, env), path, env),
             # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl0_build, lvl2_default1, lvl2_default2])),
+            # depends=list(map(lambda x: x.id, group0_build + [lvl2_default1, lvl2_default2])),
         # )
     # )
     # env = {
@@ -447,7 +447,7 @@ def sched_lvl3b(lang):
             # tasks.run_test,
             # args=(lang + ".lvl3_wsDefault1", get_test_cmd(lang, cl, suite, env), path, env),
             # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl0_build, lvl0_webfsStart, lvl2_default1])),
+            # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1])),
         # )
     # )
     # env = {
@@ -464,7 +464,7 @@ def sched_lvl3b(lang):
             # tasks.run_test,
             # args=(lang + ".lvl3_wsDefault2", get_test_cmd(lang, cl, suite, env), path, env),
             # hard_timeout=timeout,
-            # depends=list(map(lambda x: x.id, [lvl0_build, lvl0_webfsStart, lvl2_default1, lvl2_default2])),
+            # depends=list(map(lambda x: x.id, group0_build + [lvl0_webfsStart, lvl2_default1, lvl2_default2])),
         # )
     # )
 
@@ -507,9 +507,12 @@ def sched(lang: str, gpu: bool = False):
     if lang not in langs:
         print("Supported languages: ", langs)
         return
-    sched_lvl0(lang, gpu)
-    # sched_lvl1(lang, gpu)
-    # sched_lvl2(lang, gpu)
-    # sched_lvl3a(lang)
-    # sched_lvl3b(lang) # remote drives
-    # sched_lvl4(lang, gpu)
+    
+    sched_lvl0a("GCC", gpu) # native build
+    sched_lvl0a(lang, gpu) # main build
+    # sched_lvl0b(lang, gpu) # services build
+    # sched_lvl1(lang, gpu) # native test
+    # sched_lvl2(lang, gpu) # core test
+    # sched_lvl3a(lang) # local fs test
+    sched_lvl3b(lang) # remote fs drives (httpfs, webfs)
+    # sched_lvl4(lang, gpu) # performance

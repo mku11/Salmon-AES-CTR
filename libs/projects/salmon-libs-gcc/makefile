@@ -38,9 +38,16 @@ $(info )
 PLATFORM?=win
 ARCH?=x86_64
 CC?=gcc
+DEBUG?=0
 
-$(info PLATFORM: $PLATFORM)
-$(info ARCH: $PLATFORM)
+$(info PLATFORM: $(PLATFORM))
+$(info ARCH: $(ARCH))
+$(info ENABLE_JNI: $(ENABLE_JNI))
+$(info USE_OPENCL: $(USE_OPENCL))
+$(info OPENCL_INCLUDE: $(OPENCL_INCLUDE))
+$(info OPENCL_LIB: $(OPENCL_LIB))
+$(info DEBUG: $(DEBUG))
+
 $(info )
 
 ifeq ($(ARCH),aarch64)
